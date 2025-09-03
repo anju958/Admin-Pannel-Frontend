@@ -1,0 +1,56 @@
+.register{
+    border:0px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    height: 770px;
+    border-radius: 0px 200px 200px 0px;
+    background-color: rgb(98, 159, 244);
+    color: whitesmoke;
+
+}
+.formData{
+    
+     height: 770px;
+     padding: 12px;
+     margin: 15px;
+    
+}
+.formData .heading{
+    font-size: 50px;
+    font-weight: bold;
+     display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;  
+}
+
+.register .btn{
+    background: transparent;
+    color: white;
+    width: 150px;
+}
+.adminNavBar{
+    border: 1px solid black;
+}
+.searchBar{
+    width: 600px !important;
+}
+.list{
+    font-weight: bold !important;
+}
+.list:hover{
+    background-color: beige;
+    border-radius: 15px;
+    
+}
+td {
+  max-width: 250px; 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.list1{
+    list-style: none;
+}
