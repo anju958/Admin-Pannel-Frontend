@@ -166,7 +166,7 @@ function Trainee() {
                                                     <td className="text-center">
                                                         <div className="d-flex justify-content-center gap-3">
                                                             <button className="btn btn-sm btn-success rounded-pill"
-                                                            onClick={() => moveToEmployee(emp.employeeId,"employee")}
+                                                            onClick={() => navigate(`/admin/moveToEmplyee/${emp.employeeId}`)}
                                                             >
                                                                 Move to Employee
                                                             </button>

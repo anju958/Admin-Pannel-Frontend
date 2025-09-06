@@ -1,7 +1,18 @@
 import React from 'react'
 import { FaUserCircle } from "react-icons/fa";
+import { useNavigate } from 'react-router-dom';
+import Button from '@mui/material/Button';
 
 function Navbar() {
+    const user = JSON.parse(localStorage.getItem("user")); 
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token"); 
+    localStorage.removeItem("user");
+    navigate("/");
+  };
+
     return (
         <nav className="navbar  bg-success p-3 text-dark bg-opacity-25 px-3">
             <span className="navbar-brand">
@@ -19,23 +30,28 @@ function Navbar() {
             </span>
             
             <div className="ms-auto dropdown">
-                <button
-                    className="btn btn-dark dropdown-toggle d-flex align-items-center"
-                    type="button"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                >
-                    <FaUserCircle size={28} className="me-2" />
-                    <span>John Doe</span>
-                </button>
+          <button
+            className="btn btn-dark dropdown-toggle d-flex align-items-center"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <FaUserCircle size={28} className="me-2" />
+            <span>{user?.ename || "Admin"} </span>
+          </button>
 
-                <ul className="dropdown-menu dropdown-menu-end shadow">
-                    <li><a className="dropdown-item" href="/profile">👤 Profile</a></li>
-                    <li><a className="dropdown-item" href="/settings">⚙️ Settings</a></li>
-                    <li><hr className="dropdown-divider" /></li>
-                    <li><a className="dropdown-item text-danger" href="/logout">🚪 Logout</a></li>
-                </ul>
-            </div>
+          <ul className="dropdown-menu dropdown-menu-end shadow">
+            <li>
+              <Button 
+                onClick={handleLogout} 
+                className="dropdown-item text-danger" 
+                component="span"
+              >
+                 Logout
+              </Button>
+            </li>
+          </ul>
+        </div>
 
 
         </nav>

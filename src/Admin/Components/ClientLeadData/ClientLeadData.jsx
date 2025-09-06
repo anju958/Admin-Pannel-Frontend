@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function ClientLeadData() {
@@ -10,16 +10,29 @@ function ClientLeadData() {
         phoneNo: '',
         sourse: '',
         service: '',
-        project_type:'',
-        project_price:'',
-        start_date:'',
-        deadline:'',
-        startProjectDate:'',
+        project_type: '',
+        project_price: '',
+        start_date: '',
+        deadline: '',
+        startProjectDate: '',
         date: '',
         status: '',
         assign: '',
         userType: ''
     });
+    const [employee, setEmployee] = useState([])
+    useEffect(() => {
+        axios.get('http://localhost:5000/api/getemployeeData').
+            then(result => {
+                if (result.data) {
+                    setEmployee(result.data)
+                }
+                else {
+                    alert(result.data.Error)
+                }
+            })
+
+    }, [])
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -28,15 +41,24 @@ function ClientLeadData() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const { leadName, emailId, phoneNo, sourse, service,project_type,project_price, start_date, deadline , startProjectDate,date, status, assign, userType } = Lead;
-        if (!leadName || !emailId || !phoneNo || !sourse || !service  || !project_type || !project_price || !start_date || !deadline || !startProjectDate  || !date  || !status || !assign || !userType) {
+
+        const payload = {
+            ...Lead,
+            sourse: Lead.sourse === "Other" ? Lead.customSource : Lead.sourse,
+            service: Lead.service === "Other" ? Lead.customService : Lead.service,
+            status: Lead.status === "Other" ? Lead.customStatus : Lead.status
+        };
+
+
+        const { leadName, emailId, phoneNo, sourse, service, project_type, project_price, start_date, deadline, startProjectDate, date, status, assign, userType } = payload;
+        if (!leadName || !emailId || !phoneNo || !sourse || !service || !project_type || !project_price || !start_date || !deadline || !startProjectDate || !date || !status || !assign || !userType) {
             alert('All fields are required');
             return;
         }
         try {
             await axios.post('http://localhost:5000/api/genClientLead', Lead);
             alert("Lead Successfully Entered");
-            navigate('/admin/Leads');
+            navigate('/admin/client');
         } catch (error) {
             if (error.response && error.response.status === 400) {
                 alert(error.response.data.message);
@@ -86,27 +108,55 @@ function ClientLeadData() {
                                     placeholder='Enter Phone Number'
                                 />
                             </div>
-                            <div className='form-group m-3'>
+                            <div className="form-group m-3">
                                 <label>Source</label>
-                                <input
-                                    type='text'
-                                    name='sourse'
+                                <select
+                                    name="sourse"
                                     value={Lead.sourse}
                                     onChange={handleChange}
-                                    className="form-control"
-                                    placeholder='Enter Source'
-                                />
+                                    className="form-select"
+                                >
+                                    <option value="">Select Source</option>
+                                    <option value="Referral">Referral</option>
+                                    <option value="Website">Website</option>
+                                    <option value="LinkedIn">LinkedIn</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                {Lead.sourse === "Other" && (
+                                    <input
+                                        type="text"
+                                        name="customSource"
+                                        value={Lead.customSource}
+                                        onChange={handleChange}
+                                        className="form-control mt-2"
+                                        placeholder="Enter custom source"
+                                    />
+                                )}
                             </div>
-                            <div className='form-group m-3'>
+                            <div className="form-group m-3">
                                 <label>Service</label>
-                                <input
-                                    type='text'
-                                    name='service'
+                                <select
+                                    name="service"
                                     value={Lead.service}
                                     onChange={handleChange}
-                                    className="form-control"
-                                    placeholder='Enter Service'
-                                />
+                                    className="form-select"
+                                >
+                                    <option value="">Select Service</option>
+                                    <option value="Web Development">Web Development</option>
+                                    <option value="Mobile App">Mobile App</option>
+                                    <option value="SEO">SEO</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                {Lead.service === "Other" && (
+                                    <input
+                                        type="text"
+                                        name="customService"
+                                        value={Lead.customService}
+                                        onChange={handleChange}
+                                        className="form-control mt-2"
+                                        placeholder="Enter custom service"
+                                    />
+                                )}
                             </div>
                             <div className='form-group m-3'>
                                 <label>Project Type</label>
@@ -128,7 +178,7 @@ function ClientLeadData() {
                                     className="form-control"
                                 />
                             </div>
-                            
+
                             <div className='form-group m-3'>
                                 <label>Start Date</label>
                                 <input
@@ -169,28 +219,46 @@ function ClientLeadData() {
                                     className="form-control"
                                 />
                             </div>
-                            <div className='form-group m-3'>
+                            <div className="form-group m-3">
                                 <label>Status</label>
-                                <input
-                                    type='text'
-                                    name='status'
+                                <select
+                                    name="status"
                                     value={Lead.status}
                                     onChange={handleChange}
-                                    className="form-control"
-                                    placeholder='Enter Status'
-                                />
+                                    className="form-select"
+                                >
+                                    <option value="">Select Status</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                {Lead.status === "Other" && (
+                                    <input
+                                        type="text"
+                                        name="customStatus"
+                                        value={Lead.customStatus}
+                                        onChange={handleChange}
+                                        className="form-control mt-2"
+                                        placeholder="Enter custom status"
+                                    />
+                                )}
                             </div>
-                            <div className='form-group m-3'>
+
+                            <div className="form-group m-3">
                                 <label>Assigned To</label>
                                 <select
-                                    name='assign'
+                                    name="assign"
                                     value={Lead.assign}
                                     onChange={handleChange}
                                     className="form-select"
                                 >
                                     <option value="">Select Employee</option>
-                                    <option value="Payal">Payal</option>
-                                    <option value="Deepika">Deepika</option>
+                                    {employee.map((emp) => (
+                                        <option key={emp._id} value={emp.ename}>
+                                            {emp.ename}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                             <div className='form-group m-3'>

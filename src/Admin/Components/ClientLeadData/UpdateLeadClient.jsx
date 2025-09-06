@@ -22,45 +22,92 @@ function UpdateLeadClient() {
         assign: '',
         userType: ''
     });
+
+
+    const [customSourse, setCustomSourse] = useState("");
+    const [customService, setCustomService] = useState("");
+    const [customStatus, setCustomStatus] = useState("");
+
+    const [employee, setEmployee] = useState([])
     useEffect(() => {
-        axios
-            .get(`http://localhost:5000/api/getEmpDataByID/${leadId}`)
-            .then((res) => {
-                // console.log(res.data)
-                setFormData(res.data);
+        axios.get('http://localhost:5000/api/getemployeeData').
+            then(result => {
+                if (result.data) {
+                    setEmployee(result.data)
+                }
+                else {
+                    alert(result.data.Error)
+                }
             })
-            .catch((err) => console.log(err));
-    }, [leadId]);
+
+    }, [])
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
+
+    useEffect(() => {
+        axios.get(`http://localhost:5000/api/getClientLeadbyId/${leadId}`)
+            .then((res) => {
+                const user = res.data.user || res.data;
+                setFormData(
+                    {
+                        leadName: user.leadName || "",
+                        emailId: user.emailId || "",
+                        phoneNo: user.phoneNo || "",
+                        sourse: user.sourse || "",
+                        service: user.service || "",
+                        project_type: user.project_type || "",
+                        project_price: user.project_price || "",
+                        start_date: user.start_date ? user.start_date.split("T")[0] : "",
+                        deadline: user.deadline ? user.deadline.split("T")[0] : "",
+                        startProjectDate: user.startProjectDate ? user.startProjectDate.split("T")[0] : "",
+                        date: user.date ? user.date.split("T")[0] : "",
+                        status: user.status || "",
+                        assign: user.assign || "",
+                        userType: user.userType || ""
+                    }
+
+                );
+                console.log("API Response:", res.data);
+            })
+            .catch((err) => console.log(err));
+    }, [leadId]);
+
+  
+
 
 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const data = new FormData();
 
-        Object.keys(formData).forEach((key) => {
-            data.append(key, formData[key]);
-        });
+        const updatedData = {
+            ...formData,
+            sourse: formData.sourse === "Other" ? customSourse : formData.sourse,
+            service: formData.service === "Other" ? customService : formData.service,
+            status: formData.status === "Other" ? customStatus : formData.status,
+        };
 
         try {
             await axios.put(
                 `http://localhost:5000/api/updateClientLead/${leadId}`,
-                data,
-                { headers: { "Content-Type": "multipart/form-data" } }
+                updatedData
             );
 
-            alert("Employee updated successfully!");
-            if (formData.userType === "employee") {
-                navigate("/admin/Employee");
-            }
-            else {
-                navigate("/admin/clients");
-            }
+            alert("Client updated successfully!");
+
+            // if (userType === "client") {
+            //     navigate("/admin/client");
+            // } else if (userType === "lead") {
+            //     navigate("/admin/leads");
+            // } else {
+            //     navigate("/admin"); 
+            // }
+
+            navigate("/admin/client");
+
         } catch (error) {
             console.error(error);
             alert("Error updating employee: " + error.message);
@@ -72,6 +119,7 @@ function UpdateLeadClient() {
             <h3 className="text-center mb-4">Update User</h3>
             <form onSubmit={handleSubmit} className="row g-3">
 
+
                 <div className="col-md-6">
                     <label>Name</label>
                     <input
@@ -80,23 +128,22 @@ function UpdateLeadClient() {
                         value={formData.leadName}
                         onChange={handleChange}
                         className="form-control"
+                        required
                     />
                 </div>
 
-
                 <div className="col-md-6">
-                    <label>Date of Birth</label>
+                    <label>Email</label>
                     <input
                         type="email"
                         name="emailId"
                         value={formData.emailId}
                         onChange={handleChange}
                         className="form-control"
+                        required
                     />
                 </div>
 
-
-        
 
                 <div className="col-md-6">
                     <label>Phone Number</label>
@@ -106,33 +153,64 @@ function UpdateLeadClient() {
                         value={formData.phoneNo}
                         onChange={handleChange}
                         className="form-control"
+                        required
                     />
                 </div>
 
-
                 <div className="col-md-6">
-                    <label>Personal Email</label>
-                    <input
-                        type="text"
+                    <label>Source</label>
+                    <select
                         name="sourse"
                         value={formData.sourse}
                         onChange={handleChange}
-                        className="form-control"
-                    />
+                        className="form-select"
+                        required
+                    >
+                        <option value="">Select Source</option>
+                        <option value="Referral">Referral</option>
+                        <option value="Website">Website</option>
+                        <option value="Social Media">Social Media</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    {formData.sourse === "Other" && (
+                        <input
+                            type="text"
+                            placeholder="Enter custom source"
+                            value={customSourse}
+                            onChange={(e) => setCustomSourse(e.target.value)}
+                            className="form-control mt-2"
+                            required
+                        />
+                    )}
                 </div>
 
 
                 <div className="col-md-6">
                     <label>Service</label>
-                    <input
-                        type="email"
+                    <select
                         name="service"
                         value={formData.service}
                         onChange={handleChange}
-                        className="form-control"
-                    />
+                        className="form-select"
+                        required
+                    >
+                        <option value="">Select Service</option>
+                        <option value="Web Development">Web Development</option>
+                        <option value="App Development">App Development</option>
+                        <option value="SEO">SEO</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    {formData.service === "Other" && (
+                        <input
+                            type="text"
+                            placeholder="Enter custom service"
+                            value={customService}
+                            onChange={(e) => setCustomService(e.target.value)}
+                            className="form-control mt-2"
+                            required
+                        />
+                    )}
                 </div>
-
 
                 <div className="col-md-6">
                     <label>Project Type</label>
@@ -142,8 +220,10 @@ function UpdateLeadClient() {
                         value={formData.project_type}
                         onChange={handleChange}
                         className="form-control"
+                        required
                     />
                 </div>
+
 
                 <div className="col-md-6">
                     <label>Project Price</label>
@@ -153,28 +233,33 @@ function UpdateLeadClient() {
                         value={formData.project_price}
                         onChange={handleChange}
                         className="form-control"
+                        required
                     />
                 </div>
 
 
-                <div className="col-md-12">
+                <div className="col-md-6">
                     <label>Start Date</label>
-                    <input type="date"
+                    <input
+                        type="date"
                         name="start_date"
                         value={formData.start_date}
                         onChange={handleChange}
                         className="form-control"
+                        required
                     />
                 </div>
 
+
                 <div className="col-md-6">
-                    <label>DeadLine</label>
+                    <label>Deadline</label>
                     <input
-                        type="text"
+                        type="date"
                         name="deadline"
                         value={formData.deadline}
                         onChange={handleChange}
                         className="form-control"
+                        required
                     />
                 </div>
 
@@ -182,57 +267,89 @@ function UpdateLeadClient() {
                 <div className="col-md-6">
                     <label>Project Start Date</label>
                     <input
-                        type="text"
+                        type="date"
                         name="startProjectDate"
                         value={formData.startProjectDate}
                         onChange={handleChange}
                         className="form-control"
+                        required
                     />
                 </div>
 
+
                 <div className="col-md-6">
-                    <label>Date</label>
+                    <label>Enquiry Date</label>
                     <input
                         type="date"
                         name="date"
                         value={formData.date}
                         onChange={handleChange}
                         className="form-control"
+                        required
                     />
                 </div>
 
                 <div className="col-md-6">
                     <label>Status</label>
-                    <input
-                        type="text"
+                    <select
                         name="status"
                         value={formData.status}
                         onChange={handleChange}
-                        className="form-control"
-                    />
+                        className="form-select"
+                        required
+                    >
+                        <option value="">Select Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    {formData.status === "Other" && (
+                        <input
+                            type="text"
+                            placeholder="Enter custom status"
+                            value={customStatus}
+                            onChange={(e) => setCustomStatus(e.target.value)}
+                            className="form-control mt-2"
+                            required
+                        />
+                    )}
                 </div>
 
                 <div className="col-md-6">
-                    <label>Assign</label>
-                    <input
-                        type="text"
+                    <label>Assign To</label>
+                    <select
                         name="assign"
                         value={formData.assign}
                         onChange={handleChange}
-                        className="form-control"
-                    />
+                        className="form-select"
+                        required
+                    >
+                        <option value="">Select Employee</option>
+                        {employee.map((emp) => (
+                            <option key={emp._id} value={emp.ename}>
+                                {emp.ename}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className="col-md-6">
                     <label>User Type</label>
-                    <input
-                        type="text"
+                    <select
                         name="userType"
                         value={formData.userType}
                         onChange={handleChange}
-                        className="form-control"
-                    />
+                        className="form-select"
+                        required
+                    >
+                        <option value="">Select Type</option>
+                        <option value="client">Client</option>
+                        <option value="lead">Lead</option>
+                        <option value="employee">Employee</option>
+                    </select>
                 </div>
+
                 <div className="col-md-12 text-center mt-3">
                     <button type="submit" className="btn btn-success">
                         Update User

@@ -1,12 +1,17 @@
 import axios from 'axios';
 import { useEffect } from 'react';
 import { useState } from 'react'
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Button from "@mui/material/Button";
+import { formatDate } from "../../../utils/dateFormatter";
+
+
+
+
 function Clients() {
   const [Client, setClient] = useState([])
   console.log(Client);
-
+  const navigate = useNavigate()
   useEffect(() => {
     axios.get('http://localhost:5000/api/getClientData')
       .then(res => {
@@ -80,10 +85,10 @@ function Clients() {
                   <td>{clients.service}</td>
                   <td>{clients.project_type}</td>
                   <td>{clients.project_price}</td>
-                  <td>{clients.start_date}</td>
-                  <td>{clients.deadline}</td>
-                  <td>{clients.startProjectDate}</td>
-                  <td>{clients.date}</td>
+                  <td>{formatDate(clients.start_date)}</td>
+                  <td>{formatDate(clients.deadline)}</td>
+                  <td>{formatDate(clients.startProjectDate)}</td>
+                  <td>{formatDate(clients.date)}</td>
                   <td>{clients.status}</td>
                   <td>{clients.assign}</td>
                   <td>{clients.userType}</td>
@@ -92,6 +97,7 @@ function Clients() {
                       <div className="d-flex justify-content-center gap-2">
                         <button
                           className="btn btn-sm btn-primary rounded-pill"
+                           onClick={() => navigate(`/admin/updateLeadClient/${clients.leadId}`)}
                         >
                           Update
                         </button>

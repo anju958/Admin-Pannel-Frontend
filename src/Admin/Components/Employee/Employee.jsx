@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import UpdateEmp from './UpdateEmp'
+import { formatDate } from '../../../utils/dateFormatter'
 
 
 function Employee() {
@@ -99,7 +100,7 @@ function Employee() {
                                             <tr>
                                                 <td>{emp.employeeId}</td>
                                                 <td>{emp.ename}</td>
-                                                <td>{emp.dateOfBirth}</td>
+                                                <td>{formatDate(emp.dateOfBirth)}</td>
                                                 <td>{emp.gender}</td>
                                                 <td>{emp.phoneNo}</td>
                                                 <td>{emp.personal_email}</td>

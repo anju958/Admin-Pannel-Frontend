@@ -14,17 +14,19 @@ import AddDepartment from './Admin/Components/Department/AddDepartment';
 import AddJobs from './Admin/Components/Job Opening/AddJobs';
 import Employee from './Admin/Components/Employee/Employee';
 import Clients from './Admin/Components/Client/Clients';
-import AddLead from './Admin/Components/Leads/AddLead';
 import Trainee from './Admin/Components/Traniee/Traniee';
 import RolesAndResponsibilities from './Admin/Components/Roles and Responsibility/RolesAndResponsibilities';
 import UpdateEmp from './Admin/Components/Employee/UpdateEmp';
-// import AddClient from './Admin/Components/Attendance/AddClient';
 import ClientLead from './Admin/Components/ClientLeadData/ClientLeadData';
-// import AddAttendance from './Admin/Components/Attendance/AddAttendance';
 import UpdateLeadClient from './Admin/Components/ClientLeadData/UpdateLeadClient';
 import EmployeeLayout from './Employee/Components/EmployeeLayout/EmployeeLayout';
 import EmployeeHome from './Employee/Components/EmployeeHome/EmployeeHome';
 import EmployeeAttendance from './Employee/Components/Attendance/EmployeeAttendance';
+import MoveToEmp from './Admin/Components/Employee/MoveToEmp';
+import LeavePage from './Employee/Components/Leaves/LeavePage';
+import SalaryPage from './Employee/Components/Salary/SalaryPage';
+import AddServices from './Admin/Components/Services/AddServices';
+import Service from './Admin/Components/Services/Service';
 
 
 function App() {
@@ -41,6 +43,8 @@ function App() {
             <Route path="home" element={<Admin />} />
             <Route path="jobopening" element={<Opening />} />
             <Route path='department' element={<Department />} />
+            <Route path="addService" element={<AddServices/>}/>
+            <Route path='Service' element={<Service/>}/>
             <Route path='addemployee' element={<AddEmployee />} />
             <Route path='designation' />
             <Route path="Attendance" element={<Attendance />} />
@@ -49,19 +53,20 @@ function App() {
             <Route path='addJobs' element={<AddJobs />} />
             <Route path='Employee' element={<Employee />} />
             <Route path='client' element={<Clients />} />
-            <Route path='Lead' element={<AddLead />} />
             <Route path='trainee' element={<Trainee />} />
             <Route path='Roles' element={<RolesAndResponsibilities />} />
             <Route path='upDateUder/:employeeId' element={<UpdateEmp />} />
-            {/* <Route path='addClient' element={<AddClient/>}/> */}
             <Route path='addClientLead' element={<ClientLead />} />
-            {/* <Route path='add_attendance' element={<AddAttendance />} /> */}
-            <Route path='updateLeadClient' element={<UpdateLeadClient />} />
+            <Route path='moveToEmplyee/:employeeId' element={<MoveToEmp/>}/>
+
+            <Route path='updateLeadClient/:leadId' element={<UpdateLeadClient />} />
           </Route>
           {/* Employee Routes */}
           <Route path='employee' element={<EmployeeLayout />}>
           <Route index element={<EmployeeHome />} />
         <Route path='employeeattendance' element={<EmployeeAttendance/>}/>
+        <Route path='LeavePage' element={<LeavePage/>}/>
+        <Route path='salaryPage' element={<SalaryPage/>}/>
 
 
 

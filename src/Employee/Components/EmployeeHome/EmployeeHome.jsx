@@ -11,25 +11,20 @@ function EmployeeHome() {
       const user = JSON.parse(localStorage.getItem("user")); 
     const cards = [
   {
-    id: 1,
-    title: 'Total Employees',
-    number:200,
-  },
-  {
     id: 2,
     title: 'Total Projects',
-    number:23
+    number:0
   },
   {
     id: 3,
-    title: 'Total Clients',
-    number:300,
+    title: 'Total Leaves',
+    number:0,
    
   },
     {
     id: 4,
-    title: ' Pending Payments',
-    number:20000
+    title: 'Pending Projects',
+    number:0
    
   },
 ];

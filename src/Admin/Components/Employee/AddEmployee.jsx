@@ -1,8 +1,9 @@
 
-import { Link, useNavigate } from 'react-router-dom';
+import {  useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import axios from 'axios';
 import { useEffect } from 'react';
+import { Link } from 'react-router-dom';  
 
 function AddEmployee() {
   const [formData, setFormData] = useState({
@@ -123,7 +124,7 @@ function AddEmployee() {
         designation: '', interviewDate: '', joiningDate: '', expectedSalary: '', givenSalary: '',
         workingTime: '', resumeFile: null, userType: '', traineeDuration: ''
       });
-      navigate('/admin/Employee')
+      navigate('/admin/trainee')
     } catch (error) {
       console.error(error);
       alert('Failed to submit form.');
@@ -136,7 +137,7 @@ function AddEmployee() {
           <div className='col-md-12'>
             <form onSubmit={handleSubmit}>
               <h3 className=" text-center mb-3">Add Employee</h3>
-              {/* Personal Info */}
+             
               <h5 className="mb-3">Personal Information</h5>
               <div className="row mb-3">
                 <div className="col-md-6">
@@ -167,7 +168,7 @@ function AddEmployee() {
                 </div>
               </div>
 
-              {/* Contact Info */}
+              
               <h5 className="mb-3">Contact & Login</h5>
               <div className="row mb-3">
                 <div className="col-md-6">
@@ -189,7 +190,7 @@ function AddEmployee() {
                   value={formData.password} onChange={handleChange} placeholder="Password" />
               </div>
 
-              {/* Family Info */}
+             
               <h5 className="mb-3">Family Information</h5>
               <div className="row mb-3">
                 <div className="col-md-6">
@@ -204,7 +205,6 @@ function AddEmployee() {
                 </div>
               </div>
 
-              {/* Address */}
               <div className="mb-3">
                 Address
                 <input type="text" className="form-control" name="address"
@@ -222,7 +222,7 @@ function AddEmployee() {
               </div>
 
 
-              {/* bank Info */}
+           
               <h5 className="mb-3">Bank Account Information</h5>
               <div className="mb-3">
                 Bank Name
@@ -255,7 +255,7 @@ function AddEmployee() {
                   value={formData.panNo} onChange={handleChange} placeholder="Pan Card Number" />
               </div>
 
-              {/* qualification */}
+              
               <h5 className="mb-3">Qualification and  Experience</h5>
               <div className="row mb-3">
                 <div className="col-md-6">
@@ -274,7 +274,7 @@ function AddEmployee() {
                     value={formData.expWithPWT} onChange={handleChange} placeholder=" Experience  with PWT" />
                 </div>
               </div>
-              {/* Job Info */}
+              
               <h5 className="mb-3">Job Information</h5>
               <div className="form-input m-3">
                 <label className="form-label">Department</label>
@@ -338,14 +338,13 @@ function AddEmployee() {
                 </div>
               </div>
 
-              {/* Upload Resume */}
+            
               <div className="mb-3">
                 <label className="form-label">Upload Resume</label>
                 <input type="file" className="form-control" name="resumeFile"
                   onChange={handleChange} accept=".pdf,.doc,.docx" />
               </div>
 
-              {/* Employee Type */}
               <div className="mb-3">
                 <label className="form-label">Employee Type</label>
                 <select className="form-select" name="userType" value={formData.userType} onChange={handleChange}>
@@ -368,7 +367,7 @@ function AddEmployee() {
                 </div>
               )}
 
-              {/* Submit */}
+            
               <div className="text-center">
                 <button type="submit" className="btn btn-primary px-5">Add Employee</button>
               </div>

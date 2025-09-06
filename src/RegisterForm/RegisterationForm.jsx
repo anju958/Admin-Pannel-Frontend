@@ -168,7 +168,7 @@ const handleSubmit = async (e) => {
                 </div>
               </div>
 
-              {/* Contact Info */}
+              
               <h5 className="mb-3">Contact & Login</h5>
               <div className="row mb-3">
                 <div className="col-md-6">
@@ -190,7 +190,7 @@ const handleSubmit = async (e) => {
                   value={formData.password} onChange={handleChange} placeholder="Password" />
               </div>
 
-              {/* Family Info */}
+             
               <h5 className="mb-3">Family Information</h5>
               <div className="row mb-3">
                 <div className="col-md-6">
@@ -205,7 +205,7 @@ const handleSubmit = async (e) => {
                 </div>
               </div>
 
-              {/* Address */}
+             
               <div className="mb-3">
                 Address
                 <input type="text" className="form-control" name="address"
@@ -223,7 +223,7 @@ const handleSubmit = async (e) => {
               </div>
 
 
-              {/* bank Info */}
+            
               <h5 className="mb-3">Bank Account Information</h5>
               <div className="mb-3">
                 Bank Name
@@ -256,7 +256,7 @@ const handleSubmit = async (e) => {
                   value={formData.panNo} onChange={handleChange} placeholder="Pan Card Number" />
               </div>
 
-              {/* qualification */}
+             
               <h5 className="mb-3">Qualification and  Experience</h5>
               <div className="row mb-3">
                 <div className="col-md-6">
@@ -275,7 +275,7 @@ const handleSubmit = async (e) => {
                     value={formData.expWithPWT} onChange={handleChange} placeholder=" Experience  with PWT" />
                 </div>
               </div>
-              {/* Job Info */}
+             
               <h5 className="mb-3">Job Information</h5>
               <div className="form-input m-3">
                 <label className="form-label">Department</label>
@@ -339,14 +339,14 @@ const handleSubmit = async (e) => {
                 </div>
               </div>
 
-              {/* Upload Resume */}
+              
               <div className="mb-3">
                 <label className="form-label">Upload Resume</label>
                 <input type="file" className="form-control" name="resumeFile"
                   onChange={handleChange} accept=".pdf,.doc,.docx" />
               </div>
 
-              {/* Employee Type */}
+             
               <div className="mb-3">
                 <label className="form-label">Employee Type</label>
                 <select className="form-select" name="userType" value={formData.userType} onChange={handleChange}>
@@ -369,7 +369,7 @@ const handleSubmit = async (e) => {
                 </div>
               )}
 
-              {/* Submit */}
+              
               <div className="text-center">
                 <button type="submit" className="btn btn-primary px-5">Add Employee</button>
               </div> <div className="text-center mt-3">

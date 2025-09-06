@@ -102,7 +102,7 @@ function Attendance() {
                       {row.status}
                     </span>
                   </td>
-                  <td>{row.remark || "-"}</td>
+                  <td>{row.remark|| "-"}</td>
                 </tr>
               ))
             ) : (

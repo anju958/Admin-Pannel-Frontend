@@ -16,11 +16,11 @@ function SideBar() {
                                 <Link to="/employee/employeeattendance" className="nav-link text-black list" href="#">Attendance</Link>
                             </li>
                             <li className="nav-item">
-                                <Link to="" className="nav-link text-black list" href="#">Leaves</Link>
+                                <Link to="/employee/LeavePage" className="nav-link text-black list" href="#">Leaves</Link>
                             </li>
                             
                             <li className="nav-item">
-                                <Link to="" className="nav-link text-black list" href="#">Salary</Link>
+                                <Link to="/employee/salaryPage" className="nav-link text-black list" href="#">Salary</Link>
                             </li>
                             <li className="nav-item">
                                 <Link to="" className="nav-link text-black list" href="#">Task</Link>

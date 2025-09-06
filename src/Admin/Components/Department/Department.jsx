@@ -1,12 +1,11 @@
 import axios from 'axios'
-import React from 'react'
 import { useEffect } from 'react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 function Department() {
     const [Dept, setDept] = useState([])
     useEffect(() => {
-        axios('http://localhost:5000/api/get_Department')
+        axios('http://localhost:5000/api/getDepartment')
             .then(res => {
                 if (res.data) {
                     setDept(res.data)
@@ -14,9 +13,7 @@ function Department() {
                 else {
                     alert(res.data.Error)
                 }
-
             })
-
     }, [])
     return (
         <>
@@ -39,8 +36,6 @@ function Department() {
                                     <tr>
                                         <th>Dept. ID</th>
                                         <th>Department Name</th>
-                                        <th>Designation</th>
-
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -48,25 +43,16 @@ function Department() {
                                         Dept.map(dept => (
                                             <tr>
                                                 <td>{dept.deptId}</td>
-                                                <td>{dept.deptName}</td>
-                                                <td><ul>
-                                                    {dept.designation?.map((d, index) => (
-                                                        <li  className="list1" key={index}>{d}</li>
-                                                    ))}
-                                                </ul></td>
+                                                <td>{dept.deptName}</td>     
                                             </tr>
                                         ))
                                     }
                                 </tbody>
                             </table>
                         </div>
-
-
                     </div>
                 </div>
             </div>
-
-
         </>
     )
 }
