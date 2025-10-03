@@ -1,61 +1,80 @@
-import React from 'react'
+
+
+import React from "react";
 import { FaUserCircle } from "react-icons/fa";
-import { useNavigate } from 'react-router-dom';
-import Button from '@mui/material/Button';
+import { useNavigate } from "react-router-dom";
+import Button from "@mui/material/Button";
 
 function Navbar() {
-    const user = JSON.parse(localStorage.getItem("user")); 
+  const user = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); 
+    localStorage.removeItem("token");
     localStorage.removeItem("user");
     navigate("/");
   };
 
-    return (
-        <nav className="navbar  bg-success p-3 text-dark bg-opacity-25 px-3">
-            <span className="navbar-brand">
-                <form className="d-flex" role="search">
-                    <input
-                        className="form-control me-2 searchBar"
-                        type="search"
-                        placeholder="Search"
-                        aria-label="Search"
-                    />
-                    <button className="btn btn-outline-success" type="submit">
-                        Search
-                    </button>
-                </form>
-            </span>
-            
-            <div className="ms-auto dropdown">
-          <button
-            className="btn btn-dark dropdown-toggle d-flex align-items-center"
-            type="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            <FaUserCircle size={28} className="me-2" />
-            <span>{user?.ename || "Admin"} </span>
-          </button>
+  return (
+    <nav
+      className="navbar navbar-expand-lg px-3 py-2 shadow-sm"
+      style={{
+        background: "linear-gradient(90deg, #1A2A6C, #6A11CB, #2575FC)", // logo gradient
+        color: "white",
+      }}
+    >
+      {/* Brand / Logo */}
+      <a className="navbar-brand fw-bold text-white" href="#">
+        Premier Admin
+      </a>
 
-          <ul className="dropdown-menu dropdown-menu-end shadow">
-            <li>
-              <Button 
-                onClick={handleLogout} 
-                className="dropdown-item text-danger" 
-                component="span"
-              >
-                 Logout
-              </Button>
-            </li>
-          </ul>
-        </div>
+      {/* Search Bar */}
+      <form className="d-flex ms-3 flex-grow-1" role="search">
+        <input
+          className="form-control me-2"
+          type="search"
+          placeholder="Search..."
+          aria-label="Search"
+        />
+        <Button
+          variant="contained"
+          size="small"
+          style={{
+            backgroundColor: "#0b2c5d",
+            color: "white",
+            fontWeight: "bold",
+          }}
+        >
+          Search
+        </Button>
+      </form>
 
+      {/* User Profile Dropdown */}
+      <div className="ms-auto dropdown">
+        <button
+          className="btn btn-light dropdown-toggle d-flex align-items-center px-3 fw-bold"
+          type="button"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <FaUserCircle size={26} className="me-2 text-primary" />
+          <span>{user?.ename || "Admin"}</span>
+        </button>
 
-        </nav>
-    )
+        <ul className="dropdown-menu dropdown-menu-end shadow-sm">
+          <li>
+            <Button
+              onClick={handleLogout}
+              className="dropdown-item text-danger fw-bold"
+              component="span"
+            >
+              Logout
+            </Button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  );
 }
 
-export default Navbar
+export default Navbar;

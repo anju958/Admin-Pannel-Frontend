@@ -1,51 +1,58 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { FaHome, FaUserCheck, FaUmbrellaBeach, FaMoneyBill, FaTasks, FaChartLine, FaHeadset, FaUserCircle } from 'react-icons/fa';
+
 
 function SideBar() {
   return (
-    <>
-         <div className='sidebar'>
-                <div className="d-flex">
-                    <div className="bg-success p-2 text-dark bg-opacity-25 text-black p-3 vh-100" style={{ width: "250px" }}>
-                        <h4 className='p-3'>Employee DashBoard</h4>
-                        <ul className="nav flex-column">
-                            <li className="nav-item">
-                                <Link to="" className="nav-link text-black list" href="#">Home</Link>
-                            </li>
-                            <li className="nav-item">
-                                <Link to="/employee/employeeattendance" className="nav-link text-black list" href="#">Attendance</Link>
-                            </li>
-                            <li className="nav-item">
-                                <Link to="/employee/LeavePage" className="nav-link text-black list" href="#">Leaves</Link>
-                            </li>
-                            
-                            <li className="nav-item">
-                                <Link to="/employee/salaryPage" className="nav-link text-black list" href="#">Salary</Link>
-                            </li>
-                            <li className="nav-item">
-                                <Link to="" className="nav-link text-black list" href="#">Task</Link>
-                            </li>
-                             <li className="nav-item">
-                                <Link to="" className="nav-link text-black list" href="#">Performance</Link>
-                            </li>
-                            <li className="nav-item">
-                                <Link to="" className="nav-link text-black  list" href="#">Support/Helpdesk</Link>
-                            </li>
-                            
-                            <li className="nav-item">
-                                <Link to="" className="nav-link text-black list" href="#">Profile</Link>
-                            </li>
-                            
-                            
-                        </ul>
-                    </div>
-                </div>
-            </div>
-    
-    
-    
-    </>
-  )
+    <div className="sidebar-container">
+      <h4 className="sidebar-title">Employee Dashboard</h4>
+      <ul className="sidebar-menu">
+        <li>
+          <Link to="">
+            <FaHome className="sidebar-icon" /> Home
+          </Link>
+        </li>
+        <li>
+          <Link to="/employee/employeeattendance">
+            <FaUserCheck className="sidebar-icon" /> Attendance
+          </Link>
+        </li>
+        <li>
+          <Link to="/employee/LeavePage">
+            <FaUmbrellaBeach className="sidebar-icon" /> Leaves
+          </Link>
+        </li>
+        <li>
+          <Link to="/employee/salaryPage">
+            <FaMoneyBill className="sidebar-icon" /> Salary
+          </Link>
+        </li>
+        <li>
+          <Link to="/employee/employeeTask">
+            <FaTasks className="sidebar-icon" /> Task
+          </Link>
+        </li>
+        <li>
+          <Link to="/employee/performance">
+            <FaChartLine className="sidebar-icon" /> Performance
+          </Link>
+        </li>
+        <li>
+          <Link to="/employee/supportHelp">
+            <FaHeadset className="sidebar-icon" /> Support / Helpdesk
+          </Link>
+        </li>
+        <li>
+          <Link to="/employee/profile">
+            <FaUserCircle className="sidebar-icon" /> Profile
+          </Link>
+        </li>
+      </ul>
+    </div>
+  );
 }
 
-export default SideBar
+export default SideBar;

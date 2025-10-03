@@ -40,13 +40,11 @@ function EmployeeAttendance() {
     }
   }, [user]);
 
-  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -57,6 +55,7 @@ function EmployeeAttendance() {
       setMessage(res.data.message || "Attendance marked successfully!");
       setIsError(false);
 
+      // reset form
       setFormData({
         employeeId: employee?.employeeId || "",
         employeeName: employee?.ename || "",
@@ -77,10 +76,9 @@ function EmployeeAttendance() {
 
   return (
     <div className="container mt-4">
-      <div className="card shadow p-4">
-        <h2 className="text-center mb-4">Attendance Form</h2>
+      <div className="card shadow p-4 rounded-4">
+        <h2 className="text-center mb-4 fw-bold text-primary">Attendance Form</h2>
 
-     
         {message && (
           <div className={`alert ${isError ? "alert-danger" : "alert-success"}`} role="alert">
             {message}
@@ -88,9 +86,8 @@ function EmployeeAttendance() {
         )}
 
         <form onSubmit={handleSubmit}>
-        
           <div className="mb-3">
-            <label className="form-label">Employee ID</label>
+            <label className="form-label fw-semibold">Employee ID</label>
             <input
               type="text"
               className="form-control"
@@ -101,7 +98,7 @@ function EmployeeAttendance() {
           </div>
 
           <div className="mb-3">
-            <label className="form-label">Employee Name</label>
+            <label className="form-label fw-semibold">Employee Name</label>
             <input
               type="text"
               className="form-control"
@@ -112,7 +109,7 @@ function EmployeeAttendance() {
           </div>
 
           <div className="mb-3">
-            <label className="form-label">Date</label>
+            <label className="form-label fw-semibold">Date</label>
             <input
               type="date"
               className="form-control"
@@ -123,35 +120,36 @@ function EmployeeAttendance() {
             />
           </div>
 
-          
-          <div className="mb-3">
-            <label className="form-label">Check-In Time</label>
-            <input
-              type="time"
-              className="form-control"
-              name="check_in"
-              value={formData.check_in}
-              onChange={handleChange}
-              required={formData.status === "Present" || formData.status === "Half Day"}
-              disabled={formData.status === "Absent" || formData.status === "Leave"}
-            />
+          <div className="row">
+            <div className="col-md-6 mb-3">
+              <label className="form-label fw-semibold">Check-In Time</label>
+              <input
+                type="time"
+                className="form-control"
+                name="check_in"
+                value={formData.check_in}
+                onChange={handleChange}
+                required={formData.status === "Present" || formData.status === "Half Day"}
+                disabled={formData.status === "Absent" || formData.status === "Leave"}
+              />
+            </div>
+
+            <div className="col-md-6 mb-3">
+              <label className="form-label fw-semibold">Check-Out Time</label>
+              <input
+                type="time"
+                className="form-control"
+                name="check_out"
+                value={formData.check_out}
+                onChange={handleChange}
+                required={formData.status === "Present" || formData.status === "Half Day"}
+                disabled={formData.status === "Absent" || formData.status === "Leave"}
+              />
+            </div>
           </div>
 
-        
           <div className="mb-3">
-            <label className="form-label">Check-Out Time</label>
-            <input
-              type="time"
-              className="form-control"
-              name="check_out"
-              value={formData.check_out}
-              onChange={handleChange}
-              required={formData.status === "Present" || formData.status === "Half Day"}
-              disabled={formData.status === "Absent" || formData.status === "Leave"}
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Status</label>
+            <label className="form-label fw-semibold">Status</label>
             <select
               className="form-select"
               name="status"
@@ -167,23 +165,21 @@ function EmployeeAttendance() {
             </select>
           </div>
 
-        
           <div className="mb-3">
-            <label className="form-label">Remarks</label>
+            <label className="form-label fw-semibold">Remarks</label>
             <textarea
               className="form-control"
               rows="3"
-              name="remarks"
-              value={formData.remarks}
+              name="remark"
+              value={formData.remark}
               onChange={handleChange}
               placeholder="Any notes..."
             />
           </div>
 
-          
           <button
             type="submit"
-            className="btn btn-primary w-100 rounded-pill"
+            className="btn btn-primary w-100 rounded-pill fw-semibold"
             disabled={loading}
           >
             {loading ? "Submitting..." : "Mark Attendance"}

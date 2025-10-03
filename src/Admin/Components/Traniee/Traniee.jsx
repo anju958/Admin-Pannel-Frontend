@@ -1,197 +1,228 @@
 
-import { useEffect, useState } from 'react'
-
-import axios from 'axios'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from "react";
+import { formatDate } from "../../../utils/dateFormatter";
+import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 
 function Trainee() {
-    const [employee, setEmployee] = useState([])
-    const [filter, setFilter] = useState("All");
-      const navigate = useNavigate()
-    console.log(employee)
-    useEffect(() => {
-        axios.get('http://localhost:5000/api/getTraniee').
-            then(result => {
-                if (result.data) {
-                    setEmployee(result.data)
-                }
-                else {
-                    alert(result.data.Error)
-                }
-            })
+  const [employee, setEmployee] = useState([]);
+  const navigate = useNavigate();
 
-    }, [])
-    const moveToEmployee = async (employeeId,userType) => {
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/getTraineeData")
+      .then((result) => {
+        if (result.data) {
+          setEmployee(result.data);
+        } else {
+          alert(result.data.Error);
+        }
+      });
+  }, []);
+
+  const handleDelete = async (employeeId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this employee?"
+    );
+    if (!confirmDelete) return;
+
     try {
-      await axios.put(`http://localhost:5000/api/movetoemployee/${employeeId}`, {userType})
-      alert("Moved to Employee successfully!")
-
-      setEmployee(prev => prev.filter(emp => emp.employeeId !== employeeId))
-    } catch (err) {
-      console.error(err)
-      alert("Error while moving to employee")
+      await axios.delete(
+        `http://localhost:5000/api/deleteSignUpUser/${employeeId}`
+      );
+      setEmployee((prev) =>
+        prev.filter((emp) => emp.employeeId !== employeeId)
+      );
+      alert("Employee deleted successfully!");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to delete employee");
     }
-  }
+  };
 
-   const handleDelete = async (employeeId) => {
-        const answer = prompt("type Yes if you want to delete user");
-        if (!answer || answer.toLowerCase() !== "yes") {
-            alert("Delete cancelled!");
-            return;
-        }
-        try {
-            await axios.delete(`http://localhost:5000/api/deleteSignUpUser/${employeeId}`);
-            setEmployee(employee.filter(emp => emp.employeeId !== employeeId));
-            alert("Employee deleted successfully!");
-        } catch (error) {
-            console.error(error);
-            alert("Failed to delete employee");
-        }
-    };
+  return (
+    <div className="container-fluid">
+      <div className="row">
+        <div className="col-md-12">
+          <div className="container mt-4">
+            <h3 className="text-center fw-bold">Trainee List</h3>
 
-    return (
-        <>
-            <div className='container-fluid'>
-                <div className='row'>
-                    <div className='col-md-12'>
-                        <div className="container mt-4">
-                            <h3 className="text-center">Intern and Trainee List</h3>
-                            <div className='form-input m-3'>
-                                <Link to="/admin/addemployee"
-                                    type="submit"
-                                    className="btn bg-dark-subtle  w-10 rounded-pill fw-bold">
-                                    Add Intern  or  Trainee
-                                </Link>
-                                <select className="form-select w-auto d-inline mx-2" value={filter} onChange={(e) => setFilter(e.target.value)}>
-                                    <option value="All">All</option>
-                                    <option value="intern">Intern</option>
-                                    <option value="trainee">Trainee</option>
-                                </select>
-                            </div>
-                            <table className="table table-striped table-bordered table-hover align-middle text-center">
-                                <thead className="table-dark">
-                                    <tr>
-                                        <th>Emp_Id</th>
-                                        <th>Name</th>
-                                        <th>DOB</th>
-                                        <th>Gender</th>
-                                        <th>Phone No.</th>
-                                        <th>Personal Email</th>
-                                        <th>Official Email</th>
-                                        <th>Father Name</th>
-                                        <th>Mother Name</th>
-                                        <th>Address</th>
-                                        <th>Emergency Contact</th>
-                                        <th>Relation</th>
-                                        <th>Bank Name</th>
-                                        <th>Account Number</th>
-                                        <th>IFSC Code</th>
-                                        <th>Account Holder Name</th>
-                                        <th>Aadar Card No.</th>
-                                        <th>PAN No.</th>
-                                        <th>Qualification</th>
-                                        <th>Last Experience</th>
-                                        <th>Experience with PWT</th>
-                                        <th>Department</th>
-                                        <th>Designation</th>
-                                        <th>Interview Date</th>
-                                        <th>Joining Date</th>
-                                        <th>Expected Salary</th>
-                                        <th>Given Salary</th>
-                                        <th>Woking Time</th>
-                                        <th>Resume</th>
-                                        <th> User Type</th>
-
-                                        <th>Duration</th>
-                                        <th>Update</th>
-                                        <th>Action</th>
-                                        
-
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {
-                                        employee.filter(emp => filter === "All" || emp.userType === filter)
-                                            .map(emp => (
-                                                <tr>
-                                                    <td>{emp.employeeId}</td>
-                                                    <td>{emp.ename}</td>
-                                                    <td>{emp.dateOfBirth}</td>
-                                                    <td>{emp.gender}</td>
-                                                    <td>{emp.phoneNo}</td>
-                                                    <td>{emp.personal_email}</td>
-                                                    <td>{emp.official_email}</td>
-                                                    {/* <td>{emp.password}</td> */}
-                                                    <td>{emp.fatherName}</td>
-                                                    <td>{emp.motherName}</td>
-                                                    <td>{emp.address}</td>
-                                                    <td>{emp.emergencyContact}</td>
-                                                    <td>{emp.relation}</td>
-                                                    <td>{emp.bankName}</td>
-                                                    <td>{emp.accountNo}</td>
-                                                    <td>{emp.ifscCode}</td>
-                                                    <td>{emp.accountHolderName}</td>
-                                                    <td>{emp.adarCardNo}</td>
-                                                    <td>{emp.panNo}</td>
-                                                    <td>{emp.qualification}</td>
-                                                    <td>{emp.lastExp}</td>
-                                                    <td>{emp.expWithPWT}</td>
-                                                    <td>{emp.deptName}</td>
-                                                    <td>{emp.designation}</td>
-                                                    <td>{emp.interviewDate ? new Date(emp.interviewDate).toISOString().split("T")[0] : ""}</td>
-                                                    <td>{emp.joiningDate ? new Date(emp.joiningDate).toISOString().split("T")[0] : ""}</td>
-                                                    <td>{emp.expectedSalary}</td>
-                                                    <td>{emp.givenSalary}</td>
-                                                    <td>{emp.workingTime}</td>
-                                                    <td>
-                                                        {emp.resumeFile ? (<a href={`http://localhost:5000/uploads/resumes/${emp.resumeFile}`}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer">
-                                                            View Resume
-                                                        </a>
-
-                                                        ) : (
-                                                            "No Resume"
-                                                        )}
-                                                    </td>
-                                                    <td>{emp.userType}</td>
-                                                    <td>{emp.traineeDuration}</td>
-                                                     <td>
-                                                        <button className="btn btn-sm btn-warning rounded-pill" 
-                                                        onClick={() => navigate(`/admin/upDateUder/${emp.employeeId}`)}
-                                                        >
-                                                             Update
-                                                            </button>
-                                                    </td>
-                                                    <td className="text-center">
-                                                        <div className="d-flex justify-content-center gap-3">
-                                                            <button className="btn btn-sm btn-success rounded-pill"
-                                                            onClick={() => navigate(`/admin/moveToEmplyee/${emp.employeeId}`)}
-                                                            >
-                                                                Move to Employee
-                                                            </button>
-
-                                                            <button className="btn btn-sm btn-danger rounded-pill"
-                                                            onClick={() => { handleDelete(emp.employeeId) }}
-                                                            >
-                                                                Delete
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                    }
-
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+            <div className="form-input m-3">
+              <Link
+                to="/admin/addemployee"
+                className="btn btn-dark rounded-pill fw-bold"
+              >
+                ➕ Add Trainee/Intern
+              </Link>
             </div>
 
+            {/* ✅ Responsive wrapper */}
+            <div className="table-responsive">
+              <table className="table table-striped table-bordered align-middle text-center">
+                <thead className="table-dark">
+                  <tr>
+                    <th>Emp_Id</th>
+                    <th>Name</th>
+                    <th>DOB</th>
+                    <th>Gender</th>
+                    <th>Phone No.</th>
+                    <th>Personal Email</th>
+                    <th>Official Email</th>
+                    <th>Father Name</th>
+                    <th>Mother Name</th>
+                    <th>Address</th>
+                    <th>Emergency Contact</th>
+                    <th>Relation</th>
+                    <th>Bank Name</th>
+                    <th>Account Number</th>
+                    <th>IFSC Code</th>
+                    <th>Account Holder Name</th>
+                    <th>Aadhar Card</th>
+                    <th>PAN No.</th>
+                    <th>Qualification</th>
+                    <th>Last Experience</th>
+                    <th>Exp with PWT</th>
+                    <th>Department</th>
+                    <th>Services</th>
+                    <th>Interview Date</th>
+                    <th>Joining Date</th>
+                    <th>Expected Salary</th>
+                    <th>Given Salary</th>
+                    <th>Working Time</th>
+                    <th>Resume</th>
+                    <th>Image</th>
+                    <th>User Type</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
 
-        </>
-    )
+                <tbody>
+                  {employee.map((emp) => (
+                    <tr key={emp.employeeId}>
+                      <td>{emp.employeeId}</td>
+                      <td>{emp.ename}</td>
+                      <td>{formatDate(emp.dateOfBirth)}</td>
+                      <td>{emp.gender}</td>
+                      <td>{emp.phoneNo}</td>
+                      <td>{emp.personal_email}</td>
+                      <td>{emp.official_email}</td>
+                      <td>{emp.fatherName}</td>
+                      <td>{emp.motherName}</td>
+                      <td>{emp.address}</td>
+                      <td>{emp.emergencyContact}</td>
+                      <td>{emp.relation}</td>
+                      <td>{emp.bankName}</td>
+                      <td>{emp.accountNo}</td>
+                      <td>{emp.ifscCode}</td>
+                      <td>{emp.accountHolderName}</td>
+                      <td>{emp.adarCardNo}</td>
+                      <td>{emp.panNo}</td>
+                      <td>{emp.qualification}</td>
+                      <td>{emp.lastExp}</td>
+                      <td>{emp.expWithPWT}</td>
+                      <td>{emp.department?.deptName}</td>
+                      <td>{emp.service?.serviceName}</td>
+                      <td>
+                        {emp.interviewDate
+                          ? new Date(emp.interviewDate)
+                              .toISOString()
+                              .split("T")[0]
+                          : ""}
+                      </td>
+                      <td>
+                        {emp.joiningDate
+                          ? new Date(emp.joiningDate)
+                              .toISOString()
+                              .split("T")[0]
+                          : ""}
+                      </td>
+                      <td>
+                        <span className="badge bg-warning text-dark px-2">
+                          ₹{emp.expectedSalary}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="badge bg-success px-2">
+                          ₹{emp.givenSalary}
+                        </span>
+                      </td>
+                      <td>{emp.workingTime}</td>
+                      <td>
+                        {emp.resumeFile ? (
+                          <a
+                            href={emp.resumeFile}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-outline-primary btn-sm"
+                          >
+                            📄 View
+                          </a>
+                        ) : (
+                          "No Resume"
+                        )}
+                      </td>
+                      <td>
+                        {emp.img ? (
+                          <img
+                            src={emp.img}
+                            alt="Employee"
+                            style={{
+                              width: "50px",
+                              height: "50px",
+                              borderRadius: "50%",
+                              objectFit: "cover",
+                            }}
+                          />
+                        ) : (
+                          "No Image"
+                        )}
+                      </td>
+                      <td>
+                        <span
+                          className={`badge ${
+                            emp.userType === "trainee"
+                              ? "bg-info text-dark"
+                              : "bg-secondary"
+                          }`}
+                        >
+                          {emp.userType}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          className="btn btn-success btn-sm me-2"
+                          onClick={() =>
+                            navigate(`/admin/upDateUder/${emp.employeeId}`)
+                          }
+                        >
+                          ✏️ Update
+                        </button>
+                        <button
+                          className="btn btn-primary btn-sm me-2"
+                          onClick={() =>
+                            navigate(`/admin/moveToEmplyee/${emp.employeeId}`)
+                          }
+                        >
+                          👤 Move
+                        </button>
+                        <button
+                          className="btn btn-danger btn-sm"
+                          onClick={() => handleDelete(emp.employeeId)}
+                        >
+                          🗑️ Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {/* ✅ End Responsive wrapper */}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
-export default Trainee
+export default Trainee;

@@ -3,6 +3,7 @@ import React from 'react'
 import { useState } from 'react';
 import { MdEmail, MdLock } from "react-icons/md";
 import { Link, useNavigate } from 'react-router-dom';
+import logo from '../assessts/premier-logo.png'; 
 
 function Login() {
     const [formData, setFormData] = useState({
@@ -48,7 +49,10 @@ function Login() {
             <div className='row'>
                 <div className='col-md-6'>
                     <div className='register'>
-                        <h1>Welcome ,Company Name!</h1>
+
+                        <img src={logo} alt="Premier Logo" width="160" className="mb-4 shadow-sm" />
+                        <h1>Welcome ,Premier webtech</h1>
+                        <p className="text-center mt-2">Your trusted partner for IT & Digital Marketing solutions.</p>
                         <h5>Don't have an account?</h5>
                         <Link to="/RegisterationForm" class="btn btn-light" type='submit'>Register</Link>
                     </div>
@@ -56,6 +60,14 @@ function Login() {
                 <div className='col-md-6'>
                     <div className='  d-flex justify-content-center align-items-center vh-100 bg-light login'>
                         <div className='formData card shadow-lg p-4 ' style={{ width: "600px", height: '500px' }}>
+                            <div className="d-flex justify-content-center mb-4">
+                                <img
+                                    src={logo}
+                                    alt="Premier Logo"
+                                    width="160"
+                                    className="shadow-sm "
+                                />
+                            </div>
                             <div className=' heading  text-center mb-4 fw-bold'>Login</div>
                             <form onSubmit={handleSubmit}>
                                 <div className="input-group mb-3">

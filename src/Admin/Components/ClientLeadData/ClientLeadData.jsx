@@ -1,290 +1,330 @@
-import axios from 'axios';
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
-function ClientLeadData() {
-    const navigate = useNavigate();
-    const [Lead, setLead] = useState({
-        leadName: '',
-        emailId: '',
-        phoneNo: '',
-        sourse: '',
-        service: '',
-        project_type: '',
-        project_price: '',
-        start_date: '',
-        deadline: '',
-        startProjectDate: '',
-        date: '',
-        status: '',
-        assign: '',
-        userType: ''
-    });
-    const [employee, setEmployee] = useState([])
-    useEffect(() => {
-        axios.get('http://localhost:5000/api/getemployeeData').
-            then(result => {
-                if (result.data) {
-                    setEmployee(result.data)
-                }
-                else {
-                    alert(result.data.Error)
-                }
-            })
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import Select from "react-select";
 
-    }, [])
+function ClientLead() {
+  const navigate = useNavigate();
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setLead((prev) => ({ ...prev, [name]: value }));
+  const [departments, setDepartments] = useState([]);
+  const [services, setServices] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [formData, setFormData] = useState({
+    leadName: "",
+    emailId: "",
+    phoneNo: "",
+    sourse: "",
+    department: "",
+    service: "",
+    project_type: "",
+    project_price: "",
+    start_date: "",
+    assign: [], // ✅ must be array
+    userType: "lead",
+    status: "Cold",
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  // Fetch Departments
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/getDepartment");
+        setDepartments(res.data);
+      } catch (err) {
+        console.error("Error fetching departments:", err);
+      }
     };
+    fetchDepartments();
+  }, []);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        const payload = {
-            ...Lead,
-            sourse: Lead.sourse === "Other" ? Lead.customSource : Lead.sourse,
-            service: Lead.service === "Other" ? Lead.customService : Lead.service,
-            status: Lead.status === "Other" ? Lead.customStatus : Lead.status
-        };
-
-
-        const { leadName, emailId, phoneNo, sourse, service, project_type, project_price, start_date, deadline, startProjectDate, date, status, assign, userType } = payload;
-        if (!leadName || !emailId || !phoneNo || !sourse || !service || !project_type || !project_price || !start_date || !deadline || !startProjectDate || !date || !status || !assign || !userType) {
-            alert('All fields are required');
-            return;
-        }
-        try {
-            await axios.post('http://localhost:5000/api/genClientLead', Lead);
-            alert("Lead Successfully Entered");
-            navigate('/admin/client');
-        } catch (error) {
-            if (error.response && error.response.status === 400) {
-                alert(error.response.data.message);
-            } else {
-                alert("Something went wrong, try again");
-            }
-        }
+  // Fetch Services when department changes
+  useEffect(() => {
+    if (!formData.department) return;
+    const fetchServices = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:5000/api/getServicebyDepartment/${formData.department}`
+        );
+        setServices(res.data);
+      } catch (err) {
+        console.error("Error fetching services:", err);
+      }
     };
+    fetchServices();
+  }, [formData.department]);
 
-    return (
-        <div className='container-fluid'>
-            <div className='row'>
-                <div className='col-md-12'>
-                    <form encType='multipart/form-data' onSubmit={handleSubmit}>
-                        <h3 className='text-center'>Add Client/Lead</h3>
-                        <div className='form p-3'>
-                            <div className='form-group m-3'>
-                                <label>Employee Name</label>
-                                <input
-                                    type='text'
-                                    name='leadName'
-                                    value={Lead.leadName}
-                                    onChange={handleChange}
-                                    className="form-control"
-                                    placeholder='Enter Employee Name'
-                                />
-                            </div>
-                            <div className='form-group m-3'>
-                                <label>Email ID</label>
-                                <input
-                                    type='email'
-                                    name='emailId'
-                                    value={Lead.emailId}
-                                    onChange={handleChange}
-                                    className="form-control"
-                                    placeholder='Enter Email ID'
-                                />
-                            </div>
-                            <div className='form-group m-3'>
-                                <label>Phone Number</label>
-                                <input
-                                    type='text'
-                                    name='phoneNo'
-                                    value={Lead.phoneNo}
-                                    onChange={handleChange}
-                                    className="form-control"
-                                    placeholder='Enter Phone Number'
-                                />
-                            </div>
-                            <div className="form-group m-3">
-                                <label>Source</label>
-                                <select
-                                    name="sourse"
-                                    value={Lead.sourse}
-                                    onChange={handleChange}
-                                    className="form-select"
-                                >
-                                    <option value="">Select Source</option>
-                                    <option value="Referral">Referral</option>
-                                    <option value="Website">Website</option>
-                                    <option value="LinkedIn">LinkedIn</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                                {Lead.sourse === "Other" && (
-                                    <input
-                                        type="text"
-                                        name="customSource"
-                                        value={Lead.customSource}
-                                        onChange={handleChange}
-                                        className="form-control mt-2"
-                                        placeholder="Enter custom source"
-                                    />
-                                )}
-                            </div>
-                            <div className="form-group m-3">
-                                <label>Service</label>
-                                <select
-                                    name="service"
-                                    value={Lead.service}
-                                    onChange={handleChange}
-                                    className="form-select"
-                                >
-                                    <option value="">Select Service</option>
-                                    <option value="Web Development">Web Development</option>
-                                    <option value="Mobile App">Mobile App</option>
-                                    <option value="SEO">SEO</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                                {Lead.service === "Other" && (
-                                    <input
-                                        type="text"
-                                        name="customService"
-                                        value={Lead.customService}
-                                        onChange={handleChange}
-                                        className="form-control mt-2"
-                                        placeholder="Enter custom service"
-                                    />
-                                )}
-                            </div>
-                            <div className='form-group m-3'>
-                                <label>Project Type</label>
-                                <input
-                                    type='text'
-                                    name='project_type'
-                                    value={Lead.project_type}
-                                    onChange={handleChange}
-                                    className="form-control"
-                                />
-                            </div>
-                            <div className='form-group m-3'>
-                                <label>Project Price</label>
-                                <input
-                                    type='text'
-                                    name='project_price'
-                                    value={Lead.project_price}
-                                    onChange={handleChange}
-                                    className="form-control"
-                                />
-                            </div>
+  // Fetch Employees when department changes
+  useEffect(() => {
+    if (!formData.department) return;
+    const fetchEmployees = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:5000/api/getEmployeeByDepartment/${formData.department}`
+        );
+        setEmployees(res.data);
+      } catch (err) {
+        console.error("Error fetching employees:", err);
+      }
+    };
+    fetchEmployees();
+  }, [formData.department]);
 
-                            <div className='form-group m-3'>
-                                <label>Start Date</label>
-                                <input
-                                    type='date'
-                                    name='start_date'
-                                    value={Lead.start_date}
-                                    onChange={handleChange}
-                                    className="form-control"
-                                />
-                            </div>
-                            <div className='form-group m-3'>
-                                <label>Deadline</label>
-                                <input
-                                    type='date'
-                                    name='deadline'
-                                    value={Lead.deadline}
-                                    onChange={handleChange}
-                                    className="form-control"
-                                />
-                            </div>
-                            <div className='form-group m-3'>
-                                <label>When Start Project</label>
-                                <input
-                                    type='date'
-                                    name='startProjectDate'
-                                    value={Lead.startProjectDate}
-                                    onChange={handleChange}
-                                    className="form-control"
-                                />
-                            </div>
-                            <div className='form-group m-3'>
-                                <label>Enquery Date</label>
-                                <input
-                                    type='date'
-                                    name='date'
-                                    value={Lead.date}
-                                    onChange={handleChange}
-                                    className="form-control"
-                                />
-                            </div>
-                            <div className="form-group m-3">
-                                <label>Status</label>
-                                <select
-                                    name="status"
-                                    value={Lead.status}
-                                    onChange={handleChange}
-                                    className="form-select"
-                                >
-                                    <option value="">Select Status</option>
-                                    <option value="Pending">Pending</option>
-                                    <option value="In Progress">In Progress</option>
-                                    <option value="Completed">Completed</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                                {Lead.status === "Other" && (
-                                    <input
-                                        type="text"
-                                        name="customStatus"
-                                        value={Lead.customStatus}
-                                        onChange={handleChange}
-                                        className="form-control mt-2"
-                                        placeholder="Enter custom status"
-                                    />
-                                )}
-                            </div>
+  // Handle Input Change
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-                            <div className="form-group m-3">
-                                <label>Assigned To</label>
-                                <select
-                                    name="assign"
-                                    value={Lead.assign}
-                                    onChange={handleChange}
-                                    className="form-select"
-                                >
-                                    <option value="">Select Employee</option>
-                                    {employee.map((emp) => (
-                                        <option key={emp._id} value={emp.ename}>
-                                            {emp.ename}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className='form-group m-3'>
-                                <label>User Type</label>
-                                <select
-                                    name='userType'
-                                    value={Lead.userType}
-                                    onChange={handleChange}
-                                    className="form-select"
-                                >
-                                    <option value="">Select Type</option>
-                                    <option value="client">Client</option>
-                                    <option value="lead">Lead</option>
-                                </select>
-                            </div>
-                            <div className='form-group m-3'>
-                                <button type="submit" className="btn bg-dark-subtle w-100 rounded-pill fw-bold">
-                                    Enter Lead
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
+  // Handle Service Change (auto-fill price)
+  const handleServiceChange = (e) => {
+    const selectedService = services.find((srv) => srv._id === e.target.value);
+    setFormData((prev) => ({
+      ...prev,
+      service: e.target.value,
+      project_price: selectedService ? selectedService.servicePrice : "",
+    }));
+  };
+
+  // Validate & Submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // ✅ Frontend Validation
+    if (
+      !formData.leadName ||
+      !formData.emailId ||
+      !formData.phoneNo ||
+      !formData.department ||
+      !formData.userType
+    ) {
+      alert("Please fill all required fields!");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await axios.post("http://localhost:5000/api/genClientLead", formData);
+      alert("Lead Added Successfully!");
+      navigate("/admin/leads");
+    } catch (err) {
+      console.error(err.response?.data || err);
+      alert(err.response?.data?.message || "Error adding lead");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="container mt-4">
+      <div className="card shadow-lg border-0 rounded-3">
+        <div className="card-header bg-primary text-white text-center">
+          <h4>Add New Client Lead</h4>
         </div>
-    );
+        <div className="card-body">
+          <form onSubmit={handleSubmit} className="row g-3">
+
+            {/* Name */}
+            <div className="col-md-6">
+              <label className="form-label">Name *</label>
+              <input
+                type="text"
+                name="leadName"
+                className="form-control"
+                value={formData.leadName}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            {/* Email */}
+            <div className="col-md-6">
+              <label className="form-label">Email *</label>
+              <input
+                type="email"
+                name="emailId"
+                className="form-control"
+                value={formData.emailId}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            {/* Phone */}
+            <div className="col-md-6">
+              <label className="form-label">Phone *</label>
+              <input
+                type="text"
+                name="phoneNo"
+                className="form-control"
+                value={formData.phoneNo}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            {/* Source */}
+            <div className="col-md-6">
+              <label className="form-label">Source</label>
+              <select
+                name="sourse"
+                className="form-select"
+                value={formData.sourse}
+                onChange={handleChange}
+              >
+                <option value="">-- Select Source --</option>
+                <option value="Google">Google</option>
+                <option value="FaceBook">FaceBook</option>
+                <option value="Instagram">Instagram</option>
+                <option value="Website">Website</option>
+                <option value="LinkedIn">LinkedIn</option>
+                <option value="Referral">Referral</option>
+                <option value="Advertisement">Advertisement</option>
+                <option value="WhatsApp Marketing">WhatsApp Marketing</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            {/* Department */}
+            <div className="col-md-6">
+              <label className="form-label">Department *</label>
+              <select
+                name="department"
+                className="form-select"
+                value={formData.department}
+                onChange={handleChange}
+                required
+              >
+                <option value="">-- Select Department --</option>
+                {departments.map((dept) => (
+                  <option key={dept._id} value={dept._id}>
+                    {dept.deptName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Service */}
+            <div className="col-md-6">
+              <label className="form-label">Service</label>
+              <select
+                name="service"
+                className="form-select"
+                value={formData.service}
+                onChange={handleServiceChange}
+              >
+                <option value="">-- Select Service --</option>
+                {services.map((srv) => (
+                  <option key={srv._id} value={srv._id}>
+                    {srv.serviceName} (₹{srv.servicePrice})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Project Price */}
+            <div className="col-md-6">
+              <label className="form-label">Project Price</label>
+              <input
+                type="number"
+                name="project_price"
+                className="form-control"
+                value={formData.project_price}
+                onChange={handleChange}
+              />
+            </div>
+
+            {/* Project Type */}
+            <div className="col-md-6">
+              <label className="form-label">Project Type</label>
+              <select
+                name="project_type"
+                className="form-select"
+                value={formData.project_type}
+                onChange={handleChange}
+              >
+                <option value="">-- Select Project Type --</option>
+                <option value="Web Development">Web Development</option>
+                <option value="Mobile App Development">Mobile App Development</option>
+                <option value="Software Development">Software Development</option>
+                <option value="UI/UX Design">UI/UX Design</option>
+                <option value="Digital Marketing">Digital Marketing</option>
+                <option value="Cloud Solutions">Cloud Solutions</option>
+                <option value="IT Consulting">IT Consulting</option>
+                <option value="AI/ML Projects">AI/ML Projects</option>
+                <option value="Cybersecurity">Cybersecurity</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            {/* Start Date */}
+            <div className="col-md-6">
+              <label className="form-label">Enroll Date</label>
+              <input
+                type="date"
+                name="start_date"
+                className="form-control"
+                value={formData.start_date}
+                onChange={handleChange}
+              />
+            </div>
+
+            {/* User Type */}
+            <div className="col-md-6">
+              <label className="form-label">User Type *</label>
+              <select
+                name="userType"
+                className="form-select"
+                value={formData.userType}
+                onChange={handleChange}
+                required
+              >
+                <option value="lead">Lead</option>
+                <option value="client">Client</option>
+              </select>
+            </div>
+
+            {/* Status */}
+            <div className="col-md-6">
+              <label className="form-label">Status</label>
+              <select
+                name="status"
+                className="form-select"
+                value={formData.status}
+                onChange={handleChange}
+              >
+                <option value="Cold">Cold</option>
+                <option value="Warm">Warm</option>
+                <option value="Hot">Hot</option>
+                <option value="Schedule Appointment">Schedule Appointment</option>
+                <option value="Proposal sent">Proposal sent</option>
+                <option value="Win">Win</option>
+                <option value="Hold">Hold</option>
+                <option value="Close">Close</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            {/* Buttons */}
+            <div className="col-12 text-center mt-3">
+              <button type="submit" className="btn btn-success px-4" disabled={loading}>
+                {loading ? "Adding..." : "Add Lead"}
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary px-4 ms-3"
+                onClick={() => navigate("/admin/leads")}
+              >
+                Cancel
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  );
 }
 
-export default ClientLeadData;
+export default ClientLead;
