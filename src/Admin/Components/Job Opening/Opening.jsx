@@ -1,13 +1,14 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_URL } from "../../../config";
 
 function Opening() {
   const [Jobs, setJobs] = useState([]);
   console.log(Jobs);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/get_Jobs')
+    axios.get(`${API_URL}/api/get_Jobs`)
       .then(result => {
         if (result.data) {
           setJobs(result.data);
@@ -19,7 +20,7 @@ function Opening() {
 
   const handleUpdate = async (jobId) => {
     try {
-      const res = await axios.put(`http://localhost:5000/api/updateVacancy/${jobId}`, {
+      const res = await axios.put(`${API_URL}/api/updateVacancy/${jobId}`, {
         count: 1
       });
       // setJobs(prev =>
@@ -49,7 +50,7 @@ function Opening() {
 const deleteJob = async (jobId) => {
   if (window.confirm("Are you sure you want to delete this job?")) {
     try {
-      await axios.delete(`http://localhost:5000/api/deleteJob/${jobId}`);
+      await axios.delete(`${API_URL}/api/deleteJob/${jobId}`);
       alert("Job deleted successfully");
 
       // remove from state

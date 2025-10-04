@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Select from "react-select";
+import { API_URL } from "../../../config";
 
 function ClientLead() {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ function ClientLead() {
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/getDepartment");
+        const res = await axios.get(`${API_URL}/api/getDepartment`);
         setDepartments(res.data);
       } catch (err) {
         console.error("Error fetching departments:", err);
@@ -46,7 +47,7 @@ function ClientLead() {
     const fetchServices = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/getServicebyDepartment/${formData.department}`
+          `${API_URL}/api/getServicebyDepartment/${formData.department}`
         );
         setServices(res.data);
       } catch (err) {
@@ -62,7 +63,7 @@ function ClientLead() {
     const fetchEmployees = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/getEmployeeByDepartment/${formData.department}`
+          `${API_URL}/api/getEmployeeByDepartment/${formData.department}`
         );
         setEmployees(res.data);
       } catch (err) {
@@ -105,7 +106,7 @@ function ClientLead() {
 
     try {
       setLoading(true);
-      await axios.post("http://localhost:5000/api/genClientLead", formData);
+      await axios.post(`${API_URL}/api/genClientLead`, formData);
       alert("Lead Added Successfully!");
       navigate("/admin/leads");
     } catch (err) {

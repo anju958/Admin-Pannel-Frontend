@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { formatDate } from "../../../utils/dateFormatter";
+import { API_URL } from "../../../config";
 
 function Employee() {
   const [employee, setEmployee] = useState([]);
@@ -13,7 +14,7 @@ function Employee() {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/deleteSignUpUser/${employeeId}`);
+      await axios.delete(`${API_URL}/api/deleteSignUpUser/${employeeId}`);
       setEmployee(employee.filter((emp) => emp.employeeId !== employeeId));
       alert("Employee deleted successfully!");
     } catch (error) {
@@ -23,7 +24,7 @@ function Employee() {
   };
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/getemployeeData")
+    axios.get(`${API_URL}/api/getemployeeData`)
       .then((res) => {
         if (res.data) setEmployee(res.data);
         else alert(res.data.Error);

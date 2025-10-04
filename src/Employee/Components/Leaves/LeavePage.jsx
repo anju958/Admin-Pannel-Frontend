@@ -7,6 +7,9 @@ import Typography from '@mui/material/Typography';
 import CardActionArea from '@mui/material/CardActionArea';
 import axios from 'axios';
 
+import { API_URL } from "../../../config";
+
+
 function LeavePage() {
   const user = JSON.parse(localStorage.getItem("user"));
   const [selectedCard, setSelectedCard] = useState(0);
@@ -60,7 +63,7 @@ function LeavePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/api/addLeave", leave);
+      const res = await axios.post(`${API_URL}/api/addLeave`, leave);
       alert(res.data.message);
       setLeave({
         employeeId: user?.employeeId || "",
@@ -70,7 +73,7 @@ function LeavePage() {
         reason: "",
       });
       // refresh history after submit
-      const history = await axios.get(`http://localhost:5000/api/getLeaveHistory/${user.employeeId}`);
+      const history = await axios.get(`${API_URL}/api/getLeaveHistory/${user.employeeId}`);
       setLeaveHistory(history.data || []);
     } catch (err) {
       console.error(err);

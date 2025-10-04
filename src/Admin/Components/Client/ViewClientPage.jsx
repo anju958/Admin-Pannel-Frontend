@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
+import { API_URL } from "../../../config";
 
 function ViewClientPage() {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ function ViewClientPage() {
     if (!leadId) return;
 
     axios
-      .get(`http://localhost:5000/api/getClientLeadbyId/${leadId}`)
+      .get(`${API_URL}/api/getClientLeadbyId/${leadId}`)
       .then((res) => {
         const user = res.data.user || res.data;
 
@@ -59,7 +60,7 @@ function ViewClientPage() {
     setLoading(true);
 
     axios
-      .get(`http://localhost:5000/api/getProjectbyClient/${formData._id}`)
+      .get(`${API_URL}/api/getProjectbyClient/${formData._id}`)
       .then((res) => {
         console.log("✅ Projects from API:", res.data);
         setProjects(res.data || []);

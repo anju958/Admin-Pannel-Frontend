@@ -1,8 +1,7 @@
-
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
+import { API_URL } from "../../../config";
 
 function PayPage() {
   const { invoiceId } = useParams();
@@ -29,7 +28,7 @@ function PayPage() {
   useEffect(() => {
     const fetchInvoice = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/getSingleInvoice/${invoiceId}`);
+        const res = await axios.get(`${API_URL}/api/getSingleInvoice/${invoiceId}`);
         if (!res.data) {
           setError("Invoice not found");
         } else {
@@ -60,7 +59,7 @@ function PayPage() {
 
     try {
       // Create order on backend
-      const { data } = await axios.post(`http://localhost:5000/api/sendInvoice/${invoice._id}`);
+      const { data } = await axios.post(`${API_URL}/api/sendInvoice/${invoice._id}`);
       const order = data.order;
 
       if (!order) {
@@ -77,7 +76,7 @@ function PayPage() {
         order_id: order.id,
         handler: async function (response) {
           try {
-            await axios.post("http://localhost:5000/api/verifyPayment", {
+            await axios.post(`${API_URL}/api/verifyPayment`, {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,

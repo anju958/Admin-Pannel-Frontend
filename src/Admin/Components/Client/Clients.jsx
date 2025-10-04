@@ -3,6 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { formatDate } from "../../../utils/dateFormatter";
+import { API_URL } from "../../../config";
 
 function Clients() {
   const [Client, setClient] = useState([]);
@@ -10,7 +11,7 @@ function Clients() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/getClientData")
+      .get(`${API_URL}/api/getClientData`)
       .then((res) => {
         if (res.data) {
           setClient(res.data);
@@ -29,7 +30,7 @@ function Clients() {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/DeleteLead/${leadId}`);
+      await axios.delete(`${API_URL}/api/DeleteLead/${leadId}`);
       setClient(Client.filter((clients) => clients.leadId !== leadId));
       alert("Client deleted successfully!");
     } catch (error) {

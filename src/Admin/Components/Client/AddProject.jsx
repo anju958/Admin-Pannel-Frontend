@@ -3,6 +3,7 @@ import axios from "axios";
 import { useLocation, useParams } from "react-router-dom";
 import CreatableSelect from "react-select/creatable";
 import Select from "react-select";
+import { API_URL } from "../../../config";
 
 function AddProject() {
   const { clientId } = useParams();
@@ -56,7 +57,7 @@ function AddProject() {
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/getDepartment");
+        const res = await axios.get(`${API_URL}/api/getDepartment`);
         setDepartments(res.data);
       } catch (error) {
         console.error("Error fetching departments:", error);
@@ -71,7 +72,7 @@ function AddProject() {
     const fetchServices = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/getServicebyDepartment/${formData.department}`
+          `${API_URL}/api/getServicebyDepartment/${formData.department}`
         );
         setServices(res.data);
       } catch (error) {
@@ -87,7 +88,7 @@ function AddProject() {
     const fetchEmployees = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/getEmployeeByDepartment/${formData.department}`
+          `${API_URL}/api/getEmployeeByDepartment/${formData.department}`
         );
         setEmployees(res.data);
       } catch (error) {
@@ -116,45 +117,7 @@ function AddProject() {
     setFormData({ ...formData, addFile: e.target.files[0] });
   };
 
-  // Submit Form
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     const data = new FormData();
-  //     for (const key in formData) {
-  //       data.append(key, formData[key]);
-  //     }
-  //     data.append("projectCategory", JSON.stringify(selectedCategories));
-  //     data.append("addMember", JSON.stringify(formData.assign));
-
-  //     await axios.post("http://localhost:5000/api/addProject", data, {
-  //       headers: { "Content-Type": "multipart/form-data" },
-  //     });
-
-  //     alert("Project added successfully!");
-  //     // Reset form
-  //     setFormData({
-  //       projectName: "",
-  //       department: "",
-  //       service: "",
-  //       startDate: "",
-  //       endDate: "",
-  //       projectCategory: "",
-  //       clientId: clientData?._id || "",
-  //       displayClientId: clientData?.leadId || "",
-  //       clientName: clientData?.leadName || "",
-  //       notes: "",
-  //       addFile: null,
-  //       budget: "",
-  //       projectDescription: "",
-  //       price: "",
-  //       assign: [],
-  //     });
-  //     setSelectedCategories([]);
-  //   } catch (err) {
-  //     console.error("Error adding project:", err.response?.data || err.message);
-  //   }
-  // };
+  
   const handleSubmit = async (e) => {
   e.preventDefault();
   try {
@@ -168,7 +131,7 @@ function AddProject() {
     }
     data.append("addMember", JSON.stringify(formData.assign));
 
-    await axios.post("http://localhost:5000/api/addProject", data, {
+    await axios.post(`${API_URL}/api/addProject`, data, {
       headers: { "Content-Type": "multipart/form-data" },
     });
 

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { formatDate } from "../../../utils/dateFormatter";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+import { API_URL } from "../../../config";
 
 function Trainee() {
   const [employee, setEmployee] = useState([]);
@@ -10,7 +11,7 @@ function Trainee() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/getTraineeData")
+      .get(`${API_URL}/api/getTraineeData`)
       .then((result) => {
         if (result.data) {
           setEmployee(result.data);
@@ -28,7 +29,7 @@ function Trainee() {
 
     try {
       await axios.delete(
-        `http://localhost:5000/api/deleteSignUpUser/${employeeId}`
+        `${API_URL}/api/deleteSignUpUser/${employeeId}`
       );
       setEmployee((prev) =>
         prev.filter((emp) => emp.employeeId !== employeeId)

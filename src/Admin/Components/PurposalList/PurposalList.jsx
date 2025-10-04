@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_URL } from "../../../config";
 
 function ProposalList() {
   const [proposals, setProposals] = useState([]);
@@ -11,7 +12,7 @@ function ProposalList() {
   useEffect(() => {
     const fetchProposals = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/getAllProposal");
+        const response = await axios.get(`${API_URL}/api/getAllProposal`);
         setProposals(response.data);
       } catch (error) {
         console.error("Error fetching proposals:", error);
@@ -25,7 +26,7 @@ function ProposalList() {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this proposal?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/proposals/${id}`);
+        await axios.delete(`${API_URL}/api/proposals/${id}`);
         setProposals(proposals.filter((p) => p._id !== id));
       } catch (error) {
         console.error("Error deleting proposal:", error);

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Link, useNavigate } from 'react-router-dom'
+import { API_URL } from "../../../config";
 
 function Service() {
   const [services, setServices] = useState([])
@@ -8,7 +9,7 @@ function Service() {
 
   // Fetch services
   const fetchServices = () => {
-    axios.get('http://localhost:5000/api/getServices')
+    axios.get(`${API_URL}/api/getServices`)
       .then(res => {
         if (res.data) {
           setServices(res.data)
@@ -27,7 +28,7 @@ function Service() {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this service?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/deleteService/${id}`)
+        await axios.delete(`${API_URL}/api/deleteService/${id}`)
         alert("Service deleted successfully")
         fetchServices() 
       } catch (error) {

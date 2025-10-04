@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useParams, useNavigate } from 'react-router-dom'
+import { API_URL } from "../../../config";
 
 function UpdateService() {
   const { id } = useParams()
@@ -13,7 +14,7 @@ function UpdateService() {
 
   // Fetch service by ID
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/getServiceById/${id}`)
+    axios.get(`${API_URL}/api/getServiceById/${id}`)
       .then(res => {
         if (res.data) {
           setServiceName(res.data.serviceName)
@@ -26,7 +27,7 @@ function UpdateService() {
 
   // Fetch departments for dropdown
   useEffect(() => {
-    axios.get('http://localhost:5000/api/getDepartment')
+    axios.get(`${API_URL}/api/getDepartment`)
       .then(res => setDepartments(res.data))
       .catch(err => console.error(err))
   }, [])
@@ -35,7 +36,7 @@ function UpdateService() {
   const handleUpdate = async (e) => {
     e.preventDefault()
     try {
-      await axios.put(`http://localhost:5000/api/UpdateService/${id}`, {
+      await axios.put(`${API_URL}/api/UpdateService/${id}`, {
         serviceName,
         servicePrice,
         deptId

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { API_URL } from "../../../config";
 
 function ClientProjects({ clientId }) {
   const [client, setClient] = useState(null);
@@ -8,11 +9,11 @@ function ClientProjects({ clientId }) {
   useEffect(() => {
 
     axios
-      .get(`http://localhost:5000/api/getClientLeadbyId/${clientId}`)
+      .get(`${API_URL}/api/getClientLeadbyId/${clientId}`)
       .then((res) => setClient(res.data))
       .catch((err) => console.error("Error fetching client:", err));
     axios
-      .get(`http://localhost:5000/api/getProjectByid/${clientId}`)
+      .get(`${API_URL}/api/getProjectByid/${clientId}`)
       .then((res) => setProjects(res.data))
       .catch((err) => console.error("Error fetching projects:", err));
   }, [clientId]);

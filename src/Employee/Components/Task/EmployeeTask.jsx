@@ -5,6 +5,9 @@ import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import CardActionArea from '@mui/material/CardActionArea';
 import axios from 'axios';
+import { API_URL } from "../../../config";
+
+
 
 function EmployeeTask() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -45,12 +48,12 @@ function EmployeeTask() {
   // Update task status
   const handleStatusChange = async (taskId, newStatus) => {
     try {
-      await axios.put(`http://localhost:5000/api/updateTaskStatus/${taskId}`, { status: newStatus });
+      await axios.put(`${API_URL}/api/updateTaskStatus/${taskId}`, { status: newStatus });
       // refresh tasks after update
-      const updated = await axios.get(`http://localhost:5000/api/getTasksByEmployee/${user.employeeId}`);
+      const updated = await axios.get(`${API_URL}/api/getTasksByEmployee/${user.employeeId}`);
       setTasks(updated.data || []);
       // refresh stats
-      const stats = await axios.get(`http://localhost:5000/api/getTaskStats/${user.employeeId}`);
+      const stats = await axios.get(`${API_URL}/api/getTaskStats/${user.employeeId}`);
       setCards([
         { id: 1, title: 'Total Tasks', number: stats.data.totalTasks || 0 },
         { id: 2, title: 'Completed Tasks', number: stats.data.completedTasks || 0 },

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Select from "react-select";
+import { API_URL } from "../../../config";
 
 function UpdateLeadClient() {
   const { leadId } = useParams();
@@ -28,7 +29,7 @@ function UpdateLeadClient() {
 
   // Fetch Departments
   useEffect(() => {
-    axios.get("http://localhost:5000/api/getDepartment")
+    axios.get(`${API_URL}/api/getDepartment`)
       .then(res => setDepartments(res.data))
       .catch(err => console.error("Error fetching departments:", err));
   }, []);
@@ -36,7 +37,7 @@ function UpdateLeadClient() {
   // Fetch Services when department changes
   useEffect(() => {
     if (!formData.department) return;
-    axios.get(`http://localhost:5000/api/getServicebyDepartment/${formData.department}`)
+    axios.get(`${API_URL}/api/getServicebyDepartment/${formData.department}`)
       .then(res => setServices(res.data))
       .catch(err => console.error("Error fetching services:", err));
   }, [formData.department]);
@@ -44,14 +45,14 @@ function UpdateLeadClient() {
   // Fetch Employees when department changes
   useEffect(() => {
     if (!formData.department) return;
-    axios.get(`http://localhost:5000/api/getEmployeeByDepartment/${formData.department}`)
+    axios.get(`${API_URL}/api/getEmployeeByDepartment/${formData.department}`)
       .then(res => setEmployees(res.data))
       .catch(err => console.error("Error fetching employees:", err));
   }, [formData.department]);
 
   // Fetch Lead Data by ID (Pre-fill)
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/getClientLeadbyId/${leadId}`)
+    axios.get(`${API_URL}/api/getClientLeadbyId/${leadId}`)
       .then(res => {
         const user = res.data.user || res.data;
         setFormData({
@@ -94,7 +95,7 @@ function UpdateLeadClient() {
     e.preventDefault();
     try {
       await axios.put(
-        `http://localhost:5000/api/updateClientLead/${leadId}`,
+        `${API_URL}/api/updateClientLead/${leadId}`,
         formData
       );
       alert("Lead updated successfully!");

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { API_URL } from "../../../config";
 
 function UpdateDepartment() {
   const { id } = useParams();
@@ -10,7 +11,7 @@ function UpdateDepartment() {
 
   // Fetch department details by ID
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/getDepartmentById/${id}`)
+    axios.get(`${API_URL}/api/getDepartmentById/${id}`)
       .then(res => {
         if (res.data) {
           setDeptName(res.data.deptName);
@@ -26,7 +27,7 @@ function UpdateDepartment() {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/api/updateDepartment/${id}`, { deptName });
+      await axios.put(`${API_URL}/api/updateDepartment/${id}`, { deptName });
       alert("Department updated successfully");
       navigate("/admin/department"); // ✅ go back to list
     } catch (error) {

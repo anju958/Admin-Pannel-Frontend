@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+import { API_URL } from "../../../config";
 function AddJobs() {
   const navigate = useNavigate();
   const [departments, setDepartments] = useState([]);
@@ -22,7 +23,7 @@ function AddJobs() {
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/getDepartment");
+        const res = await axios.get(`${API_URL}/api/getDepartment`);
         setDepartments(res.data);
       } catch (error) {
         console.error("Error fetching departments:", error);
@@ -36,7 +37,7 @@ function AddJobs() {
     const fetchServices = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/getServicebyDepartment/${formData.department}`
+          `${API_URL}/api/getServicebyDepartment/${formData.department}`
         );
         setServices(res.data);
       } catch (error) {
@@ -65,7 +66,7 @@ function AddJobs() {
     }
 
     try {
-      const res = await axios.post('http://localhost:5000/api/addJob', formData);
+      const res = await axios.post(`${API_URL}/api/addJob`, formData);
       alert('Job Added Successfully');
       console.log('Form submitted:', res.data);
 

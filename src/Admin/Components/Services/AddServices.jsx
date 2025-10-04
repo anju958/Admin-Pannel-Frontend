@@ -3,6 +3,7 @@
 import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { API_URL } from "../../../config";
 
 function AddServices() {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ function AddServices() {
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/getDepartment");
+        const res = await axios.get(`${API_URL}/api/getDepartment`);
         setDepartments(res.data);
       } catch (error) {
         console.error("Error fetching departments:", error);
@@ -43,7 +44,7 @@ function AddServices() {
     }
 
     try {
-      const res = await axios.post("http://localhost:5000/api/addService", formData);
+      const res = await axios.post(`${API_URL}/api/addService`, formData);
       alert(res.data.message || "Service added successfully");
 
       setFormData({ deptId: '', serviceName: '', servicePrice: '' });

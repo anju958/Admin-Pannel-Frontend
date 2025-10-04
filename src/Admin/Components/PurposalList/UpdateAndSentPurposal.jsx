@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_URL } from "../../../config";
+
 
 function EditProposal() {
   const { id } = useParams();
@@ -24,7 +26,7 @@ function EditProposal() {
   useEffect(() => {
     const fetchProposal = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/getProposalById/${id}`);
+        const res = await axios.get(`${API_URL}/api/getProposalById/${id}`);
         // Map backend client fields correctly
         const data = res.data;
         setFormData({
@@ -75,7 +77,7 @@ function EditProposal() {
       // New files
       newFiles.forEach((file) => data.append("attachments", file));
 
-      await axios.put(`http://localhost:5000/api/UpdateProposal/${id}`, data, {
+      await axios.put(`${API_URL}/api/UpdateProposal/${id}`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

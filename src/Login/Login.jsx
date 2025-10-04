@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { MdEmail, MdLock } from "react-icons/md";
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assessts/premier-logo.png'; 
+import { API_URL } from "../config";
+
 
 function Login() {
     const [formData, setFormData] = useState({
@@ -20,12 +22,12 @@ function Login() {
         let res;
         try {
             if (formData.official_email === 'admin@gmail.com') {
-                res = await axios.post('http://localhost:5000/api/adminLogin', formData)
+                res = await axios.post(`${API_URL}/api/adminLogin`, formData)
             }
             else {
-                res = await axios.post("http://localhost:5000/api/userLogin", formData);
+                res = await axios.post(`${API_URL}/api/userLogin`, formData);
             }
-            localStorage.setItem("token", res.data.token);
+            localStorage.setItem(`token`, res.data.token);
             const user = {
                 employeeId: res.data.employeeId,
                 ename: res.data.ename,

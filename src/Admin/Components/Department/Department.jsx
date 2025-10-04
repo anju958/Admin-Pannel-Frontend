@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { API_URL } from "../../../config";
 
 function Department() {
   const [Dept, setDept] = useState([])
@@ -8,7 +9,7 @@ function Department() {
 
   
   const fetchDepartments = () => {
-    axios.get('http://localhost:5000/api/getDepartment')
+    axios.get(`${API_URL}/api/getDepartment`)
       .then(res => {
         if (res.data) {
           setDept(res.data)
@@ -27,7 +28,7 @@ function Department() {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this department?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/deleteDepartment/${id}`)
+        await axios.delete(`${API_URL}/api/deleteDepartment/${id}`)
         alert("Department deleted successfully")
         fetchDepartments() 
       } catch (error) {

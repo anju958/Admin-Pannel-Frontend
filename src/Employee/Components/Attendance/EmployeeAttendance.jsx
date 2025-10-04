@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { API_URL } from "../../../config";
 
 function EmployeeAttendance() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -24,7 +25,7 @@ function EmployeeAttendance() {
   useEffect(() => {
     if (user?.employeeId) {
       axios
-        .get(`http://localhost:5000/api/getEmpDataByID/${user.employeeId}`)
+        .get(`${API_URL}/api/getEmpDataByID/${user.employeeId}`)
         .then((res) => {
           const currentEmployee = res.data;
           if (currentEmployee) {
@@ -51,7 +52,7 @@ function EmployeeAttendance() {
     setMessage(null);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/add_attendance", formData);
+      const res = await axios.post(`${API_URL}/api/add_attendance`, formData);
       setMessage(res.data.message || "Attendance marked successfully!");
       setIsError(false);
 

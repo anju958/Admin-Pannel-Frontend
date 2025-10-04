@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_URL } from "../../../config";
 
 function ViewLeadPage() {
   const { leadId } = useParams();
@@ -22,7 +23,7 @@ function ViewLeadPage() {
     if (!leadId) return;
 
     axios
-      .get(`http://localhost:5000/api/leadById/${leadId}`)
+      .get(`${API_URL}/api/leadById/${leadId}`)
       .then((res) => {
         const lead = res.data.lead || res.data;
         setLeadData({

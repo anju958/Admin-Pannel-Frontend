@@ -1,6 +1,7 @@
 import Button from "@mui/material/Button";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { API_URL } from "../../../config";
 
 function Attendance() {
   const [selectedDate, setSelectedDate] = useState("");
@@ -8,7 +9,7 @@ function Attendance() {
   const [attendance, setAttendance] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/get_attendance")
+    axios.get(`${API_URL}/api/get_attendance`)
       .then((res) => {
         if (res.data) {
           setAttendance(res.data);

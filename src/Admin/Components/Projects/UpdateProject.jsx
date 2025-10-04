@@ -4,6 +4,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Select from "react-select";
 
+import { API_URL } from "../../../config";
+
 const UpdateProject = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -31,7 +33,7 @@ const UpdateProject = () => {
     const fetchData = async () => {
       try {
         const projectRes = await axios.get(
-          `http://localhost:5000/api/getprojectByPorjectId/${id}`
+          `${API_URL}/api/getprojectByPorjectId/${id}`
         );
         const projectData = projectRes.data;
 
@@ -50,7 +52,7 @@ const UpdateProject = () => {
             : []
         });
 
-        const deptRes = await axios.get("http://localhost:5000/api/getDepartment");
+        const deptRes = await axios.get(`${API_URL}/api/getDepartment`);
         setDepartments(deptRes.data || []);
       } catch (err) {
         console.error("Error fetching project or departments:", err);
@@ -71,8 +73,8 @@ const UpdateProject = () => {
     const fetchDeptData = async () => {
       try {
         const [serviceRes, empRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/getServicebyDepartment/${project.department}`),
-          axios.get(`http://localhost:5000/api/getEmployeeByDepartment/${project.department}`)
+          axios.get(`${API_URL}/api/getServicebyDepartment/${project.department}`),
+          axios.get(`${API_URL}/api/getEmployeeByDepartment/${project.department}`)
         ]);
 
         setServices(serviceRes.data || []);
@@ -106,7 +108,7 @@ const UpdateProject = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/api/updateProject/${id}`, {
+      await axios.put(`${API_URL}/api/updateProject/${id}`, {
         ...project,
         addMember: project.addMember.map((m) => m.value) // send only IDs
       });

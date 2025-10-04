@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_URL } from "../../../config";
 
 const ShowProject = () => {
   const { id } = useParams();
@@ -12,7 +13,7 @@ const ShowProject = () => {
     const fetchProject = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/getprojectByPorjectId/${id}`
+          `${API_URL}/api/getprojectByPorjectId/${id}`
         );
         setProject(res.data);
       } catch (err) {

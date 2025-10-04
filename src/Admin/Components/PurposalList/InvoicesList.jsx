@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_URL } from "../../../config";
+
 
 function InvoiceList() {
   const [invoices, setInvoices] = useState([]);
@@ -10,7 +12,7 @@ function InvoiceList() {
   useEffect(() => {
     const fetchInvoices = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/getAllInvoice");
+        const response = await axios.get(`${API_URL}/api/getAllInvoice`);
         const data = response.data;
         if (data.success && Array.isArray(data.invoices)) {
           setInvoices(data.invoices);
@@ -28,7 +30,7 @@ function InvoiceList() {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this invoice?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/deleteInvoice/${id}`);
+      await axios.delete(`${API_URL}/api/deleteInvoice/${id}`);
       setInvoices(invoices.filter(inv => inv._id !== id));
     } catch (err) {
       console.error("Error deleting invoice:", err);

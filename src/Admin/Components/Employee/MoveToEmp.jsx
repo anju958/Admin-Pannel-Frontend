@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_URL } from "../../../config";
 
 function MoveToEmp() {
   const { employeeId } = useParams();
@@ -44,7 +45,7 @@ function MoveToEmp() {
 
     useEffect(() => {
     axios
-      .get("http://localhost:5000/api/getDepartment")
+      .get(`${API_URL}/api/getDepartment`)
       .then((res) => setDepartments(res.data))
       .catch((err) => console.error("Error fetching departments:", err));
   }, []);
@@ -52,7 +53,7 @@ function MoveToEmp() {
   useEffect(() => {
     if (!formData.department) return;
     axios
-      .get(`http://localhost:5000/api/getServicebyDepartment/${formData.department}`)
+      .get(`${API_URL}/api/getServicebyDepartment/${formData.department}`)
       .then((res) => setServices(res.data))
       .catch((err) => console.error("Error fetching services:", err));
   }, [formData.department]);
@@ -81,7 +82,7 @@ function MoveToEmp() {
 
     try {
       await axios.put(
-        `http://localhost:5000/api/updateSignUser/${employeeId}`,
+        `${API_URL}/api/updateSignUser/${employeeId}`,
         data,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

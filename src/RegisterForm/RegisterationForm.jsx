@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import logo from '../assessts/premier-logo.png';
+import { API_URL } from "../config";
 
 function RegisterationForm() {
 
@@ -9,6 +10,7 @@ function RegisterationForm() {
     ename: '', dateOfBirth: '', gender: '', phoneNo: '',
     personal_email: '', official_email: '', password: '',
     fatherName: '', motherName: '', address: '', emergencyContact: '',
+    
     relation: '', bankName: '', accountNo: '', ifscCode: '', accountHolderName: '',
     adarCardNo: '', panNo: '', qualification: '', lastExp: '', expWithPWT: '',
     department: '', service: '', interviewDate: '', joiningDate: '',
@@ -31,7 +33,7 @@ function RegisterationForm() {
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/getDepartment");
+        const res = await axios.get(`${API_URL}/api/getDepartment`);
         setDepartments(res.data);
       } catch (error) {
         console.error("Error fetching departments:", error);
@@ -45,12 +47,13 @@ function RegisterationForm() {
     const fetchServices = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/getServicebyDepartment/${formData.department}`
+          `${API_URL}/api/getServicebyDepartment/${formData.department}`
         );
         setServices(res.data);
       } catch (error) {
         console.error("Error fetching services:", error);
       }
+
     };
     fetchServices();
   }, [formData.department]);
@@ -80,7 +83,7 @@ function RegisterationForm() {
         data.append("jobId", "JOB123");
       }
 
-      const res = await axios.post("http://localhost:5000/api/signUp", data, {
+      const res = await axios.post(`${API_URL}/api/signUp`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

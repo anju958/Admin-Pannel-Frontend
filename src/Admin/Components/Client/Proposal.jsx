@@ -3,6 +3,8 @@ import React, { useRef, useState, useEffect } from "react";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import CreatableSelect from "react-select/creatable";
+import { API_URL } from "../../../config";
+
 
 function Proposal() {
   const proposalRef = useRef();
@@ -42,7 +44,7 @@ function Proposal() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/getServices")
+      .get(`${API_URL}/api/getServices`)
       .then((res) => {
         const options = res.data.map((service) => ({
           value: service._id,
@@ -84,7 +86,7 @@ function Proposal() {
 
       if (proposal.file) formData.append("attachments", proposal.file);
 
-      await axios.post("http://localhost:5000/api/proposals", formData);
+      await axios.post("${API_URL}/api/proposals", formData);
 
       alert("Proposal saved & sent successfully!");
       setShowPreview(false);

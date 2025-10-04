@@ -3,13 +3,14 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { formatDate } from '../../../utils/dateFormatter';
 import StatusDropdown from '../Leads/StatusDropdown';
+import { API_URL } from "../../../config";
 
 function Lead() {
   const [Client, setClient] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/getLeadData')
+    axios.get(`${API_URL}/api/getLeadData`)
       .then(res => {
         if (res.data) {
           setClient(res.data);
@@ -31,7 +32,7 @@ function Lead() {
 
   const moveToClient = async (leadId) => {
     try {
-      const res = await axios.put(`http://localhost:5000/api/moveleadtoClient/${leadId}`);
+      const res = await axios.put(`${API_URL}/api/moveleadtoClient/${leadId}`);
       if (res.status === 200) {
         alert("Lead moved to client successfully!");
         navigate("/admin/client");
@@ -49,7 +50,7 @@ function Lead() {
     }
 
     try {
-      await axios.delete(`http://localhost:5000/api/DeleteLead/${leadId}`);
+      await axios.delete(`${API_URL}/api/DeleteLead/${leadId}`);
       setClient(Client.filter(clients => clients.leadId !== leadId));
       alert("User deleted successfully!");
     } catch (error) {

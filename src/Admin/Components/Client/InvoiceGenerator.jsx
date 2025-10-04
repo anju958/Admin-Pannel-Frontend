@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useLocation } from "react-router-dom";
+import { API_URL } from "../../../config";
 
 function InvoiceGenerator() {
   const { clientId } = useParams();
@@ -20,7 +21,7 @@ function InvoiceGenerator() {
     if (!clientId) return;
 
     axios
-      .get(`http://localhost:5000/api/getProjectbyClient/${clientId}`)
+      .get(`${API_URL}/api/getProjectbyClient/${clientId}`)
       .then((res) => setProjects(res.data || []))
       .catch((err) => {
         console.error("Failed to fetch projects:", err);
@@ -68,7 +69,7 @@ function InvoiceGenerator() {
       });
 
       // 1️⃣ Create invoice in backend
-      const res = await axios.post(`http://localhost:5000/api/createInvoice/${clientId}`, {
+      const res = await axios.post(`${API_URL}/api/createInvoice/${clientId}`, {
         projects: payloadProjects,
         dueDate,
         clientEmail: client?.emailId,
@@ -79,7 +80,7 @@ function InvoiceGenerator() {
 
       // 2️⃣ Send invoice email using your existing API
       try {
-        await axios.post(`http://localhost:5000/api/sendInvoice/${created._id}`);
+        await axios.post(`${API_URL}/api/sendInvoice/${created._id}`);
         setEmailSent(true);
       } catch (err) {
         console.error("Failed to send invoice email:", err);
@@ -100,7 +101,7 @@ function InvoiceGenerator() {
   if (!invoice) return;
   try {
     setLoading(true);
-    await axios.post(`http://localhost:5000/api/sendInvoice/${invoice._id}`);
+    await axios.post(`${API_URL}/api/sendInvoice/${invoice._id}`);
     setEmailSent(true);
     alert("Email resent successfully!");
   } catch (err) {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useLocation, Link } from "react-router-dom";
+import { API_URL } from "../../../config";
 
 
 function ViewProjects() {
@@ -11,7 +12,7 @@ function ViewProjects() {
 
     useEffect(() => {
         if (!clientId) return;
-        axios.get(`http://localhost:5000/api/getProjectbyClient/${clientId}`)
+        axios.get(`${API_URL}/api/getProjectbyClient/${clientId}`)
             .then(res => setProjects(res.data))
             .catch(err => console.error("Error fetching projects:", err));
     }, [clientId]);

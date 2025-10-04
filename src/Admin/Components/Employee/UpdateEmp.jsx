@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_URL } from "../../../config";
 
 function UpdateEmp() {
   const { employeeId } = useParams();
@@ -44,14 +45,14 @@ function UpdateEmp() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/getEmpDataByID/${employeeId}`)
+      .get(`${API_URL}/api/getEmpDataByID/${employeeId}`)
       .then((res) => setFormData(res.data))
       .catch((err) => console.log(err));
   }, [employeeId]);
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/getDepartment")
+      .get(`${API_URL}/api/getDepartment`)
       .then((res) => setDepartments(res.data))
       .catch((err) => console.error("Error fetching departments:", err));
   }, []);
@@ -59,7 +60,7 @@ function UpdateEmp() {
   useEffect(() => {
     if (!formData.department) return;
     axios
-      .get(`http://localhost:5000/api/getServicebyDepartment/${formData.department}`)
+      .get(`${API_URL}/api/getServicebyDepartment/${formData.department}`)
       .then((res) => setServices(res.data))
       .catch((err) => console.error("Error fetching services:", err));
   }, [formData.department]);
@@ -84,7 +85,7 @@ function UpdateEmp() {
 
     try {
       await axios.put(
-        `http://localhost:5000/api/updateSignUser/${employeeId}`,
+        `${API_URL}/api/updateSignUser/${employeeId}`,
         data,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

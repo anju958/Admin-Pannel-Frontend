@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
+import { API_URL } from "../../../config";
 
 function ProjectDetails() {
   const { clientId, projectId } = useParams();
@@ -10,7 +11,7 @@ function ProjectDetails() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/getProjectById/${clientId}/${projectId}`)
+      .get(`${API_URL}/api/getProjectById/${clientId}/${projectId}`)
       .then((res) => setProject(res.data))
       .catch((err) => console.error("Error fetching project:", err));
   }, [clientId, projectId]);
