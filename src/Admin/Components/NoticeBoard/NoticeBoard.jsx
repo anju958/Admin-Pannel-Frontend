@@ -60,24 +60,7 @@ function NoticeBoard() {
       allUsers: sendToAll,
       userIds: selectedUsers.map(u => u.value), // send selected user IDs
     };
-    // try {
-    //   setLoading(true);
-    //   await axios.post(`${API_URL}/api/sendNotification`, body);
-    //   alert("✅ Notification sent successfully!");
-    //   setShow(false);
-    //   setNewNotice({ title: "", description: "", category: "General" });
-    //   setSelectedUsers([]);
-    //   setSendToAll(false);
-    //   fetchNotifications();
-    // } catch (error) {
-    //   if (error.response && error.response.status === 409) {
-    //     alert("⚠️ This notification already exists!");
-    //   } else {
-    //     alert("❌ Failed to send notification");
-    //   }
-    // } finally {
-    //   setLoading(false);
-    // }
+
     try {
       setLoading(true);
       await axios.post(`${API_URL}/api/sendNotification`, body);
@@ -126,6 +109,32 @@ function NoticeBoard() {
 
       {/* Notices */}
       {notices.map(notice => (
+        // <Card key={notice.NotificationId} className="mb-3 shadow-sm">
+        //   <Card.Body>
+        //     <div className="d-flex justify-content-between align-items-start">
+        //       <div>
+        //         <Card.Title className="mb-1">
+        //           {notice.title}{" "}
+        //           <span className="badge bg-info">{notice.category}</span>
+        //         </Card.Title>
+        //         <small className="text-muted">
+        //           📅 {new Date(notice.createdAt).toLocaleString()}
+        //         </small>
+        //       </div>
+
+        //       <div>
+        //         <Button
+        //           variant="danger"
+        //           size="sm"
+        //           onClick={() => handleDeleteNotice(notice._id)}
+        //         >
+        //           Delete
+        //         </Button>
+        //       </div>
+        //     </div>
+        //     <Card.Text className="mt-2">{notice.body}</Card.Text>
+        //   </Card.Body>
+        // </Card>
         <Card key={notice.NotificationId} className="mb-3 shadow-sm">
           <Card.Body>
             <div className="d-flex justify-content-between align-items-start">
@@ -137,8 +146,16 @@ function NoticeBoard() {
                 <small className="text-muted">
                   📅 {new Date(notice.createdAt).toLocaleString()}
                 </small>
+                {/* Show recipients */}
+                <div>
+                  <strong>Recipients:</strong>
+                  {notice.recipientNames ? (
+                    notice.recipientNames.join(", ")
+                  ) : (
+                    notice.allUsers ? "All Employees" : "—"
+                  )}
+                </div>
               </div>
-
               <div>
                 <Button
                   variant="danger"
@@ -152,6 +169,7 @@ function NoticeBoard() {
             <Card.Text className="mt-2">{notice.body}</Card.Text>
           </Card.Body>
         </Card>
+
       ))}
 
       {/* Modal */}
