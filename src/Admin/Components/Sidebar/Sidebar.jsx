@@ -100,7 +100,7 @@ function Sidebar() {
               </ul>
             )}
           </li>
-           <li className="nav-item">
+          <li className="nav-item">
             <Link to="/admin/getProjectList" className="nav-link text-white">🗂️ Projects</Link>
           </li>
 
@@ -111,6 +111,11 @@ function Sidebar() {
           <li className="nav-item">
             <Link to="/admin/NoticeBoard" className="nav-link text-white">📢 Notice Board</Link>
           </li>
+
+          <li className="nav-item">
+            <Link to="/admin/companyDetails" className="nav-link text-white">⚙️ Settings</Link>
+          </li>
+
         </ul>
       </div>
     </div>

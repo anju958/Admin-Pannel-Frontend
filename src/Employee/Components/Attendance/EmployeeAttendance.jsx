@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { API_URL } from "../../../config";
@@ -52,11 +51,19 @@ function EmployeeAttendance() {
     setMessage(null);
 
     try {
-      const res = await axios.post(`${API_URL}/api/add_attendance`, formData);
+      const payload = {
+        employeeId: formData.employeeId,
+        date: formData.date,
+        check_in: formData.check_in,
+        check_out: formData.check_out,
+        status: formData.status,
+        remark: formData.remark,
+      };
+
+      const res = await axios.post(`${API_URL}/api/add_attendance`, payload);
       setMessage(res.data.message || "Attendance marked successfully!");
       setIsError(false);
 
-      // reset form
       setFormData({
         employeeId: employee?.employeeId || "",
         employeeName: employee?.ename || "",

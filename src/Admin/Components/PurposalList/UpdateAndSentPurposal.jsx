@@ -17,7 +17,7 @@ function EditProposal() {
     services: [],
     category: [],
     attachments: [],
-    clientId: { leadName: "", emailId: "", phoneNo: "" }, 
+    clientId: { leadName: "", emailId: "", phoneNo: "" },
   });
 
   const [newFiles, setNewFiles] = useState([]);
@@ -61,26 +61,59 @@ function EditProposal() {
 
   const totalPrice = formData.services?.reduce((acc, s) => acc + (s.price || 0), 0);
 
+  // const handleSave = async () => {
+  //   try {
+  //     const data = new FormData();
+  //     data.append("title", formData.title);
+  //     data.append("description", formData.description);
+  //     data.append("terms", formData.terms);
+  //     data.append("status", "Sent"); // mark sent automatically
+  //     data.append("services", JSON.stringify(formData.services));
+  //     data.append("category", JSON.stringify(formData.category));
+
+  //     // Existing attachments
+  //     formData.attachments.forEach((file) => data.append("existingAttachments[]", file));
+
+  //     // New files
+  //     newFiles.forEach((file) => data.append("attachments", file));
+
+  //     await axios.put(`${API_URL}/api/UpdateProposal/${id}`, data, {
+  //       headers: { "Content-Type": "multipart/form-data" },
+  //     });
+
+  //     alert("Proposal updated & sent!");
+  //     navigate("/admin/PurposalList");
+  //   } catch (err) {
+  //     console.error("Error updating proposal:", err);
+  //     alert("Failed to update proposal. Check console.");
+  //   }
+  // };
+
+  // Always send ALL files as attachments (for multer), and old filenames in a separate field
   const handleSave = async () => {
     try {
       const data = new FormData();
       data.append("title", formData.title);
       data.append("description", formData.description);
       data.append("terms", formData.terms);
-      data.append("status", "Sent"); // mark sent automatically
+      data.append("status", "Sent");
       data.append("services", JSON.stringify(formData.services));
       data.append("category", JSON.stringify(formData.category));
 
-      // Existing attachments
-      formData.attachments.forEach((file) => data.append("existingAttachments[]", file));
-
-      // New files
-      newFiles.forEach((file) => data.append("attachments", file));
-
-      await axios.put(`${API_URL}/api/UpdateProposal/${id}`, data, {
-        headers: { "Content-Type": "multipart/form-data" },
+      // Old files (existing)
+      formData.attachments.forEach(fileName => {
+        data.append("existingAttachments[]", fileName); // pass like this for array
       });
 
+      // New uploaded files
+      newFiles.forEach(file => {
+        data.append("attachments", file); // upload as files for multer
+      });
+
+      data.append("clientEmail", formData.clientId.emailId || "");
+      data.append("clientName", formData.clientId.leadName || "");
+
+      await axios.put(`${API_URL}/api/UpdateProposal/${id}`, data);
       alert("Proposal updated & sent!");
       navigate("/admin/PurposalList");
     } catch (err) {
@@ -88,6 +121,9 @@ function EditProposal() {
       alert("Failed to update proposal. Check console.");
     }
   };
+
+
+
 
   return (
     <div className="container mt-4">

@@ -1,6 +1,9 @@
-import React from "react";
+
+
+import React, { useEffect, useState } from "react";
 import { Card, Row, Col } from "react-bootstrap";
 import { Bar, Pie } from "react-chartjs-2";
+import { API_URL } from "../../../config";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -15,32 +18,51 @@ import {
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 function ReportsDashboard() {
-  // Dummy data
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/reports/summary`)
+      .then((response) => {
+        if (!response.ok) throw new Error("Failed to fetch data");
+        return response.json();
+      })
+      .then((json) => {
+        setData(json);
+        setLoading(false);
+      })
+      .catch((error) => {
+        setError(error.message);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <div className="container mt-4">Loading...</div>;
+  if (error) return <div className="container mt-4 text-danger">Error: {error}</div>;
+
+  // Use data from API response
   const proposals = [
-    { status: "Pending" },
-    { status: "Approved" },
-    { status: "Rejected" },
-    { status: "Approved" },
+    { status: "Pending", count: data.proposals.pending || 0 },
+    { status: "Approved", count: data.proposals.approved || 0 },
+    { status: "Rejected", count: data.proposals.rejected || 0 },
+    { status: "Draft", count: data.proposals.draft || 0 },
   ];
 
   const invoices = [
-    { status: "Paid" },
-    { status: "Pending" },
-    { status: "Paid" },
-    { status: "Pending" },
-    { status: "Paid" },
+    { status: "Paid", count: data.invoices.paid || 0 },
+    { status: "Partial", count: data.invoices.partial || 0 },
+    { status: "Pending", count: data.invoices.pending || 0 },
   ];
 
-  // Count stats
-  const totalProposals = proposals.length;
-  const approvedProposals = proposals.filter((p) => p.status === "Approved").length;
-  const pendingProposals = proposals.filter((p) => p.status === "Pending").length;
+  const totalProposals = data.proposals.total || 0;
+  const approvedProposals = data.proposals.approved || 0;
+  const pendingProposals = data.proposals.pending || 0;
 
-  const totalInvoices = invoices.length;
-  const paidInvoices = invoices.filter((i) => i.status === "Paid").length;
-  const pendingInvoices = invoices.filter((i) => i.status === "Pending").length;
+  const totalInvoices = data.invoices.total || 0;
+  const paidInvoices = data.invoices.paid || 0;
+  const pendingInvoices = data.invoices.pending || 0;
 
-  // Chart data (Bar)
   const barData = {
     labels: ["Proposals", "Invoices"],
     datasets: [
@@ -57,7 +79,6 @@ function ReportsDashboard() {
     ],
   };
 
-  // Chart data (Pie)
   const pieData = {
     labels: ["Proposals", "Invoices"],
     datasets: [
@@ -75,7 +96,7 @@ function ReportsDashboard() {
 
       {/* Summary Cards */}
       <Row className="mb-4">
-        <Col md={3}>
+        <Col md={2}>
           <Card className="shadow-sm text-center p-3">
             <h5>Total Proposals</h5>
             <h3>{totalProposals}</h3>
@@ -87,18 +108,26 @@ function ReportsDashboard() {
             <h3>{approvedProposals}</h3>
           </Card>
         </Col>
-        <Col md={3}>
+        <Col md={2}>
           <Card className="shadow-sm text-center p-3">
             <h5>Total Invoices</h5>
             <h3>{totalInvoices}</h3>
           </Card>
         </Col>
-        <Col md={3}>
+        <Col md={2}>
           <Card className="shadow-sm text-center p-3">
             <h5>Paid Invoices</h5>
             <h3>{paidInvoices}</h3>
           </Card>
         </Col>
+        <Col md={3}>
+          <Card className="shadow-sm text-center p-3">
+            <h5>Partial Payment Pending</h5>
+            <h3>
+              ₹{(data.invoices.partialPendingAmount ?? 0).toLocaleString()}
+            </h3>
+          </Card>
+        </Col>  
       </Row>
 
       {/* Charts */}
@@ -115,7 +144,12 @@ function ReportsDashboard() {
             <Pie data={pieData} />
           </Card>
         </Col>
+
       </Row>
+
+
+
+
     </div>
   );
 }

@@ -1,5 +1,3 @@
-
-
 import React from "react";
 import { FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -17,61 +15,57 @@ function Navbar() {
 
   return (
     <nav
-      className="navbar navbar-expand-lg px-3 py-2 shadow-sm"
+      className="navbar navbar-expand-lg px-4 py-3 shadow-sm"
       style={{
-        background: "linear-gradient(90deg, #1A2A6C, #6A11CB, #2575FC)", // logo gradient
+        background: "linear-gradient(90deg, #1A2A6C 0%, #6A11CB 50%, #2575FC 100%)",
         color: "white",
+        borderBottom: "2px solid #e0e0e0",
+        minHeight: "70px"
       }}
     >
-      {/* Brand / Logo */}
-      <a className="navbar-brand fw-bold text-white" href="#">
-        Premier Admin
-      </a>
+      {/* Brand / Centered */}
+      <div className="container-fluid d-flex align-items-center justify-content-between">
 
-      {/* Search Bar */}
-      <form className="d-flex ms-3 flex-grow-1" role="search">
-        <input
-          className="form-control me-2"
-          type="search"
-          placeholder="Search..."
-          aria-label="Search"
-        />
-        <Button
-          variant="contained"
-          size="small"
-          style={{
-            backgroundColor: "#0b2c5d",
-            color: "white",
-            fontWeight: "bold",
-          }}
-        >
-          Search
-        </Button>
-      </form>
+        {/* Sidebar Brand (optional, can be removed if only Premier Admin is center) */}
+        {/* <span className="navbar-brand fw-bold text-white fs-3" style={{ letterSpacing: "1px" }}>
+          Admin Dashboard
+        </span> */}
 
-      {/* User Profile Dropdown */}
-      <div className="ms-auto dropdown">
-        <button
-          className="btn btn-light dropdown-toggle d-flex align-items-center px-3 fw-bold"
-          type="button"
-          data-bs-toggle="dropdown"
-          aria-expanded="false"
-        >
-          <FaUserCircle size={26} className="me-2 text-primary" />
-          <span>{user?.ename || "Admin"}</span>
-        </button>
+        <div className="mx-auto text-center" style={{ flex: 1 }}>
+          <span
+            className="fw-bold text-white"
+            style={{ fontSize: "2rem", letterSpacing: "1px", fontFamily: "inherit" }}
+          >
+            Premier Admin
+          </span>
+        </div>
 
-        <ul className="dropdown-menu dropdown-menu-end shadow-sm">
-          <li>
-            <Button
-              onClick={handleLogout}
-              className="dropdown-item text-danger fw-bold"
-              component="span"
+        {/* Profile and Actions (far right) */}
+        <div className="d-flex align-items-center gap-3">
+          <div className="dropdown">
+            <button
+              className="btn btn-light dropdown-toggle d-flex align-items-center px-3 fw-bold"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+              style={{ fontSize: "1.12rem" }}
             >
-              Logout
-            </Button>
-          </li>
-        </ul>
+              <FaUserCircle size={30} className="me-2 text-primary" />
+              <span>{user?.ename || "Admin"}</span>
+            </button>
+            <ul className="dropdown-menu dropdown-menu-end shadow-sm">
+              <li>
+                <Button
+                  onClick={handleLogout}
+                  className="dropdown-item text-danger fw-bold"
+                  component="span"
+                >
+                  Logout
+                </Button>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
     </nav>
   );

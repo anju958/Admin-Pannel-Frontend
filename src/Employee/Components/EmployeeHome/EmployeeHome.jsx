@@ -1,15 +1,9 @@
-
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
-import CardActionArea from '@mui/material/CardActionArea';
 import React from 'react';
-
+import { Container, Row, Col, Card } from 'react-bootstrap';
 
 function EmployeeHome() {
   const [selectedCard, setSelectedCard] = React.useState(0);
-  const user = JSON.parse(localStorage.getItem("user")); 
+  const user = JSON.parse(localStorage.getItem("user"));
 
   const cards = [
     {
@@ -30,43 +24,28 @@ function EmployeeHome() {
   ];
 
   return (
-    <div className="employee-home">
-      <h1 className='employee-home-title'>
+    <Container fluid className="py-4" style={{ background: "#f8fafc", minHeight: "85vh" }}>
+      <h1 className='text-center mb-4 fw-bold' style={{ letterSpacing: '1px' }}>
         Welcome to {user?.ename || "Employee"}
       </h1>
 
-      <Box
-        sx={{
-          width: '100%',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
-          gap: 2,
-        }}
-      >
+      <Row className="mb-4 mt-4 text-center justify-content-center">
         {cards.map((card, index) => (
-          <Card
-            key={card.id}
-            className={`dashboard-card ${selectedCard === index ? 'active' : ''}`}
-          >
-            <CardActionArea
+          <Col key={card.id} md={3} className="mb-4">
+            <Card
+              className={`shadow-sm rounded-3 dashboard-card h-100 ${selectedCard === index ? 'border-primary' : ''}`}
+              style={{ cursor: "pointer" }}
               onClick={() => setSelectedCard(index)}
-              sx={{
-                height: '100%',
-              }}
             >
-              <CardContent sx={{ height: '100%' }}>
-                <Typography variant="h5" component="div" className="dashboard-card-title">
-                  {card.title}
-                </Typography>
-                <Typography variant="h3" className="dashboard-card-number">
-                  {card.number}
-                </Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
+              <Card.Body>
+                <h5 className="mb-2">{card.title}</h5>
+                <h1 className="text-primary fw-bold display-5 mb-0">{card.number}</h1>
+              </Card.Body>
+            </Card>
+          </Col>
         ))}
-      </Box>
-    </div>
+      </Row>
+    </Container>
   );
 }
 

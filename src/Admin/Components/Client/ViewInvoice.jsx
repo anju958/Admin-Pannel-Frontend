@@ -1,88 +1,96 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_URL } from "../../../config";
 
-function ViewInvoice() {
-  const { clientId } = useParams();
-  const [invoices, setInvoices] = useState([]);
+function InvoiceDetail() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const fetchInvoices = async () => {
-    try {
-      const res = await axios.get(`${API_URL}/api/getInvoicebyClient/${clientId}`);
-      setInvoices(res.data.invoices || []);
-    } catch (err) {
-      console.error("Failed to fetch invoices:", err);
-      setError("Failed to load invoices. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
-    if (clientId) fetchInvoices();
-  }, [clientId]);
+    const fetchInvoice = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/getInvoiceById/${id}`);
+        if (response.data.success) setInvoice(response.data.invoice);
+      } catch (err) {
+        alert("Could not load invoice details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchInvoice();
+  }, [id]);
 
-  if (loading) return <div className="text-center mt-5">Loading invoices...</div>;
-  if (error) return <div className="text-danger text-center mt-5">{error}</div>;
-  if (invoices.length === 0) return <div className="text-center mt-5">No invoices found.</div>;
+  if (loading) return <div className="container mt-3">Loading…</div>;
+  if (!invoice) return <div className="container mt-3">Invoice not found.</div>;
 
   return (
     <div className="container mt-4">
-      <h2 className="mb-4 text-center">Client Invoices</h2>
-
-      <div className="table-responsive">
-        <table className="table table-striped table-bordered align-middle">
-          <thead className="table-dark">
-            <tr>
-              <th>Invoice #</th>
-              <th>Due Date</th>
-              <th>Status</th>
-              <th>Total Amount</th>
-              <th>Projects</th>
-            </tr>
-          </thead>
-          <tbody>
-            {invoices.map((invoice) => {
-              const totalAmount = invoice.projects.reduce(
-                (sum, p) => sum + Number(p.amount),
-                0
-              );
-
-              return (
-                <tr key={invoice._id}>
-                  <td>{invoice.invoiceNumber}</td>
-                  <td>{new Date(invoice.dueDate).toLocaleDateString()}</td>
+      <button className="btn btn-secondary mb-3" onClick={() => navigate(-1)}>
+        ← Back to List
+      </button>
+      <div className="card shadow">
+        <div className="card-body">
+          <h2 className="card-title mb-1">Invoice #{invoice.invoiceNumber}</h2>
+          <div className="mb-3"> 
+            <span className="fw-bold">Client:</span> {invoice.clientName} <br/>
+            <span className="fw-bold">Email:</span> {invoice.clientEmail}
+          </div>
+          <div className="mb-3">
+            <span className="fw-bold">Issued:</span> {invoice.date ? new Date(invoice.date).toLocaleDateString() : "-"}
+            <br/>
+            <span className="fw-bold">Due Date:</span> {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : "-"}
+            <br/>
+            <span className="fw-bold">Status:</span>{" "}
+            <span className={`badge ${
+              invoice.status === "Paid" ? "bg-success" :
+              invoice.status === "Partial" ? "bg-info text-dark" :
+              invoice.status === "Pending" ? "bg-warning text-dark" : "bg-danger"
+            }`}>{invoice.status}</span>
+          </div>
+          <table className="table table-bordered">
+            <thead>
+              <tr>
+                <th>Project/Service</th>
+                <th>Amount (₹)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {invoice.projects.map((p, i) => (
+                <tr key={i}>
                   <td>
-                    <span
-                      className={`badge ${
-                        invoice.status === "Paid" ? "bg-success" : "bg-warning text-dark"
-                      }`}
-                    >
-                      {invoice.status}
-                    </span>
+                    {typeof p.projectId === "object" && p.projectId?.projectName
+                      ? p.projectId.projectName
+                      : p.name || p.title || p.projectId || "Service"}
                   </td>
-                  <td>₹{totalAmount.toLocaleString()}</td>
-                  <td>
-                    <ul className="mb-0 ps-3">
-                      {invoice.projects.map((p) => (
-                        <li key={p.projectId?._id || p.projectId}>
-                          {p.projectId?.projectName || p.projectId} — ₹
-                          {Number(p.amount).toLocaleString()}
-                        </li>
-                      ))}
-                    </ul>
-                  </td>
+                  <td>₹{Number(p.amount).toLocaleString()}</td>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              ))}
+              <tr>
+                <td className="fw-bold">Total</td>
+                <td className="fw-bold">₹{invoice.totalAmount.toLocaleString()}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div className="mb-2">
+            <span className="fw-bold">Paid Amount:</span> ₹{(invoice.paidAmount || 0).toLocaleString()}<br />
+            <span className="fw-bold">Remaining:</span> ₹{(invoice.remainingAmount !== undefined ? invoice.remainingAmount : invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString()}
+          </div>
+          <div>
+            <span className="fw-bold">Bank Details:</span>
+            <ul>
+              <li><b>Bank:</b> YOUR_BANK_NAME</li>
+              <li><b>Account Number:</b> XXXXX1234567</li>
+              <li><b>IFSC:</b> IFSC0000123</li>
+              <li><b>Account Holder:</b> YOUR_NAME</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-export default ViewInvoice;
+export default InvoiceDetail;

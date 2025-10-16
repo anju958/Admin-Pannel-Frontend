@@ -58,6 +58,8 @@ import ShowProject from './Admin/Components/Projects/Projects';
 import ProjectList from './Admin/Components/Projects/ProjectList';
 import UpdateProject from './Admin/Components/Projects/UpdateProject';
 import EditProposal from './Admin/Components/PurposalList/UpdateAndSentPurposal';
+import CompanyProjectsPage from './Admin/Components/Details/Details';
+import CompanyDetailsPage from './Admin/Components/Details/Details';
 
 
 function App() {
@@ -97,7 +99,7 @@ function App() {
             <Route path='project/:clientId/:projectId' element={<ProjectDetails />} />
             <Route path="invoice/:clientId" element={<InvoiceGenerator />} />
             <Route path='PayPage/:invoiceId' element={<PayPage />} />
-            <Route path='viewInvoice/:clientId' element={<ViewInvoice/>}/>
+            <Route path='viewInvoice/:id' element={<ViewInvoice/>}/>
             <Route path='TaskList' element={<TaskList/>}/>
             <Route path='TaskList/assignTask'  element={<AssignTask/>}/>
             <Route path='PurposalList' element={<ProposalList/>}/>
@@ -116,6 +118,7 @@ function App() {
             <Route path='NoticeBoard' element={<NoticeBoard/>}/>
 
             <Route path='updateLeadClient/:leadId' element={<UpdateLeadClient />} />
+            <Route path='companyDetails' element={<CompanyDetailsPage/>}/>
           </Route>
           {/* Employee Routes */}
           <Route path='employee' element={<EmployeeLayout />}>

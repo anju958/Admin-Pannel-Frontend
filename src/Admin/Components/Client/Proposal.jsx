@@ -86,7 +86,7 @@ function Proposal() {
 
       if (proposal.file) formData.append("attachments", proposal.file);
 
-      await axios.post("${API_URL}/api/proposals", formData);
+      await axios.post(`${API_URL}/api/proposals`, formData);
 
       alert("Proposal saved & sent successfully!");
       setShowPreview(false);
