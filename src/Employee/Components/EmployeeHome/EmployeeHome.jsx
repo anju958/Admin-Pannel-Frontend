@@ -1,27 +1,38 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card } from 'react-bootstrap';
+import axios from 'axios';
+import { API_URL } from '../../../config'; 
 
 function EmployeeHome() {
-  const [selectedCard, setSelectedCard] = React.useState(0);
   const user = JSON.parse(localStorage.getItem("user"));
+  const [selectedCard, setSelectedCard] = useState(0);
+  const [cards, setCards] = useState([
+    { id: 1, title: 'Total Projects', number: 0 },
+    { id: 2, title: 'Total Leaves', number: 0 },
+    { id: 3, title: 'Pending Projects', number: 0 },
+  ]);
 
-  const cards = [
-    {
-      id: 1,
-      title: 'Total Projects',
-      number: 0
-    },
-    {
-      id: 2,
-      title: 'Total Leaves',
-      number: 0,
-    },
-    {
-      id: 3,
-      title: 'Pending Projects',
-      number: 0
-    },
-  ];
+  // Fetch employee stats
+  const fetchStats = async () => {
+    if (!user?.employeeId) return;
+
+    try {
+      const res = await axios.get(`${API_URL}/api/employeeStats/${user.employeeId}`);
+      const data = res.data;
+
+      setCards([
+        { id: 1, title: 'Total Projects', number: data.totalProjects },
+        { id: 2, title: 'Total Leaves', number: data.totalLeaves },
+        { id: 3, title: 'Pending Projects', number: data.pendingProjects },
+      ]);
+    } catch (err) {
+      console.error("Error fetching employee stats:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, [user]);
 
   return (
     <Container fluid className="py-4" style={{ background: "#f8fafc", minHeight: "85vh" }}>

@@ -1,38 +1,95 @@
-import React from 'react';
+
+
+import React, { useState, useEffect } from "react";
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
+import CardActionArea from '@mui/material/CardActionArea';
+import axios from 'axios';
+import { API_URL } from "../../../config";
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
 
+function EmployeePerformance() {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const [cards, setCards] = useState([
+    { id: 1, title: 'Total Tasks', number: 0 },
+    { id: 2, title: 'Completed Tasks', number: 0 },
+    { id: 3, title: 'Pending Tasks', number: 0 },
+  ]);
+  const [tasks, setTasks] = useState([]);
+  const [performanceData, setPerformanceData] = useState([]);
 
-const performanceData = [
-  { month: 'Jan', score: 75 },
-  { month: 'Feb', score: 80 },
-  { month: 'Mar', score: 85 },
-  { month: 'Apr', score: 90 },
-  { month: 'May', score: 88 },
-  { month: 'Jun', score: 92 },
-];
+  // Fetch tasks
+  const fetchTasks = async () => {
+    if (user?.employeeId) {
+      try {
+        const res = await axios.get(`${API_URL}/api/getTasksByEmployee/${user.employeeId}`);
+        const tasksData = res.data || [];
+        setTasks(tasksData);
+        updateStats(tasksData);
+        updatePerformanceChart(tasksData);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
 
-function PerformancePage() {
+  useEffect(() => {
+    fetchTasks();
+  }, [user]);
+
+  // Update stats
+  const updateStats = (tasksList) => {
+    const total = tasksList.length;
+    const completed = tasksList.filter(t => t.status === "Completed").length;
+    const pending = total - completed;
+
+    setCards([
+      { id: 1, title: 'Total Tasks', number: total },
+      { id: 2, title: 'Completed Tasks', number: completed },
+      { id: 3, title: 'Pending Tasks', number: pending },
+    ]);
+  };
+
+  // Update performance chart
+  const updatePerformanceChart = (tasksList) => {
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const data = months.map((m, idx) => {
+      const count = tasksList.filter(task => {
+        if(task.status !== "Completed") return false;
+        const taskMonth = new Date(task.dueDate).getMonth();
+        return taskMonth === idx;
+      }).length;
+      return { month: m, score: count };
+    });
+    setPerformanceData(data);
+  };
+
+  const performanceScore = cards[0].number ? Math.round((cards[1].number / cards[0].number) * 100) : 0;
+
   return (
-    <div className="performance-page">
-      <h2 className="page-title">Performance Dashboard</h2>
-
-      <div className="performance-summary">
-        <div className="summary-card">
+    <div className="container-fluid">
+  
+      {/* Performance Summary */}
+      <div className="performance-summary d-flex gap-3 justify-content-center my-4">
+        <div className="summary-card p-3 border">
           <h3>Performance Score</h3>
-          <p>88%</p>
+          <p>{performanceScore}%</p>
         </div>
-        <div className="summary-card">
+        <div className="summary-card p-3 border">
           <h3>Tasks Completed</h3>
-          <p>42</p>
+          <p>{cards[1].number}</p>
         </div>
-        <div className="summary-card">
+        <div className="summary-card p-3 border">
           <h3>Pending Tasks</h3>
-          <p>5</p>
+          <p>{cards[2].number}</p>
         </div>
       </div>
 
+      {/* Performance Chart */}
       <div className="performance-chart">
-        <h3>Performance Trend</h3>
+        <h3>Tasks Completed Per Month</h3>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={performanceData}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -43,17 +100,8 @@ function PerformancePage() {
           </LineChart>
         </ResponsiveContainer>
       </div>
-
-      <div className="recent-feedback">
-        <h3>Recent Feedback</h3>
-        <ul>
-          <li>Completed project ahead of schedule – Excellent!</li>
-          <li>Improved teamwork and communication.</li>
-          <li>Needs minor improvement in reporting.</li>
-        </ul>
-      </div>
     </div>
   );
 }
 
-export default PerformancePage;
+export default EmployeePerformance;

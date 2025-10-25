@@ -7,8 +7,6 @@ import CardActionArea from '@mui/material/CardActionArea';
 import axios from 'axios';
 import { API_URL } from "../../../config";
 
-
-
 function EmployeeTask() {
   const user = JSON.parse(localStorage.getItem("user"));
   const [selectedCard, setSelectedCard] = useState(0);
@@ -23,42 +21,43 @@ function EmployeeTask() {
   // Task list
   const [tasks, setTasks] = useState([]);
 
-  // Fetch tasks & stats
-//   useEffect(() => {
-//     if (user?.employeeId) {
-//       // Get stats
-//       axios.get(`http://localhost:5000/api/getTaskStats/${user.employeeId}`)
-//         .then(res => {
-//           const stats = res.data;
-//           setCards([
-//             { id: 1, title: 'Total Tasks', number: stats.totalTasks || 0 },
-//             { id: 2, title: 'Completed Tasks', number: stats.completedTasks || 0 },
-//             { id: 3, title: 'Pending Tasks', number: stats.pendingTasks || 0 },
-//           ]);
-//         })
-//         .catch(err => console.error(err));
+  // Update stats based on tasks
+  const updateStats = (tasksList) => {
+    const total = tasksList.length;
+    const completed = tasksList.filter(t => t.status === "Completed").length;
+    const pending = tasksList.filter(t => t.status !== "Completed").length;
 
-//       // Get tasks
-//       axios.get(`http://localhost:5000/api/getTasksByEmployee/${user.employeeId}`)
-//         .then(res => setTasks(res.data || []))
-//         .catch(err => console.error(err));
-//     }
-//   }, [user]);
+    setCards([
+      { id: 1, title: 'Total Tasks', number: total },
+      { id: 2, title: 'Completed Tasks', number: completed },
+      { id: 3, title: 'Pending Tasks', number: pending },
+    ]);
+  };
+
+  // Fetch tasks
+  const fetchTasks = async () => {
+    if (user?.employeeId) {
+      try {
+        const res = await axios.get(`${API_URL}/api/getTasksByEmployee/${user.employeeId}`);
+        const tasksData = res.data || [];
+        setTasks(tasksData);
+        updateStats(tasksData);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchTasks();
+  }, [user]);
 
   // Update task status
   const handleStatusChange = async (taskId, newStatus) => {
     try {
       await axios.put(`${API_URL}/api/updateTaskStatus/${taskId}`, { status: newStatus });
-      // refresh tasks after update
-      const updated = await axios.get(`${API_URL}/api/getTasksByEmployee/${user.employeeId}`);
-      setTasks(updated.data || []);
-      // refresh stats
-      const stats = await axios.get(`${API_URL}/api/getTaskStats/${user.employeeId}`);
-      setCards([
-        { id: 1, title: 'Total Tasks', number: stats.data.totalTasks || 0 },
-        { id: 2, title: 'Completed Tasks', number: stats.data.completedTasks || 0 },
-        { id: 3, title: 'Pending Tasks', number: stats.data.pendingTasks || 0 },
-      ]);
+      // Refresh tasks
+      await fetchTasks();
     } catch (err) {
       console.error(err);
       alert("Error updating task status");
@@ -78,7 +77,7 @@ function EmployeeTask() {
           }}
         >
           {cards.map((card, index) => (
-            <Card key={card.id}>
+            <Card key={card.id} sx={{ backgroundColor: card.title === 'Pending Tasks' && card.number > 0 ? '#ffe0e0' : undefined }}>
               <CardActionArea
                 onClick={() => setSelectedCard(index)}
                 data-active={selectedCard === index ? '' : undefined}
@@ -123,16 +122,16 @@ function EmployeeTask() {
           {tasks.length > 0 ? (
             tasks.map((task, idx) => (
               <tr key={idx}>
-                <td>{task.task_name}</td>
-                <td>{task.assigned_date}</td>
-                <td>{task.due_date}</td>
+                <td>{task.title}</td>
+                <td>{new Date(task.startDate).toLocaleDateString()}</td>
+                <td>{new Date(task.dueDate).toLocaleDateString()}</td>
                 <td>{task.priority}</td>
                 <td>{task.status}</td>
                 <td>
                   {task.status !== "Completed" && (
                     <button
                       className="btn btn-success btn-sm"
-                      onClick={() => handleStatusChange(task.id, "Completed")}
+                      onClick={() => handleStatusChange(task._id, "Completed")}
                     >
                       Mark Completed
                     </button>
