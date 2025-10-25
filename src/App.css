@@ -451,3 +451,51 @@ section h3 {
 table td:last-child {
   min-width: 280px; /* adjust as needed */
 }
+/* IMPORTANT: Prevent body scroll */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+/* ViewEmployee.css */
+
+.info-item {
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #3f65d6;
+}
+
+.info-item strong {
+  display: block;
+  color: #495057;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.info-item p {
+  color: #212529;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.card {
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .info-item {
+    margin-bottom: 10px;
+  }
+}

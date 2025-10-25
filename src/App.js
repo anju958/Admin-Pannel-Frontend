@@ -60,6 +60,8 @@ import UpdateProject from './Admin/Components/Projects/UpdateProject';
 import EditProposal from './Admin/Components/PurposalList/UpdateAndSentPurposal';
 import CompanyProjectsPage from './Admin/Components/Details/Details';
 import CompanyDetailsPage from './Admin/Components/Details/Details';
+import ViewEmployee from './Admin/Components/Employee/ViewEmployee';
+import ViewTrainee from './Admin/Components/Traniee/ViewTrainee';
 
 
 function App() {
@@ -92,6 +94,8 @@ function App() {
             <Route path='addDepartment' element={<AddDepartment />} />
             <Route path='addJobs' element={<AddJobs />} />
             <Route path='Employee' element={<Employee />} />
+            <Route path='ViewEmployee/:employeeId' element={<ViewEmployee/>}/>
+            <Route path='ViewTrainee/:employeeId' element={<ViewTrainee/>}/>
             <Route path='client' element={<Clients />} />
             <Route path='leadPage/:leadId' element={<ViewLeadPage/>}/>
             <Route path='viewclientpage/:leadId' element={<ViewClientPage />} />
