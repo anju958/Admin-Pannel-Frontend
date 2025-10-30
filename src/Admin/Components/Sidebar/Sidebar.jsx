@@ -16,7 +16,6 @@ function Sidebar() {
   const isActive = (path) => location.pathname === path;
   const isParentActive = (paths) => paths.some(path => location.pathname === path);
 
-  // Active link style
   const activeLinkStyle = {
     background: 'rgba(255, 255, 255, 0.2)',
     borderLeft: '4px solid #fff',
@@ -27,7 +26,6 @@ function Sidebar() {
     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
   };
 
-  // Normal link style
   const normalLinkStyle = {
     borderRadius: '8px',
     margin: '4px 8px',
@@ -35,7 +33,6 @@ function Sidebar() {
     transition: 'all 0.3s ease'
   };
 
-  // Active parent style
   const activeParentStyle = {
     background: 'rgba(255, 255, 255, 0.15)',
     borderLeft: '4px solid #FFD700',
@@ -160,7 +157,7 @@ function Sidebar() {
               className="nav-link text-white d-flex justify-content-between align-items-center"
               style={{
                 cursor: 'pointer',
-                ...(isParentActive(['/admin/leads', '/admin/client', '/admin/PurposalList', '/admin/InvoicesList', '/admin/reports']) 
+                ...(isParentActive(['/admin/leads', '/admin/client']) 
                   ? activeParentStyle 
                   : normalLinkStyle)
               }}
@@ -189,35 +186,39 @@ function Sidebar() {
                     Clients
                   </Link>
                 </li>
-                <li className="nav-item">
-                  <Link 
-                    to="/admin/PurposalList" 
-                    className="nav-link text-white"
-                    style={isActive('/admin/PurposalList') ? activeLinkStyle : normalLinkStyle}
-                  >
-                    Proposals
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link 
-                    to="/admin/InvoicesList" 
-                    className="nav-link text-white"
-                    style={isActive('/admin/InvoicesList') ? activeLinkStyle : normalLinkStyle}
-                  >
-                    Invoices
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link 
-                    to="/admin/reports" 
-                    className="nav-link text-white"
-                    style={isActive('/admin/reports') ? activeLinkStyle : normalLinkStyle}
-                  >
-                    Reports
-                  </Link>
-                </li>
               </ul>
             )}
+          </li>
+
+          {/* Proposals, Invoices, Reports moved outside */}
+          <li className="nav-item">
+            <Link 
+              to="/admin/PurposalList" 
+              className="nav-link text-white"
+              style={isActive('/admin/PurposalList') ? activeLinkStyle : normalLinkStyle}
+            >
+              📄 Proposals
+            </Link>
+          </li>
+
+          <li className="nav-item">
+            <Link 
+              to="/admin/InvoicesList" 
+              className="nav-link text-white"
+              style={isActive('/admin/InvoicesList') ? activeLinkStyle : normalLinkStyle}
+            >
+              💰 Invoices
+            </Link>
+          </li>
+
+          <li className="nav-item">
+            <Link 
+              to="/admin/reports" 
+              className="nav-link text-white"
+              style={isActive('/admin/reports') ? activeLinkStyle : normalLinkStyle}
+            >
+              📈 Reports
+            </Link>
           </li>
 
           <li className="nav-item">

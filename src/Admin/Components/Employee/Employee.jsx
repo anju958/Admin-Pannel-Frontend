@@ -96,7 +96,7 @@ function Employee() {
                         className="btn btn-success btn-sm me-2"
                         onClick={() => navigate(`/admin/ViewEmployee/${emp.employeeId}`)}
                       >
-                        ✏️ View
+                         👁️ View
                       </button>
                       <button
                         className="btn btn-success btn-sm me-2"

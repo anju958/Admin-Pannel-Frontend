@@ -6,7 +6,7 @@ import { API_URL } from "../../../config";
 function ViewClientPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { leadId } = useParams(); // URL param
+  const { leadId } = useParams();
 
   const [loading, setLoading] = useState(true);
   const [projects, setProjects] = useState([]);
@@ -26,10 +26,10 @@ function ViewClientPage() {
     assign: [],
     userType: "",
     addMember: [],
-    _id: "", // important: store MongoDB _id
+    _id: "",
   });
 
-  // 1️⃣ Fetch client details
+  // ✅ Fetch client details
   useEffect(() => {
     if (!leadId) return;
 
@@ -53,10 +53,9 @@ function ViewClientPage() {
       .catch((err) => console.log(err));
   }, [leadId]);
 
-  // 2️⃣ Fetch projects using MongoDB _id
+  // ✅ Fetch projects for this client
   useEffect(() => {
     if (!formData._id) return;
-
     setLoading(true);
 
     axios
@@ -78,6 +77,16 @@ function ViewClientPage() {
 
   return (
     <div className="container mt-4">
+      {/* 🔙 Back Button */}
+      <div className="mb-3">
+        <button
+          className="btn btn-outline-secondary"
+          onClick={() => navigate(-1)}
+        >
+          ← Back
+        </button>
+      </div>
+
       <h3 className="text-center mb-4">Client Details</h3>
 
       {/* Actions */}
@@ -94,15 +103,18 @@ function ViewClientPage() {
           >
             ➕ Add Project
           </button>
-         
+
           <button
             className="btn btn-warning"
             onClick={() =>
-              navigate(`/admin/invoice/${formData._id}`, { state: { client: formData } })
+              navigate(`/admin/invoice/${formData._id}`, {
+                state: { client: formData },
+              })
             }
           >
             🧾 Invoice
           </button>
+
           <button
             className="btn btn-info"
             onClick={() =>
@@ -111,10 +123,13 @@ function ViewClientPage() {
           >
             📂 View Projects
           </button>
+
           <button
             className="btn btn-secondary"
             onClick={() =>
-              navigate(`/admin/viewinvoice/${formData._id}`, { state: { client: formData } })
+              navigate(`/admin/viewinvoice/${formData._id}`, {
+                state: { client: formData },
+              })
             }
           >
             👁️ View Invoice
@@ -128,33 +143,78 @@ function ViewClientPage() {
           <div className="card shadow-sm mb-3">
             <div className="card-header fw-bold">Personal Details</div>
             <div className="card-body">
-              <p><strong>Name:</strong> {formData.leadName}</p>
-              <p><strong>Email:</strong> {formData.emailId}</p>
-              <p><strong>Phone:</strong> {formData.phoneNo}</p>
-              <p><strong>Source:</strong> {formData.sourse}</p>
+              <p>
+                <strong>Name:</strong> {formData.leadName}
+              </p>
+              <p>
+                <strong>Email:</strong> {formData.emailId}
+              </p>
+              <p>
+                <strong>Phone:</strong> {formData.phoneNo}
+              </p>
+              <p>
+                <strong>Source:</strong> {formData.sourse}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Projects */}
+        {/* Projects Section */}
         <div className="col-md-6">
           <div className="card shadow-sm mb-3">
             <div className="card-header fw-bold">Projects</div>
             <div className="card-body">
-              {projects.length > 0 ? (
-                projects.map((proj) => (
-                  <div key={proj._id} className="mb-3 border-bottom pb-2">
-                    <p><strong>Project Name:</strong> {proj.projectName}</p>
-                    <p>
-                      <strong>Assigned To:</strong>{" "}
-                      {Array.isArray(proj.addMember) && proj.addMember.length > 0
-                        ? proj.addMember
-                          .map((m) => m.ename?.replace(/^[, ]+/, "") || "Unknown")
-                          .join(", ")
-                        : "Unassigned"}
-                    </p>
-                  </div>
-                ))
+              {(projects.length > 0 ||
+                formData.project_type ||
+                formData.project_price) ? (
+                <>
+                  {/* 🟢 Show First Project from ClientLead */}
+                  {formData.project_type && (
+                    <>
+                      <h6 className="text-primary">🟢 Initial Project</h6>
+                      <div className="mb-3 border-bottom pb-2">
+                        <p>
+                          <strong>Project Name:</strong> {formData.project_type}
+                        </p>
+                        <p>
+                          <strong>Project Price:</strong> ₹
+                          {formData.project_price}
+                        </p>
+                        <p>
+                          <strong>Service:</strong>{" "}
+                          {formData.service?.serviceName || "N/A"}
+                        </p>
+                      </div>
+                    </>
+                  )}
+
+                  {/* 🟣 Show Additional Projects */}
+                  {projects.length > 0 && (
+                    <>
+                      <h6 className="text-secondary">🟣 Additional Projects</h6>
+                      {projects.map((proj) => (
+                        <div key={proj._id} className="mb-3 border-bottom pb-2">
+                          <p>
+                            <strong>Project Name:</strong> {proj.projectName}
+                          </p>
+                          <p>
+                            <strong>Assigned To:</strong>{" "}
+                            {Array.isArray(proj.addMember) &&
+                            proj.addMember.length > 0
+                              ? proj.addMember
+                                  .map(
+                                    (m) =>
+                                      m.ename?.replace(/^[, ]+/, "") ||
+                                      "Unknown"
+                                  )
+                                  .join(", ")
+                              : "Unassigned"}
+                          </p>
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </>
               ) : (
                 <p className="text-muted">No project added yet.</p>
               )}
@@ -167,7 +227,9 @@ function ViewClientPage() {
       <div className="card shadow-sm mb-3">
         <div className="card-header fw-bold">Status & Assignment</div>
         <div className="card-body">
-          <p><strong>Status:</strong> {formData.status}</p>
+          <p>
+            <strong>Status:</strong> {formData.status}
+          </p>
           <p>
             <strong>Assigned To:</strong>{" "}
             {projects.length > 0
@@ -177,7 +239,9 @@ function ViewClientPage() {
                   .join(", ")
               : "Unassigned"}
           </p>
-          <p><strong>User Type:</strong> {formData.userType}</p>
+          <p>
+            <strong>User Type:</strong> {formData.userType}
+          </p>
         </div>
       </div>
     </div>

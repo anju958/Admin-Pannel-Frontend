@@ -1,5 +1,3 @@
-
-
 import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -45,13 +43,24 @@ function AddServices() {
 
     try {
       const res = await axios.post(`${API_URL}/api/addService`, formData);
-      alert(res.data.message || "Service added successfully");
 
-      setFormData({ deptId: '', serviceName: '', servicePrice: '' });
-      navigate('/admin/service');
+      // ✅ Backend always sends { success, message }
+      if (res.data.success) {
+        alert(res.data.message || "Service added successfully");
+        setFormData({ deptId: '', serviceName: '', servicePrice: '' });
+        navigate('/admin/service');
+      } else {
+        alert(res.data.message || "Something went wrong");
+      }
     } catch (error) {
-      console.error("Error submitting form:", error.response ? error.response.data : error.message);
-      alert("Failed to submit form");
+      console.error("Error submitting form:", error);
+
+      // ✅ Show backend error message (like “Service already exists”)
+      if (error.response && error.response.data && error.response.data.message) {
+        alert(error.response.data.message);
+      } else {
+        alert("Failed to submit form. Please try again.");
+      }
     }
   };
 

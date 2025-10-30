@@ -62,6 +62,7 @@ import CompanyProjectsPage from './Admin/Components/Details/Details';
 import CompanyDetailsPage from './Admin/Components/Details/Details';
 import ViewEmployee from './Admin/Components/Employee/ViewEmployee';
 import ViewTrainee from './Admin/Components/Traniee/ViewTrainee';
+import EditInvoice from './Admin/Components/Client/EditInvoice';
 
 
 function App() {
@@ -107,6 +108,7 @@ function App() {
             <Route path='TaskList' element={<TaskList/>}/>
             <Route path='TaskList/assignTask'  element={<AssignTask/>}/>
             <Route path='PurposalList' element={<ProposalList/>}/>
+            <Route path='updateInvoice/:id' element={<EditInvoice/>}/>
             <Route path='getAllprojects/edit/:id' element={<UpdateProject/>}/>
             <Route path='InvoicesList' element={<InvoiceList/>}/>
           <Route path='Reports' element={<ReportsDashboard/>}/>

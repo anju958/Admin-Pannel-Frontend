@@ -51,7 +51,7 @@ function Clients() {
       </div>
 
       {/* Add Client Button */}
-      <div className="d-flex justify-content-end mt-3 mb-2">
+      <div className="d-flex justify-content-start mt-3 mb-2">
         <Link
           to="/admin/addClientLead"
           className="btn btn-dark rounded-pill fw-bold"
@@ -69,10 +69,10 @@ function Clients() {
               <th>Name</th>
               <th>Email</th>
               <th>Phone</th>
-              <th>Source</th>
+              {/* <th>Source</th> */}
               <th>Department</th>
               <th>Service</th>
-              <th>Project Type</th>
+              {/* <th>Project Type</th> */}
               <th>Project Price</th>
               <th>Enroll Date</th>
               <th>Status</th>
@@ -95,10 +95,10 @@ function Clients() {
                   {clients.emailId}
                 </td>
                 <td>{clients.phoneNo}</td>
-                <td>{clients.sourse}</td>
+                {/* <td>{clients.sourse}</td> */}
                 <td>{clients.department?.deptName}</td>
                 <td>{clients.service?.serviceName}</td>
-                <td>{clients.project_type}</td>
+                {/* <td>{clients.project_type}</td> */}
                 <td>{clients.project_price}</td>
                 <td>{formatDate(clients.date)}</td>
                 <td>{clients.status}</td>

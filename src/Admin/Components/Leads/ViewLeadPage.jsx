@@ -18,7 +18,7 @@ function ViewLeadPage() {
     _id: "",
   });
 
-  // Fetch lead details
+  // ✅ Fetch lead details
   useEffect(() => {
     if (!leadId) return;
 
@@ -44,7 +44,16 @@ function ViewLeadPage() {
   }
 
   return (
-    <div className="container mt-4">
+    <div className="container mt-4 position-relative">
+      {/* ✅ Back Button on Top-Left */}
+      <button
+        className="btn btn-secondary position-absolute"
+        style={{ top: "10px", left: "10px" }}
+        onClick={() => navigate(-1)}
+      >
+        ← Back
+      </button>
+
       <h3 className="text-center mb-4">Lead Details</h3>
 
       {/* Actions */}
@@ -66,12 +75,24 @@ function ViewLeadPage() {
       <div className="card shadow-sm">
         <div className="card-header fw-bold">Lead Information</div>
         <div className="card-body">
-          <p><strong>Name:</strong> {leadData.leadName}</p>
-          <p><strong>Email:</strong> {leadData.emailId}</p>
-          <p><strong>Phone:</strong> {leadData.phoneNo}</p>
-          <p><strong>Source:</strong> {leadData.sourse}</p>
-          <p><strong>Date:</strong> {leadData.date}</p>
-          <p><strong>Status:</strong> {leadData.status}</p>
+          <p>
+            <strong>Name:</strong> {leadData.leadName}
+          </p>
+          <p>
+            <strong>Email:</strong> {leadData.emailId}
+          </p>
+          <p>
+            <strong>Phone:</strong> {leadData.phoneNo}
+          </p>
+          <p>
+            <strong>Source:</strong> {leadData.sourse}
+          </p>
+          <p>
+            <strong>Date:</strong> {leadData.date}
+          </p>
+          <p>
+            <strong>Status:</strong> {leadData.status}
+          </p>
         </div>
       </div>
     </div>

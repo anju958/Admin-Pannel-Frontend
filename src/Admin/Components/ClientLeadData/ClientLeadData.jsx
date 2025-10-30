@@ -1,8 +1,6 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import Select from "react-select";
 import { API_URL } from "../../../config";
 
 function ClientLead() {
@@ -11,6 +9,8 @@ function ClientLead() {
   const [departments, setDepartments] = useState([]);
   const [services, setServices] = useState([]);
   const [employees, setEmployees] = useState([]);
+  const [errors, setErrors] = useState({});
+
   const [formData, setFormData] = useState({
     leadName: "",
     emailId: "",
@@ -21,88 +21,103 @@ function ClientLead() {
     project_type: "",
     project_price: "",
     start_date: "",
-    assign: [], // ✅ must be array
+    assign: [],
     userType: "lead",
     status: "Cold",
+    isCustomPrice: false,
   });
 
   const [loading, setLoading] = useState(false);
 
   // Fetch Departments
   useEffect(() => {
-    const fetchDepartments = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/api/getDepartment`);
-        setDepartments(res.data);
-      } catch (err) {
-        console.error("Error fetching departments:", err);
-      }
-    };
-    fetchDepartments();
+    axios.get(`${API_URL}/api/getDepartment`)
+      .then((res) => setDepartments(res.data))
+      .catch((err) => console.error("Error fetching departments:", err));
   }, []);
 
-  // Fetch Services when department changes
+  // Fetch Services
   useEffect(() => {
     if (!formData.department) return;
-    const fetchServices = async () => {
-      try {
-        const res = await axios.get(
-          `${API_URL}/api/getServicebyDepartment/${formData.department}`
-        );
-        setServices(res.data);
-      } catch (err) {
-        console.error("Error fetching services:", err);
-      }
-    };
-    fetchServices();
+    axios.get(`${API_URL}/api/getServicebyDepartment/${formData.department}`)
+      .then((res) => setServices(res.data))
+      .catch((err) => console.error("Error fetching services:", err));
   }, [formData.department]);
 
-  // Fetch Employees when department changes
+  // Fetch Employees
   useEffect(() => {
     if (!formData.department) return;
-    const fetchEmployees = async () => {
-      try {
-        const res = await axios.get(
-          `${API_URL}/api/getEmployeeByDepartment/${formData.department}`
-        );
-        setEmployees(res.data);
-      } catch (err) {
-        console.error("Error fetching employees:", err);
-      }
-    };
-    fetchEmployees();
+    axios.get(`${API_URL}/api/getEmployeeByDepartment/${formData.department}`)
+      .then((res) => setEmployees(res.data))
+      .catch((err) => console.error("Error fetching employees:", err));
   }, [formData.department]);
 
-  // Handle Input Change
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  // Field Validation Rules
+  const validateField = (name, value) => {
+    let error = "";
+    if (name === "leadName" && !value.trim()) error = "Name is required";
+    if (name === "emailId" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+      error = "Invalid email address";
+    if (name === "phoneNo") {
+      if (!/^\d{10}$/.test(value)) error = "Enter valid 10-digit number";
+    }
+    if (name === "project_price" && value && value <= 0)
+      error = "Price must be positive";
+    if (name === "start_date") {
+      const year = new Date(value).getFullYear();
+      if (year < 2000 || year > 2100) error = "Invalid year in date";
+    }
+    setErrors((prev) => ({ ...prev, [name]: error }));
   };
 
-  // Handle Service Change (auto-fill price)
+  // Handle Change
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    let val = value;
+    if (name === "phoneNo") val = value.replace(/[^0-9]/g, ""); // Only digits
+    if (name === "leadName") val = val.replace(/[^a-zA-Z\s]/g, ""); // Only letters
+
+    setFormData({ ...formData, [name]: val });
+    validateField(name, val);
+  };
+
+  // Handle Price
+  const handlePriceChange = (e) => {
+    const value = e.target.value;
+    setFormData({
+      ...formData,
+      project_price: value,
+      isCustomPrice: true,
+    });
+    validateField("project_price", value);
+  };
+
+  // Handle Service Change
   const handleServiceChange = (e) => {
     const selectedService = services.find((srv) => srv._id === e.target.value);
     setFormData((prev) => ({
       ...prev,
       service: e.target.value,
-      project_price: selectedService ? selectedService.servicePrice : "",
+      project_price:
+        !prev.isCustomPrice && selectedService
+          ? selectedService.servicePrice
+          : prev.project_price,
+      isCustomPrice: false,
     }));
   };
 
-  // Validate & Submit
+  // Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ✅ Frontend Validation
-    if (
-      !formData.leadName ||
-      !formData.emailId ||
-      !formData.phoneNo ||
-      !formData.department ||
-      !formData.userType
-    ) {
-      alert("Please fill all required fields!");
-      return;
-    }
+    // Validate all required fields
+    const newErrors = {};
+    ["leadName", "emailId", "phoneNo", "department", "userType"].forEach((field) => {
+      validateField(field, formData[field]);
+      if (!formData[field]) newErrors[field] = "This field is required";
+    });
+    setErrors(newErrors);
+    if (Object.values(newErrors).some((err) => err)) return;
 
     try {
       setLoading(true);
@@ -125,18 +140,18 @@ function ClientLead() {
         </div>
         <div className="card-body">
           <form onSubmit={handleSubmit} className="row g-3">
-
+            
             {/* Name */}
             <div className="col-md-6">
               <label className="form-label">Name *</label>
               <input
                 type="text"
                 name="leadName"
-                className="form-control"
+                className={`form-control ${errors.leadName ? "is-invalid" : ""}`}
                 value={formData.leadName}
                 onChange={handleChange}
-                required
               />
+              {errors.leadName && <div className="text-danger small">{errors.leadName}</div>}
             </div>
 
             {/* Email */}
@@ -145,11 +160,11 @@ function ClientLead() {
               <input
                 type="email"
                 name="emailId"
-                className="form-control"
+                className={`form-control ${errors.emailId ? "is-invalid" : ""}`}
                 value={formData.emailId}
                 onChange={handleChange}
-                required
               />
+              {errors.emailId && <div className="text-danger small">{errors.emailId}</div>}
             </div>
 
             {/* Phone */}
@@ -158,11 +173,12 @@ function ClientLead() {
               <input
                 type="text"
                 name="phoneNo"
-                className="form-control"
+                maxLength="10"
+                className={`form-control ${errors.phoneNo ? "is-invalid" : ""}`}
                 value={formData.phoneNo}
                 onChange={handleChange}
-                required
               />
+              {errors.phoneNo && <div className="text-danger small">{errors.phoneNo}</div>}
             </div>
 
             {/* Source */}
@@ -192,10 +208,9 @@ function ClientLead() {
               <label className="form-label">Department *</label>
               <select
                 name="department"
-                className="form-select"
+                className={`form-select ${errors.department ? "is-invalid" : ""}`}
                 value={formData.department}
                 onChange={handleChange}
-                required
               >
                 <option value="">-- Select Department --</option>
                 {departments.map((dept) => (
@@ -204,6 +219,7 @@ function ClientLead() {
                   </option>
                 ))}
               </select>
+              {errors.department && <div className="text-danger small">{errors.department}</div>}
             </div>
 
             {/* Service */}
@@ -224,16 +240,17 @@ function ClientLead() {
               </select>
             </div>
 
-            {/* Project Price */}
+            {/* Price */}
             <div className="col-md-6">
               <label className="form-label">Project Price</label>
               <input
                 type="number"
                 name="project_price"
-                className="form-control"
+                className={`form-control ${errors.project_price ? "is-invalid" : ""}`}
                 value={formData.project_price}
-                onChange={handleChange}
+                onChange={handlePriceChange}
               />
+              {errors.project_price && <div className="text-danger small">{errors.project_price}</div>}
             </div>
 
             {/* Project Type */}
@@ -246,29 +263,37 @@ function ClientLead() {
                 onChange={handleChange}
               >
                 <option value="">-- Select Project Type --</option>
-                <option value="Web Development">Web Development</option>
-                <option value="Mobile App Development">Mobile App Development</option>
-                <option value="Software Development">Software Development</option>
-                <option value="UI/UX Design">UI/UX Design</option>
-                <option value="Digital Marketing">Digital Marketing</option>
-                <option value="Cloud Solutions">Cloud Solutions</option>
-                <option value="IT Consulting">IT Consulting</option>
-                <option value="AI/ML Projects">AI/ML Projects</option>
-                <option value="Cybersecurity">Cybersecurity</option>
+                <option value="One-time Project">One-time Project</option>
+                <option value="Recurring Project">Recurring Project</option>
+                <option value="Dedicated Resource">Dedicated Resource</option>
+                <option value="Time & Material">Time & Material</option>
+                <option value="Fixed Price">Fixed Price</option>
+                <option value="Maintenance & Support">Maintenance & Support</option>
                 <option value="Other">Other</option>
               </select>
+              {formData.project_type === "Other" && (
+                <input
+                  type="text"
+                  name="project_type_other"
+                  className="form-control mt-2"
+                  placeholder="Please specify"
+                  value={formData.project_type_other || ""}
+                  onChange={handleChange}
+                />
+              )}
             </div>
 
-            {/* Start Date */}
+            {/* Enroll Date */}
             <div className="col-md-6">
               <label className="form-label">Enroll Date</label>
               <input
                 type="date"
                 name="start_date"
-                className="form-control"
+                className={`form-control ${errors.start_date ? "is-invalid" : ""}`}
                 value={formData.start_date}
                 onChange={handleChange}
               />
+              {errors.start_date && <div className="text-danger small">{errors.start_date}</div>}
             </div>
 
             {/* User Type */}
@@ -276,10 +301,9 @@ function ClientLead() {
               <label className="form-label">User Type *</label>
               <select
                 name="userType"
-                className="form-select"
+                className={`form-select ${errors.userType ? "is-invalid" : ""}`}
                 value={formData.userType}
                 onChange={handleChange}
-                required
               >
                 <option value="lead">Lead</option>
                 <option value="client">Client</option>
