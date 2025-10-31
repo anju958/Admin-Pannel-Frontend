@@ -1,100 +1,3 @@
-// import React, { useEffect, useState } from "react";
-// import { useParams, useNavigate } from "react-router-dom";
-// import axios from "axios";
-// import { API_URL } from "../../../config";
-
-// function InvoiceDetail() {
-//   const { id } = useParams();
-//   const navigate = useNavigate();
-//   const [invoice, setInvoice] = useState(null);
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     const fetchInvoice = async () => {
-//       try {
-//         const response = await axios.get(`${API_URL}/api/getInvoiceById/${id}`);
-//         if (response.data.success) setInvoice(response.data.invoice);
-//       } catch (err) {
-//         alert("Could not load invoice details.");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-//     fetchInvoice();
-//   }, [id]);
-
-//   if (loading) return <div className="container mt-3">Loading…</div>;
-//   if (!invoice) return <div className="container mt-3">Invoice not found.</div>;
-
-//   return (
-//     <div className="container mt-4">
-//       <button className="btn btn-secondary mb-3" onClick={() => navigate(-1)}>
-//         ← Back to List
-//       </button>
-//       <div className="card shadow">
-//         <div className="card-body">
-//           <h2 className="card-title mb-1">Invoice #{invoice.invoiceNumber}</h2>
-//           <div className="mb-3"> 
-//             <span className="fw-bold">Client:</span> {invoice.clientName} <br/>
-//             <span className="fw-bold">Email:</span> {invoice.clientEmail}
-//           </div>
-//           <div className="mb-3">
-//             <span className="fw-bold">Issued:</span> {invoice.date ? new Date(invoice.date).toLocaleDateString() : "-"}
-//             <br/>
-//             <span className="fw-bold">Due Date:</span> {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : "-"}
-//             <br/>
-//             <span className="fw-bold">Status:</span>{" "}
-//             <span className={`badge ${
-//               invoice.status === "Paid" ? "bg-success" :
-//               invoice.status === "Partial" ? "bg-info text-dark" :
-//               invoice.status === "Pending" ? "bg-warning text-dark" : "bg-danger"
-//             }`}>{invoice.status}</span>
-//           </div>
-//           <table className="table table-bordered">
-//             <thead>
-//               <tr>
-//                 <th>Project/Service</th>
-//                 <th>Amount (₹)</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {invoice.projects.map((p, i) => (
-//                 <tr key={i}>
-//                   <td>
-//                     {typeof p.projectId === "object" && p.projectId?.projectName
-//                       ? p.projectId.projectName
-//                       : p.name || p.title || p.projectId || "Service"}
-//                   </td>
-//                   <td>₹{Number(p.amount).toLocaleString()}</td>
-//                 </tr>
-//               ))}
-//               <tr>
-//                 <td className="fw-bold">Total</td>
-//                 <td className="fw-bold">₹{invoice.totalAmount.toLocaleString()}</td>
-//               </tr>
-//             </tbody>
-//           </table>
-//           <div className="mb-2">
-//             <span className="fw-bold">Paid Amount:</span> ₹{(invoice.paidAmount || 0).toLocaleString()}<br />
-//             <span className="fw-bold">Remaining:</span> ₹{(invoice.remainingAmount !== undefined ? invoice.remainingAmount : invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString()}
-//           </div>
-//           <div>
-//             <span className="fw-bold">Bank Details:</span>
-//             <ul>
-//               <li><b>Bank:</b> YOUR_BANK_NAME</li>
-//               <li><b>Account Number:</b> XXXXX1234567</li>
-//               <li><b>IFSC:</b> IFSC0000123</li>
-//               <li><b>Account Holder:</b> YOUR_NAME</li>
-//             </ul>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default InvoiceDetail;
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -125,56 +28,28 @@ function InvoiceDetail() {
 
   return (
     <div className="container mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <button className="btn btn-secondary" onClick={() => navigate(-1)}>
-          ← Back to List
-        </button>
-
-        {/* ✅ Show Edit button only if invoice is not sent or unpaid */}
-        {invoice.status !== "Paid" && (
-          <button
-            className="btn btn-primary"
-            onClick={() => navigate(`/edit-invoice/${invoice._id}`)}
-          >
-            ✏️ Edit Invoice
-          </button>
-        )}
-      </div>
-
+      <button className="btn btn-secondary mb-3" onClick={() => navigate(-1)}>
+        ← Back to List
+      </button>
       <div className="card shadow">
         <div className="card-body">
           <h2 className="card-title mb-1">Invoice #{invoice.invoiceNumber}</h2>
-
-          <div className="mb-3">
-            <span className="fw-bold">Client:</span> {invoice.clientName} <br />
+          <div className="mb-3"> 
+            <span className="fw-bold">Client:</span> {invoice.clientName} <br/>
             <span className="fw-bold">Email:</span> {invoice.clientEmail}
           </div>
-
           <div className="mb-3">
-            <span className="fw-bold">Issued:</span>{" "}
-            {invoice.date ? new Date(invoice.date).toLocaleDateString() : "-"}
-            <br />
-            <span className="fw-bold">Due Date:</span>{" "}
-            {invoice.dueDate
-              ? new Date(invoice.dueDate).toLocaleDateString()
-              : "-"}
-            <br />
+            <span className="fw-bold">Issued:</span> {invoice.date ? new Date(invoice.date).toLocaleDateString() : "-"}
+            <br/>
+            <span className="fw-bold">Due Date:</span> {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : "-"}
+            <br/>
             <span className="fw-bold">Status:</span>{" "}
-            <span
-              className={`badge ${
-                invoice.status === "Paid"
-                  ? "bg-success"
-                  : invoice.status === "Partial"
-                  ? "bg-info text-dark"
-                  : invoice.status === "Pending"
-                  ? "bg-warning text-dark"
-                  : "bg-danger"
-              }`}
-            >
-              {invoice.status}
-            </span>
+            <span className={`badge ${
+              invoice.status === "Paid" ? "bg-success" :
+              invoice.status === "Partial" ? "bg-info text-dark" :
+              invoice.status === "Pending" ? "bg-warning text-dark" : "bg-danger"
+            }`}>{invoice.status}</span>
           </div>
-
           <table className="table table-bordered">
             <thead>
               <tr>
@@ -195,50 +70,23 @@ function InvoiceDetail() {
               ))}
               <tr>
                 <td className="fw-bold">Total</td>
-                <td className="fw-bold">
-                  ₹{invoice.totalAmount.toLocaleString()}
-                </td>
+                <td className="fw-bold">₹{invoice.totalAmount.toLocaleString()}</td>
               </tr>
             </tbody>
           </table>
-
           <div className="mb-2">
-            <span className="fw-bold">Paid Amount:</span> ₹
-            {(invoice.paidAmount || 0).toLocaleString()}
-            <br />
-            <span className="fw-bold">Remaining:</span> ₹
-            {(
-              invoice.remainingAmount !== undefined
-                ? invoice.remainingAmount
-                : invoice.totalAmount - (invoice.paidAmount || 0)
-            ).toLocaleString()}
+            <span className="fw-bold">Paid Amount:</span> ₹{(invoice.paidAmount || 0).toLocaleString()}<br />
+            <span className="fw-bold">Remaining:</span> ₹{(invoice.remainingAmount !== undefined ? invoice.remainingAmount : invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString()}
           </div>
-
           <div>
             <span className="fw-bold">Bank Details:</span>
             <ul>
-              <li>
-                <b>Bank:</b> YOUR_BANK_NAME
-              </li>
-              <li>
-                <b>Account Number:</b> XXXXX1234567
-              </li>
-              <li>
-                <b>IFSC:</b> IFSC0000123
-              </li>
-              <li>
-                <b>Account Holder:</b> YOUR_NAME
-              </li>
+              <li><b>Bank:</b> YOUR_BANK_NAME</li>
+              <li><b>Account Number:</b> XXXXX1234567</li>
+              <li><b>IFSC:</b> IFSC0000123</li>
+              <li><b>Account Holder:</b> YOUR_NAME</li>
             </ul>
           </div>
-
-          {/* ✅ Preview note before sending */}
-          {invoice.status !== "Paid" && (
-            <div className="alert alert-info mt-4">
-              <strong>Preview Mode:</strong> Please review the invoice details
-              carefully before sending it to the client.
-            </div>
-          )}
         </div>
       </div>
     </div>

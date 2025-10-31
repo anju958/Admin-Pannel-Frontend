@@ -63,6 +63,8 @@ import CompanyDetailsPage from './Admin/Components/Details/Details';
 import ViewEmployee from './Admin/Components/Employee/ViewEmployee';
 import ViewTrainee from './Admin/Components/Traniee/ViewTrainee';
 import EditInvoice from './Admin/Components/Client/EditInvoice';
+import ClientInvoicesList from './Admin/Components/Client/ClientInvoicesList';
+import ClientInvoicesListPage from './Admin/Components/Client/ClientInvoicesListPage';
 
 
 function App() {
@@ -100,6 +102,7 @@ function App() {
             <Route path='client' element={<Clients />} />
             <Route path='leadPage/:leadId' element={<ViewLeadPage/>}/>
             <Route path='viewclientpage/:leadId' element={<ViewClientPage />} />
+            <Route path='clientInvoicesList/:clientId' element={<ClientInvoicesListPage/>}/>
             <Route path='projects' element={<ViewProjects />} />
             <Route path='project/:clientId/:projectId' element={<ProjectDetails />} />
             <Route path="invoice/:clientId" element={<InvoiceGenerator />} />

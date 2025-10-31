@@ -334,7 +334,7 @@ function ClientLead() {
             {/* Buttons */}
             <div className="col-12 text-center mt-3">
               <button type="submit" className="btn btn-success px-4" disabled={loading}>
-                {loading ? "Adding..." : "Add Lead"}
+                {loading ? "Adding..." : "Submit Data"}
               </button>
               <button
                 type="button"

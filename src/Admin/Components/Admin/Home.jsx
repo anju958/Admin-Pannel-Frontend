@@ -30,6 +30,11 @@ function Admin() {
     { id: 3, title: "Total Clients", number: summary.totalClients },
     { id: 4, title: "Pending Payments", number: summary.pendingPayments?.toLocaleString() },
     { id: 5, title: "Jobs Opening", number: summary.jobsOpening },
+    { id:6,  title:"Total Assign Task"  , number: summary.totalTasks},
+    { id:7,  title:" Pending Task"  , number: summary.pendingTasks},
+     { id:8,  title:"InProgress Task"  , number: summary.inProgressTasks},
+    { id:8,  title:"Total  complete Task"  , number: summary.completedTasks},
+
   ];
 
   return (

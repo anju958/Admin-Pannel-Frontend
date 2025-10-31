@@ -75,7 +75,7 @@ function Clients() {
               {/* <th>Project Type</th> */}
               <th>Project Price</th>
               <th>Enroll Date</th>
-              <th>Status</th>
+              {/* <th>Status</th> */}
               {/* <th>Assigned To</th>
               <th>User Type</th> */}
               {/* <th>View</th> */}
@@ -101,7 +101,7 @@ function Clients() {
                 {/* <td>{clients.project_type}</td> */}
                 <td>{clients.project_price}</td>
                 <td>{formatDate(clients.date)}</td>
-                <td>{clients.status}</td>
+                {/* <td>{clients.status}</td> */}
                 <td>
                   <div className="d-flex justify-content-center gap-2">
                     <button

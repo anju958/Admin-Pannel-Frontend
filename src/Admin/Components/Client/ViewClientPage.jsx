@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -15,39 +16,22 @@ function ViewClientPage() {
     emailId: "",
     phoneNo: "",
     sourse: "",
-    service: "",
-    project_type: "",
-    project_price: "",
-    start_date: "",
-    deadline: "",
-    startProjectDate: "",
-    date: "",
     status: "",
-    assign: [],
     userType: "",
-    addMember: [],
     _id: "",
   });
+  const [invoices, setInvoices] = useState([]); // New: store invoices
 
   // ✅ Fetch client details
   useEffect(() => {
     if (!leadId) return;
-
     axios
       .get(`${API_URL}/api/getClientLeadbyId/${leadId}`)
       .then((res) => {
         const user = res.data.user || res.data;
-
         setFormData({
           ...user,
           _id: user._id,
-          start_date: user.start_date ? user.start_date.split("T")[0] : "",
-          deadline: user.deadline ? user.deadline.split("T")[0] : "",
-          startProjectDate: user.startProjectDate
-            ? user.startProjectDate.split("T")[0]
-            : "",
-          date: user.date ? user.date.split("T")[0] : "",
-          addMember: user.addMember || [],
         });
       })
       .catch((err) => console.log(err));
@@ -57,19 +41,47 @@ function ViewClientPage() {
   useEffect(() => {
     if (!formData._id) return;
     setLoading(true);
-
     axios
       .get(`${API_URL}/api/getProjectbyClient/${formData._id}`)
       .then((res) => {
-        console.log("✅ Projects from API:", res.data);
         setProjects(res.data || []);
         setLoading(false);
       })
       .catch((err) => {
-        console.log(err);
         setLoading(false);
       });
   }, [formData._id]);
+
+  // ✅ Fetch invoices for this client
+  // useEffect(() => {
+  //   if (!formData._id) return;
+  //   axios
+  //     .get(`${API_URL}/api/getInvoicesByClient/${formData._id}`)
+  //     .then((res) => {
+  //       if (res.data && res.data.success) {
+  //         setInvoices(res.data.invoices);
+  //       } else {
+  //         setInvoices([]);
+  //       }
+  //     })
+  //     .catch(() => setInvoices([]));
+  // }, [formData._id]);
+  useEffect(() => {
+  if (!formData._id) return;
+  axios
+    .get(`${API_URL}/api/getInvoicesByClient/${formData._id}`)
+    .then((res) => {
+      if (res.data && res.data.success) {
+        setInvoices(res.data.invoices);
+        console.log("Client _id:", formData._id);
+        console.log("Fetched client invoices:", res.data.invoices);
+      } else {
+        setInvoices([]);
+      }
+    })
+    .catch(() => setInvoices([]));
+}, [formData._id]);
+
 
   if (loading) {
     return <div className="text-center mt-5">Loading client data...</div>;
@@ -124,16 +136,25 @@ function ViewClientPage() {
             📂 View Projects
           </button>
 
-          <button
+          {/* View Invoice Button: Opens latest invoice */}
+          {/* <button
             className="btn btn-secondary"
+            disabled={invoices.length === 0}
             onClick={() =>
-              navigate(`/admin/viewinvoice/${formData._id}`, {
-                state: { client: formData },
-              })
+              invoices.length > 0
+                ? navigate(`/admin/clientInvoicesList/${invoices[0]._id}`)
+                : alert("No invoice found for this client.")
             }
           >
             👁️ View Invoice
-          </button>
+          </button> */}
+          <button
+  className="btn btn-secondary"
+  disabled={!formData._id}
+  onClick={() => navigate(`/admin/clientInvoicesList/${formData._id}`)}
+>
+  👁️ View Invoice
+</button>
         </div>
       </div>
 
@@ -164,56 +185,35 @@ function ViewClientPage() {
           <div className="card shadow-sm mb-3">
             <div className="card-header fw-bold">Projects</div>
             <div className="card-body">
-              {(projects.length > 0 ||
-                formData.project_type ||
-                formData.project_price) ? (
+              {projects.length > 0 ? (
                 <>
-                  {/* 🟢 Show First Project from ClientLead */}
-                  {formData.project_type && (
-                    <>
-                      <h6 className="text-primary">🟢 Initial Project</h6>
-                      <div className="mb-3 border-bottom pb-2">
-                        <p>
-                          <strong>Project Name:</strong> {formData.project_type}
-                        </p>
-                        <p>
-                          <strong>Project Price:</strong> ₹
-                          {formData.project_price}
-                        </p>
-                        <p>
-                          <strong>Service:</strong>{" "}
-                          {formData.service?.serviceName || "N/A"}
-                        </p>
-                      </div>
-                    </>
-                  )}
-
-                  {/* 🟣 Show Additional Projects */}
-                  {projects.length > 0 && (
-                    <>
-                      <h6 className="text-secondary">🟣 Additional Projects</h6>
-                      {projects.map((proj) => (
-                        <div key={proj._id} className="mb-3 border-bottom pb-2">
-                          <p>
-                            <strong>Project Name:</strong> {proj.projectName}
-                          </p>
-                          <p>
-                            <strong>Assigned To:</strong>{" "}
-                            {Array.isArray(proj.addMember) &&
-                            proj.addMember.length > 0
-                              ? proj.addMember
-                                  .map(
-                                    (m) =>
-                                      m.ename?.replace(/^[, ]+/, "") ||
-                                      "Unknown"
-                                  )
-                                  .join(", ")
-                              : "Unassigned"}
-                          </p>
-                        </div>
-                      ))}
-                    </>
-                  )}
+                  {projects.map((proj) => (
+                    <div key={proj._id} className="mb-3 border-bottom pb-2">
+                      <p>
+                        <strong>Project Name:</strong> {proj.projectName}
+                      </p>
+                      <p>
+                        <strong>Price:</strong> ₹
+                        {proj.project_price || proj.price || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Service:</strong>{" "}
+                        {proj.service?.serviceName || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Assigned To:</strong>{" "}
+                        {Array.isArray(proj.addMember) &&
+                        proj.addMember.length > 0
+                          ? proj.addMember
+                              .map(
+                                (m) =>
+                                  m.ename?.replace(/^[, ]+/, "") || "Unknown"
+                              )
+                              .join(", ")
+                          : "Unassigned"}
+                      </p>
+                    </div>
+                  ))}
                 </>
               ) : (
                 <p className="text-muted">No project added yet.</p>

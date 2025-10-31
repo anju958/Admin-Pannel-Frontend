@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { API_URL } from "../../../config";
 
@@ -7,40 +8,46 @@ function InvoiceList() {
   const [invoices, setInvoices] = useState([]);
   const [payNow, setPayNow] = useState({});
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const clientId = location.state?.clientId || null; // ✅ from ViewClientPage
 
   useEffect(() => {
     const fetchInvoices = async () => {
       try {
-        const response = await axios.get(`${API_URL}/api/getAllInvoices`);
+        let url = `${API_URL}/api/getAllInvoices`;
+        if (clientId) url = `${API_URL}/api/getInvoicesByClient/${clientId}`;
+
+        const response = await axios.get(url);
         const data = response.data;
         if (data.success && Array.isArray(data.invoices)) {
           setInvoices(data.invoices);
-          // PayNow is for new payments being made now
           const amounts = {};
-          data.invoices.forEach((inv) => {
-            amounts[inv._id] = "";
-          });
+          data.invoices.forEach((inv) => (amounts[inv._id] = ""));
           setPayNow(amounts);
         } else {
           setInvoices([]);
         }
       } catch (err) {
+        console.error("❌ Error fetching invoices", err);
         setInvoices([]);
       }
     };
     fetchInvoices();
-  }, []);
+  }, [clientId]);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this invoice?")) return;
     try {
       await axios.delete(`${API_URL}/api/deleteInvoice/${id}`);
-      setInvoices(invoices.filter(inv => inv._id !== id));
-    } catch (err) {}
+      setInvoices(invoices.filter((inv) => inv._id !== id));
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handlePayNowChange = (id, value) => {
-    setPayNow(prev => ({ ...prev, [id]: value }));
+    setPayNow((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleMarkPaid = async (invoice) => {
@@ -54,21 +61,26 @@ function InvoiceList() {
       return;
     }
     try {
-      await axios.put(`${API_URL}/api/markpaid/${invoice._id}`, { paidAmount: paymentNow });
+      await axios.put(`${API_URL}/api/markpaid/${invoice._id}`, {
+        paidAmount: paymentNow,
+      });
       alert("Invoice payment updated");
-      setPayNow(prev => ({ ...prev, [invoice._id]: "" }));
+      setPayNow((prev) => ({ ...prev, [invoice._id]: "" }));
       setInvoices((prev) =>
         prev.map((inv) =>
           inv._id === invoice._id
             ? {
                 ...inv,
                 paidAmount: (inv.paidAmount || 0) + paymentNow,
-                remainingAmount: inv.totalAmount - ((inv.paidAmount || 0) + paymentNow),
-                status: ((inv.paidAmount || 0) + paymentNow === inv.totalAmount)
-                  ? "Paid"
-                  : ((inv.paidAmount || 0) + paymentNow > 0)
-                  ? "Partial"
-                  : "Pending"
+                remainingAmount:
+                  inv.totalAmount -
+                  ((inv.paidAmount || 0) + paymentNow),
+                status:
+                  (inv.paidAmount || 0) + paymentNow === inv.totalAmount
+                    ? "Paid"
+                    : (inv.paidAmount || 0) + paymentNow > 0
+                    ? "Partial"
+                    : "Pending",
               }
             : inv
         )
@@ -80,7 +92,7 @@ function InvoiceList() {
 
   return (
     <div className="container mt-4">
-      <h2>🧾 Invoice List</h2>
+      <h2>🧾 Invoice List {clientId && "(Client Invoices)"}</h2>
       <table className="table table-striped table-bordered shadow-sm">
         <thead className="table-dark">
           <tr>
@@ -105,7 +117,15 @@ function InvoiceList() {
               return (
                 <tr key={invoice._id}>
                   <td>{idx + 1}</td>
-                  <td>{invoice.invoiceNumber}</td>
+                  <td
+                    className="text-primary text-decoration-underline"
+                    style={{ cursor: "pointer" }}
+                    onClick={() =>
+                      navigate(`/admin/viewInvoice/${invoice._id}`)
+                    }
+                  >
+                    {invoice.invoiceNumber}
+                  </td>
                   <td>{invoice.clientName}</td>
                   <td>
                     <b>₹{invoice.totalAmount.toLocaleString()}</b>
@@ -122,7 +142,9 @@ function InvoiceList() {
                       min="0"
                       max={unpaid}
                       value={payNow[invoice._id]}
-                      onChange={e => handlePayNowChange(invoice._id, e.target.value)}
+                      onChange={(e) =>
+                        handlePayNowChange(invoice._id, e.target.value)
+                      }
                       style={{ width: "80px" }}
                       disabled={invoice.status === "Paid"}
                       placeholder="Enter ₹"
@@ -165,7 +187,9 @@ function InvoiceList() {
                   <td>
                     <button
                       className="btn btn-sm btn-info me-2"
-                      onClick={() => navigate(`/admin/viewInvoice/${invoice._id}`)}
+                      onClick={() =>
+                        navigate(`/admin/viewInvoice/${invoice._id}`)
+                      }
                     >
                       👁️ View
                     </button>
