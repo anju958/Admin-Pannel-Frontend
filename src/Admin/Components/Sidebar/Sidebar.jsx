@@ -240,13 +240,14 @@ function Sidebar() {
               Create User
             </Link>
           </li>
+    
           <li className="nav-item">
             <Link
-              to="/admin/NoticeBoard"
+              to="/admin/companyDetails"
               className="nav-link text-white"
               style={isActive('/admin/supportHelp') ? activeLinkStyle : normalLinkStyle}
             >
-              Complaints
+              🆘 Complaints
             </Link>
           </li>
 
