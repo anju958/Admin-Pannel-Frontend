@@ -65,6 +65,8 @@ import ViewTrainee from './Admin/Components/Traniee/ViewTrainee';
 import EditInvoice from './Admin/Components/Client/EditInvoice';
 import ClientInvoicesList from './Admin/Components/Client/ClientInvoicesList';
 import ClientInvoicesListPage from './Admin/Components/Client/ClientInvoicesListPage';
+import ClientLogin from './ClientComponent/ClientLogin/ClientLogin';
+import ClientPasswordSetup from './ClientComponent/ClientLogin/ClientPasswordSetup';
 
 
 function App() {
@@ -139,10 +141,10 @@ function App() {
             <Route path='performance' element={<PerformancePage/>}/>
             <Route path='supportHelp' element={<SupportHelp/>}/>
             <Route path='profile' element={<EmployeeProfile/>}/>
-
-
-
           </Route>
+          <Route path='/ClientPage' element={<ClientLogin/>}/>
+          <Route path='/CreatePassword' element={<ClientPasswordSetup/>}/>
+          
 
           <Route path="/payment/success" element={<PaymentSuccess />} />
         </Routes>

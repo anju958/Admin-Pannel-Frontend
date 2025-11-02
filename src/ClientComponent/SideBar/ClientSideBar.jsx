@@ -4,7 +4,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaHome, FaUserCheck, FaUmbrellaBeach, FaMoneyBill, FaTasks, FaChartLine, FaHeadset, FaUserCircle } from 'react-icons/fa';
 
-function SideBar() {
+function ClientSideBar() {
   return (
     <div className="sidebar-container" style={{
       background: "linear-gradient(180deg, #1A2A6C, #6A11CB 60%, #2575FC 100%)",
@@ -55,4 +55,4 @@ function SideBar() {
   );
 }
 
-export default SideBar;
+export default ClientSideBar;

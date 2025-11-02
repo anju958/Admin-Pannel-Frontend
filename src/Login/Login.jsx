@@ -3,7 +3,7 @@ import React from 'react'
 import { useState } from 'react';
 import { MdEmail, MdLock } from "react-icons/md";
 import { Link, useNavigate } from 'react-router-dom';
-import logo from '../assessts/premier-logo.png'; 
+import logo from '../assessts/premier-logo.png';
 import { API_URL } from "../config";
 
 
@@ -106,7 +106,21 @@ function Login() {
                                     Login
                                 </button>
                             </form>
+                            <div className='client-form mt-3 text-center pt-3 border-top' style={{ width: '100%' }}>
+                                <span className='fw-semibold text-secondary fs-6'>
+                                    Are you a Client?
+                                </span>
+                                <br />
+                                <Link
+                                    to="/ClientPage"
+                                    className='fw-bold text-primary fs-5 text-decoration-underline'
+                                    style={{ letterSpacing: "0.5px" }}
+                                >
+                                    Create your password and login here
+                                </Link>
+                            </div>
                         </div>
+
                     </div>
                 </div>
             </div>

@@ -55,8 +55,8 @@ function Sidebar() {
         <ul className="nav flex-column">
 
           <li className="nav-item">
-            <Link 
-              to="/admin/home" 
+            <Link
+              to="/admin/home"
               className="nav-link text-white"
               style={isActive('/admin/home') ? activeLinkStyle : normalLinkStyle}
             >
@@ -65,8 +65,8 @@ function Sidebar() {
           </li>
 
           <li className="nav-item">
-            <Link 
-              to="/admin/jobopening" 
+            <Link
+              to="/admin/jobopening"
               className="nav-link text-white"
               style={isActive('/admin/jobopening') ? activeLinkStyle : normalLinkStyle}
             >
@@ -75,8 +75,8 @@ function Sidebar() {
           </li>
 
           <li className="nav-item">
-            <Link 
-              to="/admin/department" 
+            <Link
+              to="/admin/department"
               className="nav-link text-white"
               style={isActive('/admin/department') ? activeLinkStyle : normalLinkStyle}
             >
@@ -85,8 +85,8 @@ function Sidebar() {
           </li>
 
           <li className="nav-item">
-            <Link 
-              to="/admin/Service" 
+            <Link
+              to="/admin/Service"
               className="nav-link text-white"
               style={isActive('/admin/Service') ? activeLinkStyle : normalLinkStyle}
             >
@@ -100,8 +100,8 @@ function Sidebar() {
               className="nav-link text-white d-flex justify-content-between align-items-center"
               style={{
                 cursor: 'pointer',
-                ...(isParentActive(['/admin/employee', '/admin/trainee', '/admin/TaskList', '/admin/attendance']) 
-                  ? activeParentStyle 
+                ...(isParentActive(['/admin/employee', '/admin/trainee', '/admin/TaskList', '/admin/attendance'])
+                  ? activeParentStyle
                   : normalLinkStyle)
               }}
               onClick={() => toggleMenu('employee')}
@@ -112,8 +112,8 @@ function Sidebar() {
             {openMenu.employee && (
               <ul className="nav flex-column ms-3">
                 <li className="nav-item">
-                  <Link 
-                    to="/admin/employee" 
+                  <Link
+                    to="/admin/employee"
                     className="nav-link text-white"
                     style={isActive('/admin/employee') ? activeLinkStyle : normalLinkStyle}
                   >
@@ -121,8 +121,8 @@ function Sidebar() {
                   </Link>
                 </li>
                 <li className="nav-item">
-                  <Link 
-                    to="/admin/trainee" 
+                  <Link
+                    to="/admin/trainee"
                     className="nav-link text-white"
                     style={isActive('/admin/trainee') ? activeLinkStyle : normalLinkStyle}
                   >
@@ -130,8 +130,8 @@ function Sidebar() {
                   </Link>
                 </li>
                 <li className="nav-item">
-                  <Link 
-                    to="/admin/TaskList" 
+                  <Link
+                    to="/admin/TaskList"
                     className="nav-link text-white"
                     style={isActive('/admin/TaskList') ? activeLinkStyle : normalLinkStyle}
                   >
@@ -139,8 +139,8 @@ function Sidebar() {
                   </Link>
                 </li>
                 <li className="nav-item">
-                  <Link 
-                    to="/admin/attendance" 
+                  <Link
+                    to="/admin/attendance"
                     className="nav-link text-white"
                     style={isActive('/admin/attendance') ? activeLinkStyle : normalLinkStyle}
                   >
@@ -157,8 +157,8 @@ function Sidebar() {
               className="nav-link text-white d-flex justify-content-between align-items-center"
               style={{
                 cursor: 'pointer',
-                ...(isParentActive(['/admin/leads', '/admin/client']) 
-                  ? activeParentStyle 
+                ...(isParentActive(['/admin/leads', '/admin/client'])
+                  ? activeParentStyle
                   : normalLinkStyle)
               }}
               onClick={() => toggleMenu('leads')}
@@ -169,8 +169,8 @@ function Sidebar() {
             {openMenu.leads && (
               <ul className="nav flex-column ms-3">
                 <li className="nav-item">
-                  <Link 
-                    to="/admin/leads" 
+                  <Link
+                    to="/admin/leads"
                     className="nav-link text-white"
                     style={isActive('/admin/leads') ? activeLinkStyle : normalLinkStyle}
                   >
@@ -178,8 +178,8 @@ function Sidebar() {
                   </Link>
                 </li>
                 <li className="nav-item">
-                  <Link 
-                    to="/admin/client" 
+                  <Link
+                    to="/admin/client"
                     className="nav-link text-white"
                     style={isActive('/admin/client') ? activeLinkStyle : normalLinkStyle}
                   >
@@ -192,8 +192,8 @@ function Sidebar() {
 
           {/* Proposals, Invoices, Reports moved outside */}
           <li className="nav-item">
-            <Link 
-              to="/admin/PurposalList" 
+            <Link
+              to="/admin/PurposalList"
               className="nav-link text-white"
               style={isActive('/admin/PurposalList') ? activeLinkStyle : normalLinkStyle}
             >
@@ -202,8 +202,8 @@ function Sidebar() {
           </li>
 
           <li className="nav-item">
-            <Link 
-              to="/admin/InvoicesList" 
+            <Link
+              to="/admin/InvoicesList"
               className="nav-link text-white"
               style={isActive('/admin/InvoicesList') ? activeLinkStyle : normalLinkStyle}
             >
@@ -212,8 +212,8 @@ function Sidebar() {
           </li>
 
           <li className="nav-item">
-            <Link 
-              to="/admin/reports" 
+            <Link
+              to="/admin/reports"
               className="nav-link text-white"
               style={isActive('/admin/reports') ? activeLinkStyle : normalLinkStyle}
             >
@@ -222,8 +222,8 @@ function Sidebar() {
           </li>
 
           <li className="nav-item">
-            <Link 
-              to="/admin/getProjectList" 
+            <Link
+              to="/admin/getProjectList"
               className="nav-link text-white"
               style={isActive('/admin/getProjectList') ? activeLinkStyle : normalLinkStyle}
             >
@@ -232,18 +232,27 @@ function Sidebar() {
           </li>
 
           <li className="nav-item">
-            <Link 
-              to="/admin/Roles" 
+            <Link
+              to="/admin/Roles"
               className="nav-link text-white"
               style={isActive('/admin/Roles') ? activeLinkStyle : normalLinkStyle}
             >
-              🔐 Roles & Permissions
+              Create User
+            </Link>
+          </li>
+          <li className="nav-item">
+            <Link
+              to="/admin/NoticeBoard"
+              className="nav-link text-white"
+              style={isActive('/admin/supportHelp') ? activeLinkStyle : normalLinkStyle}
+            >
+              Complaints
             </Link>
           </li>
 
           <li className="nav-item">
-            <Link 
-              to="/admin/NoticeBoard" 
+            <Link
+              to="/admin/NoticeBoard"
               className="nav-link text-white"
               style={isActive('/admin/NoticeBoard') ? activeLinkStyle : normalLinkStyle}
             >
@@ -252,8 +261,8 @@ function Sidebar() {
           </li>
 
           <li className="nav-item">
-            <Link 
-              to="/admin/companyDetails" 
+            <Link
+              to="/admin/companyDetails"
               className="nav-link text-white"
               style={isActive('/admin/companyDetails') ? activeLinkStyle : normalLinkStyle}
             >
