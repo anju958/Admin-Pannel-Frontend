@@ -67,6 +67,10 @@ import ClientInvoicesList from './Admin/Components/Client/ClientInvoicesList';
 import ClientInvoicesListPage from './Admin/Components/Client/ClientInvoicesListPage';
 import ClientLogin from './ClientComponent/ClientLogin/ClientLogin';
 import ClientPasswordSetup from './ClientComponent/ClientLogin/ClientPasswordSetup';
+import CreateUserPage from './Admin/Components/CreateUser/CreateUser';
+import CreateUserAcc from './Admin/Components/CreateUser/CreateUserAcc';
+import AdminLogin from './Login/AdminLogin';
+import UpdateUserForm from './Admin/Components/CreateUser/UpdateUserForm';
 
 
 function App() {
@@ -77,6 +81,7 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path='/RegisterationForm' element={<RegisterationForm />} />
           <Route path="/Login" element={<Login />} />
+          <Route path='/adminLogin' element={<AdminLogin/>}/>
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Admin />} />
@@ -127,7 +132,9 @@ function App() {
             <Route path='addClientLead' element={<ClientLead />} />
             <Route path='moveToEmplyee/:employeeId' element={<MoveToEmp />} />
             <Route path='NoticeBoard' element={<NoticeBoard/>}/>
-
+              <Route path='CreateUser' element={<CreateUserPage/>}/>
+              <Route path='createUserSAcc' element={<CreateUserAcc/>}/>
+              <Route path='updateUserPermission/:id' element={<UpdateUserForm/>}/>
             <Route path='updateLeadClient/:leadId' element={<UpdateLeadClient />} />
             <Route path='companyDetails' element={<CompanyDetailsPage/>}/>
           </Route>
@@ -144,7 +151,7 @@ function App() {
           </Route>
           <Route path='/ClientPage' element={<ClientLogin/>}/>
           <Route path='/CreatePassword' element={<ClientPasswordSetup/>}/>
-          
+        
 
           <Route path="/payment/success" element={<PaymentSuccess />} />
         </Routes>

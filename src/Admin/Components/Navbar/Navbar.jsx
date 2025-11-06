@@ -1,15 +1,34 @@
-import React from "react";
+import React, { useContext } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
+import { AuthContext } from "../../../Context/AuthContext";
+
+// Optional function to capitalize role for display
+function formatRole(role) {
+  if (!role) return "";
+  switch (role) {
+    case "superadmin":
+      return "Super Admin";
+    case "admin":
+      return "Admin";
+    case "hr":
+      return "HR";
+    case "account":
+      return "Account";
+    default:
+      return role.charAt(0).toUpperCase() + role.slice(1);
+  }
+}
 
 function Navbar() {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    if (typeof logout === "function") logout();
     navigate("/");
   };
 
@@ -23,14 +42,7 @@ function Navbar() {
         minHeight: "70px"
       }}
     >
-      {/* Brand / Centered */}
       <div className="container-fluid d-flex align-items-center justify-content-between">
-
-        {/* Sidebar Brand (optional, can be removed if only Premier Admin is center) */}
-        {/* <span className="navbar-brand fw-bold text-white fs-3" style={{ letterSpacing: "1px" }}>
-          Admin Dashboard
-        </span> */}
-
         <div className="mx-auto text-center" style={{ flex: 1 }}>
           <span
             className="fw-bold text-white"
@@ -39,8 +51,6 @@ function Navbar() {
             Premier Admin
           </span>
         </div>
-
-        {/* Profile and Actions (far right) */}
         <div className="d-flex align-items-center gap-3">
           <div className="dropdown">
             <button
@@ -51,7 +61,9 @@ function Navbar() {
               style={{ fontSize: "1.12rem" }}
             >
               <FaUserCircle size={30} className="me-2 text-primary" />
-              <span>{user?.ename || "Admin"}</span>
+              <span>
+                {formatRole(user?.role)}
+              </span>
             </button>
             <ul className="dropdown-menu dropdown-menu-end shadow-sm">
               <li>

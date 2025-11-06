@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { API_URL } from "../../../config";
+import AdminChat from "./AdminChat";
 
 function Admin() {
   const [selectedCard, setSelectedCard] = useState(0);
@@ -60,6 +61,7 @@ function Admin() {
           </div>
         ))}
       </div>
+     
 
 
     </div>

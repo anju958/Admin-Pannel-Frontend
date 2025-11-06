@@ -3,6 +3,7 @@ import React from 'react';
 import Sidebar from '../../../Employee/SideBar/SideBar';
 import Navbar from '../../Navbar/Navbar';
 import { Outlet } from 'react-router-dom';
+import ChatButtonAndPopup from '../EmployeeHome/ChatButtonAndPopup';
 
 
 function EmployeeLayout() {
@@ -18,6 +19,7 @@ function EmployeeLayout() {
           <Outlet />
         </div>
       </div>
+      <ChatButtonAndPopup/>
     </div>
   );
 }

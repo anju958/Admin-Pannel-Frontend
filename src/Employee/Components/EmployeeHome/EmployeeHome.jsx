@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card } from 'react-bootstrap';
 import axios from 'axios';
-import { API_URL } from '../../../config'; 
+import { API_URL } from '../../../config';
 
 function EmployeeHome() {
   const user = JSON.parse(localStorage.getItem("user"));
   const [selectedCard, setSelectedCard] = useState(0);
   const [cards, setCards] = useState([
     { id: 1, title: 'Total Projects', number: 0 },
-    { id: 2, title: 'Total Leaves', number: 0 },
+    { id: 2, title: 'Completed Project', number: 0 },
     { id: 3, title: 'Pending Projects', number: 0 },
   ]);
 
@@ -21,10 +21,11 @@ function EmployeeHome() {
       const data = res.data;
 
       setCards([
-        { id: 1, title: 'Total Projects', number: data.totalProjects },
-        { id: 2, title: 'Total Leaves', number: data.totalLeaves },
-        { id: 3, title: 'Pending Projects', number: data.pendingProjects },
+        { id: 1, title: 'Total Projects', number: data.projects.total },
+        { id: 2, title: 'Completed Project', number: data.projects.completed },
+        { id: 3, title: 'Pending Projects', number: data.projects.pending },
       ]);
+
     } catch (err) {
       console.error("Error fetching employee stats:", err);
     }

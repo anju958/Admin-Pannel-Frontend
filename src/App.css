@@ -499,3 +499,12 @@ html, body {
     margin-bottom: 10px;
   }
 }
+.bg-gradient-primary {
+  background: linear-gradient(90deg, #5f2c82 0%, #49a09d 100%);
+}
+
+.admin-users-page {
+  /* Sets a mild background color for the page */
+  background-color: #f5f6fa;
+  min-height: 100vh;
+}

@@ -3,6 +3,8 @@ import React from 'react'
 import Sidebar from '../Sidebar/Sidebar'
 import Navbar from '../Navbar/Navbar'
 import { Outlet } from 'react-router-dom'
+import AdminChat from '../Admin/AdminChat'
+import ChatButtonAndPopup from '../Admin/ChatButtonAndPopup'
 
 function AdminLayout() {
   return (
@@ -58,6 +60,7 @@ function AdminLayout() {
           <Outlet />
         </div>
       </div>
+      <ChatButtonAndPopup/>
     </div>
   )
 }

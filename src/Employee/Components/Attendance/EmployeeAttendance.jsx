@@ -6,193 +6,188 @@ function EmployeeAttendance() {
   const user = JSON.parse(localStorage.getItem("user"));
   const today = new Date().toISOString().split("T")[0];
 
-  const [employee, setEmployee] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState(null);
-  const [isError, setIsError] = useState(false);
+  const [attendanceRecords, setAttendanceRecords] = useState([]);
+  const [previousAttendance, setPreviousAttendance] = useState([]);
+  const [loadingRecords, setLoadingRecords] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
-  const [formData, setFormData] = useState({
-    employeeId: "",
-    employeeName: "",
-    date: today,
-    check_in: "09:00",
-    check_out: "18:00",
-    status: "",
-    remark: ""
-  });
-
-  useEffect(() => {
-    if (user?.employeeId) {
-      axios
-        .get(`${API_URL}/api/getEmpDataByID/${user.employeeId}`)
-        .then((res) => {
-          const currentEmployee = res.data;
-          if (currentEmployee) {
-            setEmployee(currentEmployee);
-            setFormData((prev) => ({
-              ...prev,
-              employeeId: currentEmployee.employeeId || "",
-              employeeName: currentEmployee.ename || "",
-            }));
-          }
-        })
-        .catch((err) => console.error("Error fetching employee:", err));
-    }
-  }, [user]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage(null);
-
+  // Fetch today's attendance records
+  const fetchAttendanceRecords = async () => {
+    setLoadingRecords(true);
     try {
-      const payload = {
-        employeeId: formData.employeeId,
-        date: formData.date,
-        check_in: formData.check_in,
-        check_out: formData.check_out,
-        status: formData.status,
-        remark: formData.remark,
-      };
-
-      const res = await axios.post(`${API_URL}/api/add_attendance`, payload);
-      setMessage(res.data.message || "Attendance marked successfully!");
-      setIsError(false);
-
-      setFormData({
-        employeeId: employee?.employeeId || "",
-        employeeName: employee?.ename || "",
-        date: today,
-        check_in: "09:00",
-        check_out: "18:00",
-        status: "",
-        remark: ""
-      });
+      const response = await axios.get(
+        `${API_URL}/api/employee/working-hours`,
+        {
+          params: {
+            employeeId: user._id,
+            date: today
+          }
+        }
+      );
+      setAttendanceRecords([response.data]);
     } catch (error) {
-      console.error(error);
-      setMessage(error.response?.data?.message || "Error submitting attendance");
-      setIsError(true);
+      console.error("Error fetching attendance:", error);
+      setAttendanceRecords([]);
     } finally {
-      setLoading(false);
+      setLoadingRecords(false);
     }
   };
+
+  // Fetch previous attendance records (last 30 days)
+  const fetchPreviousAttendance = async () => {
+    setLoadingHistory(true);
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/attendance/history`,
+        {
+          params: {
+            employeeId: user._id,
+            limit: 30
+          }
+        }
+      );
+      setPreviousAttendance(response.data || []);
+    } catch (error) {
+      console.error("Error fetching attendance history:", error);
+      setPreviousAttendance([]);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  // Load attendance when component mounts
+  useEffect(() => {
+    if (user?._id) {
+      fetchAttendanceRecords();
+      fetchPreviousAttendance();
+    }
+  }, [user?._id]);
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (user?._id) {
+        fetchAttendanceRecords();
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [user?._id]);
 
   return (
-    <div className="container mt-4">
-      <div className="card shadow p-4 rounded-4">
-        <h2 className="text-center mb-4 fw-bold text-primary">Attendance Form</h2>
+    <div className="container-fluid mt-4 mb-4">
+      {/* Row 1: Today's Attendance */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card shadow-lg p-4 rounded-5 border-0" style={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" }}>
+            <h2 className="text-center mb-4 fw-bold text-white">Today's Attendance</h2>
 
-        {message && (
-          <div className={`alert ${isError ? "alert-danger" : "alert-success"}`} role="alert">
-            {message}
+            {loadingRecords ? (
+              <div className="text-center">
+                <div className="spinner-border text-light" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            ) : attendanceRecords.length > 0 ? (
+              <div className="text-white">
+                {attendanceRecords.map((record, idx) => (
+                  <div key={idx} className="rounded-4 p-4" style={{ background: "rgba(255,255,255,0.1)", backdropFilter: "blur(10px)" }}>
+                    <div className="row mb-3">
+                      <div className="col-md-4 text-center">
+                        <small className="text-white-50">Date</small>
+                        <p className="fw-bold fs-5">{new Date(record.date).toLocaleDateString('en-IN')}</p>
+                      </div>
+                      <div className="col-md-4 text-center">
+                        <small className="text-white-50">Status</small>
+                        <p className={`fw-bold fs-5 ${record.status === 'Present' ? 'text-success' : 'text-warning'}`}>
+                          {record.status}
+                        </p>
+                      </div>
+                      <div className="col-md-4 text-center">
+                        <small className="text-white-50">Check-In</small>
+                        <p className="fw-bold fs-5">{record.check_in || "N/A"}</p>
+                      </div>
+                    </div>
+
+                    <hr style={{ borderColor: "rgba(255,255,255,0.2)" }} />
+
+                    <div className="row">
+                      <div className="col-md-6 text-center">
+                        <small className="text-white-50">Check-Out</small>
+                        <p className="fw-bold fs-5">{record.check_out || "Not Checked Out Yet"}</p>
+                      </div>
+                      <div className="col-md-6 text-center">
+                        <small className="text-white-50">Working Hours</small>
+                        <p className="fw-bold fs-5" style={{ color: "#FFD700" }}>{record.workingHours || "0"} hours</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="alert alert-light" role="alert">
+                No attendance record for today
+              </div>
+            )}
           </div>
-        )}
+        </div>
+      </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label className="form-label fw-semibold">Employee ID</label>
-            <input
-              type="text"
-              className="form-control"
-              name="employeeId"
-              value={formData.employeeId}
-              disabled
-            />
+      {/* Row 2: Previous Attendance History Table */}
+      <div className="row">
+        <div className="col-12">
+          <div className="card shadow-lg p-4 rounded-5 border-0">
+            <h2 className="mb-4 fw-bold text-primary">Attendance History (Last 30 Days)</h2>
+
+            {loadingHistory ? (
+              <div className="text-center">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            ) : previousAttendance.length > 0 ? (
+              <div className="table-responsive">
+                <table className="table table-hover table-bordered align-middle">
+                  <thead style={{ background: "linear-gradient(90deg, #667eea 0%, #764ba2 100%)" }} className="text-white">
+                    <tr>
+                      <th className="text-center">Date</th>
+                      <th className="text-center">Check-In</th>
+                      <th className="text-center">Check-Out</th>
+                      <th className="text-center">Status</th>
+                      <th className="text-center">Working Hours</th>
+                      <th className="text-center">Remarks</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {previousAttendance.map((record, idx) => (
+                      <tr key={idx} className={record.status === 'Present' ? '' : record.status === 'Absent' ? 'table-danger' : 'table-warning'}>
+                        <td className="fw-bold text-center">{new Date(record.date).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                        <td className="text-center">{record.check_in || "-"}</td>
+                        <td className="text-center">{record.check_out || "-"}</td>
+                        <td className="text-center">
+                          <span className={`badge fw-bold ${
+                            record.status === 'Present' ? 'bg-success' : 
+                            record.status === 'Absent' ? 'bg-danger' : 
+                            record.status === 'Half Day' ? 'bg-warning text-dark' : 
+                            'bg-info'
+                          }`}>
+                            {record.status}
+                          </span>
+                        </td>
+                        <td className="fw-bold text-primary text-center">{record.workingHours || "0"} hrs</td>
+                        <td className="text-center">{record.remark || "-"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="alert alert-info" role="alert">
+                No attendance history available
+              </div>
+            )}
           </div>
-
-          <div className="mb-3">
-            <label className="form-label fw-semibold">Employee Name</label>
-            <input
-              type="text"
-              className="form-control"
-              name="employeeName"
-              value={formData.employeeName}
-              disabled
-            />
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label fw-semibold">Date</label>
-            <input
-              type="date"
-              className="form-control"
-              name="date"
-              value={formData.date}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="row">
-            <div className="col-md-6 mb-3">
-              <label className="form-label fw-semibold">Check-In Time</label>
-              <input
-                type="time"
-                className="form-control"
-                name="check_in"
-                value={formData.check_in}
-                onChange={handleChange}
-                required={formData.status === "Present" || formData.status === "Half Day"}
-                disabled={formData.status === "Absent" || formData.status === "Leave"}
-              />
-            </div>
-
-            <div className="col-md-6 mb-3">
-              <label className="form-label fw-semibold">Check-Out Time</label>
-              <input
-                type="time"
-                className="form-control"
-                name="check_out"
-                value={formData.check_out}
-                onChange={handleChange}
-                required={formData.status === "Present" || formData.status === "Half Day"}
-                disabled={formData.status === "Absent" || formData.status === "Leave"}
-              />
-            </div>
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label fw-semibold">Status</label>
-            <select
-              className="form-select"
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              required
-            >
-              <option value="">-- Select Status --</option>
-              <option value="Present">Present</option>
-              <option value="Absent">Absent</option>
-              <option value="Half Day">Half Day</option>
-              <option value="Leave">Leave</option>
-            </select>
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label fw-semibold">Remarks</label>
-            <textarea
-              className="form-control"
-              rows="3"
-              name="remark"
-              value={formData.remark}
-              onChange={handleChange}
-              placeholder="Any notes..."
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="btn btn-primary w-100 rounded-pill fw-semibold"
-            disabled={loading}
-          >
-            {loading ? "Submitting..." : "Mark Attendance"}
-          </button>
-        </form>
+        </div>
       </div>
     </div>
   );
