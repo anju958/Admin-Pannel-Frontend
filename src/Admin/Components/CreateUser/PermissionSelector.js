@@ -1,91 +1,102 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { API_URL } from "../../../config";
+import React from "react";
+import { ROLE_PRESETS } from "../../../utils/rolePresets";
 
-function PermissionSelector({ permissions, setPermissions }) {
-  const [modules, setModules] = useState([]);
-
-  useEffect(() => {
-    axios.get(`${API_URL}/api/getModule`)
-      .then(res => setModules(res.data))
-      .catch(() => setModules([]));
-  }, []);
-
-//   const handlePermissionChange = (moduleId, action, checked) => {
-//     setPermissions(prev => {
-//       const acts = prev[moduleId] || [];
-//       return {
-//         ...prev,
-//         [moduleId]: checked
-//           ? Array.from(new Set([...acts, action]))
-//           : acts.filter(a => a !== action)
-//       };
-//     });
-//   };
-
-const handlePermissionChange = (moduleId, action, checked) => {
-  setPermissions(prev => {
-    const acts = prev[moduleId] || [];
-    const updated = {
-      ...prev,
-      [moduleId]: checked
-        ? Array.from(new Set([...acts, action]))
-        : acts.filter(a => a !== action)
-    };
-    console.log("Permissions after change:", updated); // <-- Add this
-    return updated;
-  });
+const MODULE_LABELS = {
+  home: "Home",
+  jobOpenings: "Job Openings",
+  departments: "Departments",
+  employees: "Employees",
+  trainees: "Trainees",
+  attendance: "Attendance",
+  leads: "Leads",
+  clients: "Clients",
+  proposals: "Proposals",
+  invoices: "Invoices",
+  reports: "Reports",
+  projects: "Projects",
+  users: "User Management",
+  salaries: "Salaries",
+  noticeBoard: "Notice Board",
+  company: "Company Settings",
 };
 
+const ACTIONS = ["Add", "Edit", "View", "Delete"];
 
-  const handleSelectAll = (moduleId, actions) => {
-    setPermissions(prev => ({ ...prev, [moduleId]: actions }));
+export default function PermissionSelector({ permissions, setPermissions, role }) {
+  // Determine which modules should show
+  let allowedModules = [];
+
+  if (!role) {
+    allowedModules = []; // no role selected yet
+  } else if (ROLE_PRESETS[role] === "ALL") {
+    allowedModules = Object.keys(MODULE_LABELS);
+  } else {
+    allowedModules = ROLE_PRESETS[role];
+  }
+
+  const toggle = (moduleKey, action) => {
+    const current = permissions[moduleKey] || [];
+    const updated = current.includes(action)
+      ? current.filter(a => a !== action)
+      : [...current, action];
+
+    setPermissions({ ...permissions, [moduleKey]: updated });
   };
 
-  const handleDeselectAll = (moduleId) => {
-    setPermissions(prev => ({ ...prev, [moduleId]: [] }));
+  const selectAll = (moduleKey) => {
+    setPermissions({
+      ...permissions,
+      [moduleKey]: [...ACTIONS],
+    });
+  };
+
+  const deselectAll = (moduleKey) => {
+    const copy = { ...permissions };
+    delete copy[moduleKey];
+    setPermissions(copy);
   };
 
   return (
-    <div>
-      <h5 className="mb-3">Module Permissions</h5>
-      {modules.map(mod => (
-        <div key={mod._id} className="mb-4">
-          <div className="d-flex align-items-center mb-2">
-            <strong className="me-2">{mod.label}</strong>
-            <button
-              type="button"
-              onClick={() => handleSelectAll(mod._id, mod.actions)}
-              className="btn btn-xs btn-outline-success me-2 btn-sm"
-            >Select All</button>
-            <button
-              type="button"
-              onClick={() => handleDeselectAll(mod._id)}
-              className="btn btn-xs btn-outline-secondary btn-sm"
-            >Deselect All</button>
-          </div>
-          <div className="d-flex flex-wrap">
-            {mod.actions.map(action => (
-              <div key={action} className="form-check form-switch me-3 mb-2">
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  id={`${mod._id}-${action}`}
-                  checked={permissions[mod._id]?.includes(action) || false}
-                  onChange={e =>
-                    handlePermissionChange(mod._id, action, e.target.checked)
-                  }
-                />
-                <label className="form-check-label" htmlFor={`${mod._id}-${action}`}>
-                  {action}
-                </label>
+    <div className="card mt-3">
+      <div className="card-header fw-bold">Module Permissions</div>
+      <div className="card-body">
+
+        {allowedModules.length === 0 && (
+          <p className="text-muted">Select a role to see permissions.</p>
+        )}
+
+        {allowedModules.map((key) => (
+          <div key={key} className="mb-3 border rounded p-3">
+            <div className="d-flex justify-content-between align-items-center">
+              <h6 className="mb-0">{MODULE_LABELS[key]}</h6>
+
+              <div>
+                <button className="btn btn-sm btn-outline-primary me-2" type="button" onClick={() => selectAll(key)}>
+                  Select All
+                </button>
+                <button className="btn btn-sm btn-outline-secondary" type="button" onClick={() => deselectAll(key)}>
+                  Deselect All
+                </button>
               </div>
-            ))}
+            </div>
+
+            <div className="mt-2 d-flex flex-wrap gap-3">
+              {ACTIONS.map((a) => (
+                <label key={a} className="form-check form-switch">
+                  <input
+                    type="checkbox"
+                    className="form-check-input"
+                    checked={permissions[key]?.includes(a) || false}
+                    onChange={() => toggle(key, a)}
+                  />
+                  <span className="ms-2">{a}</span>
+                </label>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+
+      </div>
     </div>
   );
 }
-
-export default PermissionSelector;

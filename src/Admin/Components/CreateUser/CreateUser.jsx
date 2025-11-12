@@ -77,7 +77,14 @@ function CreateUserPage() {
                       <ul className="mb-0 ps-3" style={{ fontSize: "0.98rem", lineHeight: 1.4 }}>
                         {user.permissions &&
                           Object.entries(user.permissions).map(([mod, perms]) => (
-                            <li key={mod}><strong>{mod}:</strong> {perms.join(", ")}</li>
+                            // <li key={mod}><strong>{mod}:</strong> {perms.join(", ")}</li>
+                            <li key={mod}>
+                              <strong>{mod}:</strong>
+                              {" "}
+                              {Object.keys(perms)
+                                .filter(p => perms[p] === true)
+                                .join(", ") || "No permissions"}
+                            </li>
                           ))
                         }
                       </ul>

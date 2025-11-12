@@ -1,6 +1,6 @@
 import Admin from '../src/Admin/Components/Admin/Home';
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import "bootstrap/dist/js/bootstrap.bundle.min.js"; 
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "bootstrap/dist/css/bootstrap.min.css";
 import './App.css';
 
@@ -71,6 +71,9 @@ import CreateUserPage from './Admin/Components/CreateUser/CreateUser';
 import CreateUserAcc from './Admin/Components/CreateUser/CreateUserAcc';
 import AdminLogin from './Login/AdminLogin';
 import UpdateUserForm from './Admin/Components/CreateUser/UpdateUserForm';
+import ClientHome from './ClientComponent/Home/ClientHome';
+import ClientLayout from './ClientComponent/ClientLayout/ClientLayout';
+import AdminAllChats from './chat/AdminAllChats';
 
 
 function App() {
@@ -81,7 +84,7 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path='/RegisterationForm' element={<RegisterationForm />} />
           <Route path="/Login" element={<Login />} />
-          <Route path='/adminLogin' element={<AdminLogin/>}/>
+          <Route path='/adminLogin' element={<AdminLogin />} />
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Admin />} />
@@ -104,39 +107,40 @@ function App() {
             <Route path='addDepartment' element={<AddDepartment />} />
             <Route path='addJobs' element={<AddJobs />} />
             <Route path='Employee' element={<Employee />} />
-            <Route path='ViewEmployee/:employeeId' element={<ViewEmployee/>}/>
-            <Route path='ViewTrainee/:employeeId' element={<ViewTrainee/>}/>
+            <Route path='ViewEmployee/:employeeId' element={<ViewEmployee />} />
+            <Route path='ViewTrainee/:employeeId' element={<ViewTrainee />} />
             <Route path='client' element={<Clients />} />
-            <Route path='leadPage/:leadId' element={<ViewLeadPage/>}/>
+            <Route path='leadPage/:leadId' element={<ViewLeadPage />} />
             <Route path='viewclientpage/:leadId' element={<ViewClientPage />} />
-            <Route path='clientInvoicesList/:clientId' element={<ClientInvoicesListPage/>}/>
+            <Route path='clientInvoicesList/:clientId' element={<ClientInvoicesListPage />} />
             <Route path='projects' element={<ViewProjects />} />
             <Route path='project/:clientId/:projectId' element={<ProjectDetails />} />
             <Route path="invoice/:clientId" element={<InvoiceGenerator />} />
             <Route path='PayPage/:invoiceId' element={<PayPage />} />
-            <Route path='viewInvoice/:id' element={<ViewInvoice/>}/>
-            <Route path='TaskList' element={<TaskList/>}/>
-            <Route path='TaskList/assignTask'  element={<AssignTask/>}/>
-            <Route path='PurposalList' element={<ProposalList/>}/>
-            <Route path='updateInvoice/:id' element={<EditInvoice/>}/>
-            <Route path='getAllprojects/edit/:id' element={<UpdateProject/>}/>
-            <Route path='InvoicesList' element={<InvoiceList/>}/>
-          <Route path='Reports' element={<ReportsDashboard/>}/>
-          <Route path='getAllprojects/:id' element={<ShowProject/>}/>
-          <Route path='getProjectList' element={<ProjectList/>}/>
-          <Route path='updateProposal/:id' element={<EditProposal/>}/>
+            <Route path='viewInvoice/:id' element={<ViewInvoice />} />
+            <Route path='TaskList' element={<TaskList />} />
+            <Route path='TaskList/assignTask' element={<AssignTask />} />
+            <Route path='PurposalList' element={<ProposalList />} />
+            <Route path='updateInvoice/:id' element={<EditInvoice />} />
+            <Route path='getAllprojects/edit/:id' element={<UpdateProject />} />
+            <Route path='InvoicesList' element={<InvoiceList />} />
+            <Route path='Reports' element={<ReportsDashboard />} />
+            <Route path='getAllprojects/:id' element={<ShowProject />} />
+            <Route path='getProjectList' element={<ProjectList />} />
+            <Route path='updateProposal/:id' element={<EditProposal />} />
+            <Route path='view-all-chats' element={<AdminAllChats/>}/>
 
             <Route path='trainee' element={<Trainee />} />
             <Route path='Roles' element={<RolesAndResponsibilities />} />
             <Route path='upDateUder/:employeeId' element={<UpdateEmp />} />
             <Route path='addClientLead' element={<ClientLead />} />
             <Route path='moveToEmplyee/:employeeId' element={<MoveToEmp />} />
-            <Route path='NoticeBoard' element={<NoticeBoard/>}/>
-              <Route path='CreateUser' element={<CreateUserPage/>}/>
-              <Route path='createUserSAcc' element={<CreateUserAcc/>}/>
-              <Route path='updateUserPermission/:id' element={<UpdateUserForm/>}/>
+            <Route path='NoticeBoard' element={<NoticeBoard />} />
+            <Route path='CreateUser' element={<CreateUserPage />} />
+            <Route path='createUserSAcc' element={<CreateUserAcc />} />
+            <Route path='updateUserPermission/:id' element={<UpdateUserForm />} />
             <Route path='updateLeadClient/:leadId' element={<UpdateLeadClient />} />
-            <Route path='companyDetails' element={<CompanyDetailsPage/>}/>
+            <Route path='companyDetails' element={<CompanyDetailsPage />} />
           </Route>
           {/* Employee Routes */}
           <Route path='employee' element={<EmployeeLayout />}>
@@ -144,14 +148,19 @@ function App() {
             <Route path='employeeattendance' element={<EmployeeAttendance />} />
             <Route path='LeavePage' element={<LeavePage />} />
             <Route path='salaryPage' element={<SalaryPage />} />
-            <Route path='employeeTask' element={<EmployeeTask/>}/>
-            <Route path='performance' element={<PerformancePage/>}/>
-            <Route path='supportHelp' element={<SupportHelp/>}/>
-            <Route path='profile' element={<EmployeeProfile/>}/>
+            <Route path='employeeTask' element={<EmployeeTask />} />
+            <Route path='performance' element={<PerformancePage />} />
+            <Route path='supportHelp' element={<SupportHelp />} />
+            <Route path='profile' element={<EmployeeProfile />} />
           </Route>
-          <Route path='/ClientPage' element={<ClientLogin/>}/>
-          <Route path='/CreatePassword' element={<ClientPasswordSetup/>}/>
-        
+          <Route path="client" element={<ClientLayout />}>
+            <Route index element={<ClientHome />} />
+            <Route path="ClientPage" element={<ClientLogin />} />
+            <Route path="CreatePassword" element={<ClientPasswordSetup />} />
+            
+          </Route>
+
+
 
           <Route path="/payment/success" element={<PaymentSuccess />} />
         </Routes>

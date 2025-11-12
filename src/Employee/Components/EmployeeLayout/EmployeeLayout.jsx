@@ -1,10 +1,8 @@
-
 import React from 'react';
 import Sidebar from '../../../Employee/SideBar/SideBar';
 import Navbar from '../../Navbar/Navbar';
 import { Outlet } from 'react-router-dom';
-import ChatButtonAndPopup from '../EmployeeHome/ChatButtonAndPopup';
-
+import ChatButtonAndPopup from '../../../chat/ChatButtonAndPopup';
 
 function EmployeeLayout() {
   return (
@@ -19,7 +17,9 @@ function EmployeeLayout() {
           <Outlet />
         </div>
       </div>
-      <ChatButtonAndPopup/>
+
+      {/* Floating Chat Button */}
+      <ChatButtonAndPopup />
     </div>
   );
 }

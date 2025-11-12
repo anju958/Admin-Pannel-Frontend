@@ -1,69 +1,99 @@
-// src/Admin/AdminChat.js
+import React, { useEffect, useState, useRef } from "react";
+import { useChat } from "../../../chat/ChatProvider_old";
+import { getSocket } from "../../../socket";
 
-import React, { useEffect, useState, useRef } from 'react';
-import { io } from "socket.io-client";
-
-const SOCKET_SERVER_URL = "http://localhost:YOUR_SERVER_PORT"; // Change to your backend server
-
-function AdminChat() {
-  const [messages, setMessages] = useState([]);
+function AdminChat({ receiverId }) {
+  const { userId, messages } = useChat();
+  const socket = getSocket();
   const [input, setInput] = useState("");
-  const socketRef = useRef();
+  const chatRef = useRef();
+
+  const filtered = messages.filter(
+    (m) =>
+      (m.senderId === userId && m.receiverId === receiverId) ||
+      (m.senderId === receiverId && m.receiverId === userId)
+  );
 
   useEffect(() => {
-    socketRef.current = io(SOCKET_SERVER_URL, { transports: ['websocket'] });
-    socketRef.current.emit("join", "superadmin");
-    socketRef.current.on("receiveMessage", (message) => {
-      setMessages((prev) => [...prev, message]);
-    });
-    return () => {
-      socketRef.current.disconnect();
-    };
-  }, []);
+    if (chatRef.current) {
+      chatRef.current.scrollTo({
+        top: chatRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [filtered]);
 
   const sendMessage = () => {
-    if (input.trim() === "") return;
-    const messageData = {
-      senderId: "superadmin",
-      receiverId: "employee1", // Replace or select dynamically
+    if (!input.trim()) return;
+
+    const msg = {
+      senderId: userId,
+      receiverId,
       message: input,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
-    socketRef.current.emit("sendMessage", messageData);
-    setMessages((prev) => [...prev, messageData]);
+
+    socket.emit("sendMessage", msg);
     setInput("");
   };
 
   return (
-    <div style={{
-      border: "1px solid #ccc",
-      borderRadius: 8,
-      background: "#fff",
-      padding: "18px",
-      maxWidth: 400,
-      height: 450,
-      display: "flex",
-      flexDirection: "column",
-      margin: "0 auto"
-    }}>
-      <div style={{ flex: 1, overflowY: "auto", marginBottom: 10 }}>
-        {messages.map((msg, idx) => (
-          <div key={idx} style={{ marginBottom: 10 }}>
-            <b>{msg.senderId}</b>: {msg.message}<br/>
-            <small>{new Date(msg.timestamp).toLocaleString()}</small>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <div
+        ref={chatRef}
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: "10px",
+          background: "#f8fafc",
+        }}
+      >
+        {filtered.map((msg, i) => (
+          <div
+            key={i}
+            style={{
+              textAlign: msg.senderId === userId ? "right" : "left",
+              marginBottom: "8px",
+            }}
+          >
+            <div
+              style={{
+                display: "inline-block",
+                padding: "8px 12px",
+                borderRadius: "8px",
+                background: msg.senderId === userId ? "#6b46c1" : "#e2e8f0",
+                color: msg.senderId === userId ? "#fff" : "#000",
+              }}
+            >
+              {msg.message}
+            </div>
           </div>
         ))}
       </div>
-      <div style={{ display: "flex" }}>
+
+      <div style={{ display: "flex", padding: "8px" }}>
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your message"
-          style={{ flex: 1, padding: 8, borderRadius: 6, border: "1px solid #aaa" }}
+          placeholder="Type..."
+          style={{
+            flex: 1,
+            padding: "10px",
+            borderRadius: "8px",
+            border: "1px solid #ccc",
+          }}
         />
         <button
           onClick={sendMessage}
-          style={{ padding: "6px 18px", borderRadius: 6, marginLeft: 8, background: "#6b46c1", color: "#fff", border: "none" }}>
+          style={{
+            marginLeft: "8px",
+            background: "#6b46c1",
+            color: "#fff",
+            padding: "10px 16px",
+            borderRadius: "8px",
+            border: "none",
+          }}
+        >
           Send
         </button>
       </div>

@@ -1,14 +1,27 @@
-
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { formatDate } from "../../../utils/dateFormatter";
 import { API_URL } from "../../../config";
+import { AuthContext } from "../../../Context/AuthContext";
+
+// ✅ Permission helpers
+const canDo = (user, module, action) => {
+  if (user?.role === "superadmin" || user?.role === "manager") return true;
+  return user?.permissions?.[module]?.[action] === true;
+};
+
+const canViewPage = (user, module) => {
+  if (user?.role === "superadmin" || user?.role === "manager") return true;
+  return user?.permissions?.[module]?.view === true;
+};
 
 function Clients() {
   const [Client, setClient] = useState([]);
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
 
+  // ✅ Fetch all clients
   useEffect(() => {
     axios
       .get(`${API_URL}/api/getClientData`)
@@ -16,14 +29,18 @@ function Clients() {
         if (res.data) {
           setClient(res.data);
         } else {
-          alert(res.data.Error);
+          alert("Failed to load clients");
         }
       })
       .catch((err) => console.error(err));
   }, []);
-  console.log(Client);
 
+  // ✅ Delete client
   const handleDelete = async (leadId) => {
+    if (!canDo(user, "clients", "delete")) {
+      return alert("You do not have permission to delete clients.");
+    }
+
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this client?"
     );
@@ -31,13 +48,23 @@ function Clients() {
 
     try {
       await axios.delete(`${API_URL}/api/DeleteLead/${leadId}`);
-      setClient(Client.filter((clients) => clients.leadId !== leadId));
+      setClient((prev) => prev.filter((c) => c.leadId !== leadId));
       alert("Client deleted successfully!");
     } catch (error) {
       console.error(error);
-      alert("Failed to delete Client");
+      alert("Failed to delete client");
     }
   };
+
+  // ✅ PAGE ACCESS CHECK
+  if (!canViewPage(user, "clients")) {
+    return (
+      <div className="container py-5 text-center">
+        <h2 className="text-danger fw-bold">🚫 Access Denied</h2>
+        <p>You do not have permission to view Clients.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container-fluid">
@@ -50,15 +77,17 @@ function Clients() {
         </div>
       </div>
 
-      {/* Add Client Button */}
-      <div className="d-flex justify-content-start mt-3 mb-2">
-        <Link
-          to="/admin/addClientLead"
-          className="btn btn-dark rounded-pill fw-bold"
-        >
-          ➕ Add Client
-        </Link>
-      </div>
+      {/* ✅ Add Client Button (permission controlled) */}
+      {canDo(user, "clients", "add") && (
+        <div className="d-flex justify-content-start mt-3 mb-2">
+          <Link
+            to="/admin/addClientLead"
+            className="btn btn-dark rounded-pill fw-bold"
+          >
+            ➕ Add Client
+          </Link>
+        </div>
+      )}
 
       {/* Table */}
       <div className="table-responsive">
@@ -69,24 +98,20 @@ function Clients() {
               <th>Name</th>
               <th>Email</th>
               <th>Phone</th>
-              {/* <th>Source</th> */}
               <th>Department</th>
               <th>Service</th>
-              {/* <th>Project Type</th> */}
               <th>Project Price</th>
               <th>Enroll Date</th>
-              {/* <th>Status</th> */}
-              {/* <th>Assigned To</th>
-              <th>User Type</th> */}
-              {/* <th>View</th> */}
               <th>Actions</th>
             </tr>
           </thead>
+
           <tbody>
             {Client.map((clients, index) => (
               <tr key={index}>
                 <td>{clients.leadId}</td>
                 <td>{clients.leadName}</td>
+
                 <td
                   className="text-truncate"
                   style={{ maxWidth: "180px" }}
@@ -94,43 +119,55 @@ function Clients() {
                 >
                   {clients.emailId}
                 </td>
+
                 <td>{clients.phoneNo}</td>
-                {/* <td>{clients.sourse}</td> */}
                 <td>{clients.department?.deptName}</td>
                 <td>{clients.service?.serviceName}</td>
-                {/* <td>{clients.project_type}</td> */}
                 <td>{clients.project_price}</td>
                 <td>{formatDate(clients.date)}</td>
-                {/* <td>{clients.status}</td> */}
+
+                {/* ✅ BUTTON PERMISSIONS */}
                 <td>
                   <div className="d-flex justify-content-center gap-2">
-                    <button
-                      className="btn btn-sm btn-primary rounded-pill"
-                      onClick={() =>
-                        navigate(`/admin/viewclientpage/${clients.leadId}`)
-                      }
-                    >
-                      View
-                    </button>
-                    <button
-                      className="btn btn-sm btn-primary rounded-pill"
-                      onClick={() =>
-                        navigate(`/admin/updateLeadClient/${clients.leadId}`)
-                      }
-                    >
-                      Update
-                    </button>
-                    <button
-                      className="btn btn-sm btn-danger rounded-pill"
-                      onClick={() => handleDelete(clients.leadId)}
-                    >
-                      Delete
-                    </button>
+                    {/* View */}
+                    {canDo(user, "clients", "view") && (
+                      <button
+                        className="btn btn-sm btn-primary rounded-pill"
+                        onClick={() =>
+                          navigate(`/admin/viewclientpage/${clients.leadId}`)
+                        }
+                      >
+                        View
+                      </button>
+                    )}
+
+                    {/* Update */}
+                    {canDo(user, "clients", "edit") && (
+                      <button
+                        className="btn btn-sm btn-primary rounded-pill"
+                        onClick={() =>
+                          navigate(`/admin/updateLeadClient/${clients.leadId}`)
+                        }
+                      >
+                        Update
+                      </button>
+                    )}
+
+                    {/* Delete */}
+                    {canDo(user, "clients", "delete") && (
+                      <button
+                        className="btn btn-sm btn-danger rounded-pill"
+                        onClick={() => handleDelete(clients.leadId)}
+                      >
+                        Delete
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
             ))}
           </tbody>
+
         </table>
       </div>
     </div>

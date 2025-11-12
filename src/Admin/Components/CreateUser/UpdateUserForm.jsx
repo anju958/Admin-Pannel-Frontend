@@ -1,15 +1,33 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_URL } from "../../../config";
+import { AuthContext } from "../../../Context/AuthContext";
 
-const modules = ["Job Opening", "Employees"];
-const possiblePermissions = ["View", "Edit", "Add", "Delete"];
+// ✅ All modules used in your HRM system
+const MODULES = [
+    "employees",
+    "trainees",
+    "clients",
+    "leads",
+    "projects",
+    "proposals",
+    "jobopenings",
+    "invoices",
+    "tasks",
+    "services",
+    "departments",
+    "attendance",
+    "notices",
+    "salaries",
+];
+
+const PERMISSIONS = ["view", "add", "edit", "delete"];
 
 const UpdateUserForm = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user } = useContext(AuthContext);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -19,68 +37,90 @@ const UpdateUserForm = () => {
         password: "",
         permissions: {}
     });
+
     const [loading, setLoading] = useState(true);
-    const [submitting, setSubmitting] = useState(false);
+    const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
+
+    // ✅ Fetch user data
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                // Use correct backend endpoint as per your screenshot
                 const res = await axios.get(`${API_URL}/api/getAdminbyUsers/${id}`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
                 });
 
-                const user = res.data.user;
-                setFormData({
-                    name: user.name || "",
-                    email: user.email || "",
-                    role: user.role || "admin",
-                    department: user.department || "",
-                    password: "",
-                    permissions: user.permissions || {}
+                const u = res.data.user;
+
+                // ✅ Ensure permissions are always objects of booleans
+                let fixedPermissions = {};
+                Object.keys(u.permissions || {}).forEach((mod) => {
+                    fixedPermissions[mod] = {
+                        view: u.permissions[mod]?.view || false,
+                        add: u.permissions[mod]?.add || false,
+                        edit: u.permissions[mod]?.edit || false,
+                        delete: u.permissions[mod]?.delete || false,
+                    };
                 });
+
+
+                setFormData({
+                    name: u.name,
+                    email: u.email,
+                    role: u.role,
+                    department: u.department,
+                    password: "",
+                    permissions: fixedPermissions
+                });
+
                 setLoading(false);
-            } catch (e) {
+            } catch (err) {
                 setError("Failed to load user.");
                 setLoading(false);
             }
         };
+
         fetchUser();
     }, [id]);
 
-
-
-    const handleChange = (e) => {
+    // ✅ Handle simple input change
+    const handleChange = (e) =>
         setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
 
-    const handlePermissionChange = (module, perm) => {
-        const currPerms = formData.permissions[module] || [];
-        const updatePerms = currPerms.includes(perm)
-            ? currPerms.filter((p) => p !== perm)
-            : [...currPerms, perm];
-        setFormData({
-            ...formData,
+    // ✅ Toggle permission
+    const togglePermission = (module, perm) => {
+        setFormData((prev) => ({
+            ...prev,
             permissions: {
-                ...formData.permissions,
-                [module]: updatePerms
-            }
-        });
+                ...prev.permissions,
+                [module]: {
+                    ...prev.permissions[module],
+                    [perm]: !prev.permissions[module][perm],
+                },
+            },
+        }));
     };
 
+    // ✅ Submit update
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setSubmitting(true);
+        setSaving(true);
         setError("");
+
         try {
-            // Adjust endpoint here if needed
-            await axios.put(`${API_URL}/api/users/update/${id}`, formData, {
-                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-            });
+            await axios.put(
+                `${API_URL}/api/users/update/${id}`,
+                formData,
+                {
+                    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+                }
+            );
+
+            alert("User updated successfully!");
             navigate(-1);
-        } catch (e) {
-            setError("Update failed!");
-            setSubmitting(false);
+        } catch (err) {
+            setError("Update failed");
+            setSaving(false);
         }
     };
 
@@ -88,72 +128,117 @@ const UpdateUserForm = () => {
     if (error) return <div className="alert alert-danger mt-4">{error}</div>;
 
     return (
-        <div className="container my-5">
-            <div className="card p-4 shadow-sm col-lg-8 mx-auto">
-                <h2 className="mb-4 text-primary fw-semibold">Update User Permissions</h2>
-                <form onSubmit={handleSubmit} className="p-3">
-                    <div className="row g-4 mb-2">
+        <div className="container my-4">
+            <div className="card p-4 shadow col-lg-10 mx-auto">
+                <h3 className="mb-4 text-primary fw-bold">Update User Account</h3>
+
+                <form onSubmit={handleSubmit}>
+                    {/* Basic Fields */}
+                    <div className="row g-4 mb-3">
                         <div className="col-md-6">
-                            <label className="form-label">Name</label>
-                            <input name="name" className="form-control" value={formData.name} onChange={handleChange} />
+                            <label className="form-label">Full Name</label>
+                            <input
+                                name="name"
+                                className="form-control"
+                                value={formData.name}
+                                onChange={handleChange}
+                                required
+                            />
                         </div>
+
                         <div className="col-md-6">
                             <label className="form-label">Email</label>
-                            <input name="email" className="form-control" value={formData.email} onChange={handleChange} />
+                            <input
+                                name="email"
+                                className="form-control"
+                                value={formData.email}
+                                onChange={handleChange}
+                                required
+                            />
                         </div>
+
                         <div className="col-md-6">
                             <label className="form-label">Role</label>
-                            <select name="role" className="form-select" value={formData.role} onChange={handleChange}>
+                            <select
+                                name="role"
+                                value={formData.role}
+                                onChange={handleChange}
+                                className="form-select"
+                            >
                                 <option value="admin">Admin</option>
                                 <option value="superadmin">Superadmin</option>
+                                <option value="hr">HR</option>
+                                <option value="accountant">Accountant</option>
+                                <option value="manager">Manager</option>
                             </select>
                         </div>
+
                         <div className="col-md-6">
-                            <label className="form-label">Password</label>
-                            <input name="password" className="form-control" type="password" value={formData.password} onChange={handleChange} placeholder="Leave blank to keep old password" />
+                            <label className="form-label">New Password</label>
+                            <input
+                                name="password"
+                                type="password"
+                                className="form-control"
+                                placeholder="Leave empty to keep old password"
+                                value={formData.password}
+                                onChange={handleChange}
+                            />
                         </div>
                     </div>
-                    <div className="mb-4">
-                        <label className="form-label fw-bold">Permissions:</label>
-                        <div className="table-responsive">
-                            <table className="table table-bordered align-middle">
-                                <thead className="table-light">
-                                    <tr>
-                                        <th>Module</th>
-                                        {possiblePermissions.map((perm) => (
-                                            <th key={perm}>{perm}</th>
+
+                    {/* Permissions Table */}
+                    <h5 className="fw-bold mb-3">Module Permissions</h5>
+
+                    <div className="table-responsive">
+                        <table className="table table-bordered text-center align-middle">
+                            <thead className="table-light">
+                                <tr>
+                                    <th>Module</th>
+                                    {PERMISSIONS.map((p) => (
+                                        <th key={p}>{p.toUpperCase()}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {Object.keys(formData.permissions).map((mod) => (
+                                    <tr key={mod}>
+                                        <td className="fw-semibold text-capitalize">{mod}</td>
+
+                                        {PERMISSIONS.map((perm) => (
+                                            <td key={perm}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.permissions[mod]?.[perm] || false}
+                                                    onChange={() =>
+                                                        togglePermission(mod, perm)
+                                                    }
+                                                />
+                                            </td>
                                         ))}
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {modules.map((mod) => (
-                                        <tr key={mod}>
-                                            <td>{mod}</td>
-                                            {possiblePermissions.map((perm) => (
-                                                <td key={perm} className="text-center">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={
-                                                            Array.isArray(formData.permissions[mod])
-                                                                ? formData.permissions[mod].includes(perm)
-                                                                : false
-                                                        }
-                                                        onChange={() => handlePermissionChange(mod, perm)}
-                                                    />
-                                                </td>
-                                            ))}
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
-                    <div className="d-flex justify-content-end gap-3">
-                        <button type="button" className="btn btn-secondary" onClick={() => navigate(-1)} disabled={submitting}>
+
+                    {/* Buttons */}
+                    <div className="d-flex justify-content-end gap-3 mt-3">
+                        <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={() => navigate(-1)}
+                            disabled={saving}
+                        >
                             Cancel
                         </button>
-                        <button type="submit" className="btn btn-primary" disabled={submitting}>
-                            {submitting ? "Updating..." : "Update User"}
+
+                        <button
+                            type="submit"
+                            className="btn btn-primary"
+                            disabled={saving}
+                        >
+                            {saving ? "Updating..." : "Update User"}
                         </button>
                     </div>
                 </form>

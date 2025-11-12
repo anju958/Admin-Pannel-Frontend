@@ -5,13 +5,17 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {AuthProvider} from './Context/AuthContext'
+import {ChatProvider} from './chat/ChatContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <AuthProvider>
+    <ChatProvider>
     <App />
+    </ChatProvider>
     </AuthProvider>
+    
   </React.StrictMode>
 );
 

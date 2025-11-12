@@ -1,29 +1,38 @@
 import React, { useState } from "react";
 import { MdEmail, MdLock } from "react-icons/md";
-import { Link } from "react-router-dom";
-import logo from "../../../src/assessts/premier-logo.png";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import logo from "../../assessts/premier-logo.png";
+import { API_URL } from "../../config";
 
 function ClientLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   async function handleLogin(e) {
     e.preventDefault();
     setMessage("");
-
-    const response = await fetch("/client/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    const data = await response.json();
-    if (response.ok) {
+    try {
+      const response = await axios.post(`${API_URL}/api/clientLogin`, {
+        emailId: email,
+        password: password
+      });
+      const data = response.data;
       setMessage("Login successful! Redirecting...");
-      window.location.href = "/client/dashboard";
-    } else {
-      setMessage(data.error || "Invalid email or password.");
+      if (data.token) localStorage.setItem("clientToken", data.token);
+      if (data.client) localStorage.setItem("clientUser", JSON.stringify(data.client));
+      localStorage.setItem("chatUserId", data.client._id);
+      localStorage.setItem("chatRole", "client");
+      localStorage.setItem("chatName", data.client.leadName || data.client.name);
+      setTimeout(() => navigate("/client"), 1000);
+    } catch (err) {
+      if (err.response && err.response.data && err.response.data.message) {
+        setMessage(err.response.data.message);
+      } else {
+        setMessage("Network error. Please try again.");
+      }
     }
   }
 
@@ -42,20 +51,13 @@ function ClientLogin() {
               alignItems: "center"
             }}
           >
-            <img
-              src={logo}
-              alt="Premier Logo"
-              width="100"
-              style={{ marginBottom: "12px" }}
-            />
+            <img src={logo} alt="Premier Logo" width="100" style={{ marginBottom: "12px" }} />
             <div className="text-center mb-3 fw-bold fs-2" style={{ letterSpacing: "0.5px" }}>
               Client Login
             </div>
             <form style={{ width: '100%' }} onSubmit={handleLogin}>
               <div className="input-group mb-3">
-                <span className="input-group-text bg-light">
-                  <MdEmail />
-                </span>
+                <span className="input-group-text bg-light"><MdEmail /></span>
                 <input
                   type="email"
                   className="form-control"
@@ -66,9 +68,7 @@ function ClientLogin() {
                 />
               </div>
               <div className="input-group mb-3">
-                <span className="input-group-text bg-light">
-                  <MdLock />
-                </span>
+                <span className="input-group-text bg-light"><MdLock /></span>
                 <input
                   type="password"
                   className="form-control"
@@ -103,7 +103,7 @@ function ClientLogin() {
               </span>
               <br />
               <Link
-                to="/CreatePassword"
+                to="/client/CreatePassword"
                 className="fw-bold text-primary fs-5 text-decoration-underline"
                 style={{ letterSpacing: "0.5px" }}
               >

@@ -26,7 +26,7 @@ function Login() {
 
     try {
       const res = await axios.post(`${API_URL}/api/employee/login`, formData);
-      
+
       // Store token and user info
       localStorage.setItem('token', res.data.token);
       const user = {
@@ -36,6 +36,10 @@ function Login() {
         official_email: res.data.official_email,
       };
       localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("chatUserId", res.data.employeeId);
+      localStorage.setItem("chatRole", "employee");
+      localStorage.setItem("chatName", res.data.ename);
+
 
       // Redirect to employee dashboard
       navigate("/employee");
@@ -52,11 +56,11 @@ function Login() {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
       if (user?.employeeId) {
-        await axios.post(`${API_URL}/api/employee/logout`, { 
-          employeeId: user.employeeId 
+        await axios.post(`${API_URL}/api/employee/logout`, {
+          employeeId: user.employeeId
         });
       }
-      
+
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       navigate("/");
@@ -157,7 +161,7 @@ function Login() {
                 <span className='fw-semibold text-secondary'>Are you a Client?</span>
                 <br />
                 <Link
-                  to="/ClientPage"
+                  to="/client/ClientPage"
                   className='fw-bold text-primary fs-5 text-decoration-underline'
                   style={{ letterSpacing: "0.5px" }}
                 >

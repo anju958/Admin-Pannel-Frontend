@@ -1,86 +1,80 @@
-import React, { useState } from 'react';
-import AdminChat from './AdminChat';
+import React, { useState } from "react";
+import ChatWindow from "../../../chat/ChatWindow";
 
-function ChatButtonAndPopup() {
+export default function ChatButtonAndPopup() {
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      {/* Chat popup modal */}
       {open && (
         <div
           style={{
             position: "fixed",
-            bottom: 110, // Raised to make room for button
-            right: 36,
-            zIndex: 9999,
-            boxShadow: "0 4px 24px rgba(0,0,0,0.16)",
-            borderRadius: "12px",
-            background: "#fff",
-            maxWidth: "375px",
-            width: "100%",
-            height: "480px",
-            display: "flex",
-            flexDirection: "column",
+            bottom: 120,
+            right: 30,
+            width: 650, // Increased width for better visibility
+            height: 520,
+            background: "white",
+            borderRadius: 12,
+            boxShadow: "0 4px 25px rgba(0,0,0,0.18)",
             overflow: "hidden",
+            zIndex: 99999,
+            display: "flex",
+            flexDirection: "column"
           }}
         >
-          <div style={{ 
-            padding: "16px", 
-            background: "#6b46c1", 
-            color: "#fff", 
-            fontWeight: "600", 
-            fontSize: 18,
-            borderTopLeftRadius: "12px",
-            borderTopRightRadius: "12px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center"
-          }}>
-            <span> Chat</span>
+          <div
+            style={{
+              background: "#6b46c1",
+              color: "white",
+              padding: "12px 16px",
+              fontWeight: 600,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center"
+            }}
+          >
+            Chat
             <button
+              onClick={() => setOpen(false)}
               style={{
-                background: "none",
+                background: "transparent",
                 border: "none",
-                color: "#fff",
+                color: "white",
                 fontSize: 22,
                 cursor: "pointer"
               }}
-              onClick={() => setOpen(false)}
             >
               ×
             </button>
           </div>
-          <div style={{ flex: 1, background: "#f8fafc", overflowY: "auto", padding: "10px" }}>
-            <AdminChat />
+          <div style={{ flex: 1, minHeight: 0 }}>
+            <ChatWindow />
           </div>
         </div>
       )}
 
-      {/* Floating Button */}
       <button
+        onClick={() => setOpen((v) => !v)}
         style={{
           position: "fixed",
-          bottom: 36,
-          right: 36,
-          zIndex: 10000,
-          background: "#6b46c1",
-          color: "#fff",
+          bottom: 30,
+          right: 30,
+          width: 60,
+          height: 60,
           borderRadius: "50%",
-          width: 58,
-          height: 58,
-          boxShadow: "0 2px 10px rgba(0,0,0,0.21)",
+          background: "#6b46c1",
+          color: "white",
+          fontSize: 26,
           border: "none",
-          fontSize: 28,
-          cursor: "pointer"
+          cursor: "pointer",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.26)",
+          zIndex: 9999
         }}
-        onClick={() => setOpen(!open)}
-        aria-label="Open Chat"
+        aria-label="Open chat"
       >
         💬
       </button>
     </>
   );
 }
-
-export default ChatButtonAndPopup;

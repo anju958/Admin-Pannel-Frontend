@@ -1,17 +1,15 @@
-
-import React from 'react'
-import Sidebar from '../Sidebar/Sidebar'
-import Navbar from '../Navbar/Navbar'
-import { Outlet } from 'react-router-dom'
-import AdminChat from '../Admin/AdminChat'
-import ChatButtonAndPopup from '../Admin/ChatButtonAndPopup'
+import React from 'react';
+import Sidebar from '../Sidebar/Sidebar';
+import Navbar from '../Navbar/Navbar';
+import { Outlet } from 'react-router-dom';
+import ChatButtonAndPopup from '../../../chat/ChatButtonAndPopup';
 
 function AdminLayout() {
   return (
-    <div style={{ 
-      display: 'flex', 
-      height: '100vh', 
-      overflow: 'hidden' // Prevent layout scroll
+    <div style={{
+      display: 'flex',
+      height: '100vh',
+      overflow: 'hidden'
     }}>
       {/* Fixed Sidebar */}
       <div style={{
@@ -35,7 +33,7 @@ function AdminLayout() {
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
-        overflow: 'hidden' // Important!
+        overflow: 'hidden'
       }}>
         {/* Fixed Navbar */}
         <div style={{
@@ -49,7 +47,7 @@ function AdminLayout() {
           <Navbar />
         </div>
         
-        {/* SCROLLABLE CONTENT - Orange area */}
+        {/* Scrollable content */}
         <div style={{
           flex: 1,
           overflowY: 'auto',
@@ -60,9 +58,11 @@ function AdminLayout() {
           <Outlet />
         </div>
       </div>
-      <ChatButtonAndPopup/>
+
+      {/* Floating Chat Popup */}
+      <ChatButtonAndPopup />
     </div>
-  )
+  );
 }
 
-export default AdminLayout
+export default AdminLayout;

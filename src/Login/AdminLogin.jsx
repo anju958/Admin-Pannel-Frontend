@@ -3,7 +3,7 @@ import axios from 'axios';
 import React, { useState, useContext } from 'react';
 import { MdEmail, MdLock } from "react-icons/md";
 import { useNavigate } from 'react-router-dom';
-import logo from '../assessts/premier-logo.png'; 
+import logo from '../assessts/premier-logo.png';
 import { API_URL } from "../config";
 import { AuthContext } from '../Context/AuthContext';
 
@@ -22,15 +22,28 @@ function AdminLogin() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post(`${API_URL}/api/adminLogin`, formData);
-      login({ token: res.data.token, user: res.data.user });
-      navigate("/admin/home");
-    } catch (err) {
-      alert("Invalid credentials or user does not exist for selected role");
+  e.preventDefault();
+  try {
+    const res = await axios.post(`${API_URL}/api/adminLogin`, formData);
+    const user = res.data.user;
+
+    if (!user || !user._id) {
+      alert("Login succeeded but no valid user ID returned");
+      return;
     }
-  };
+
+    // Save real user id for chat
+    localStorage.setItem("chatUserId", user._id);
+    localStorage.setItem("chatRole", user.role);
+    localStorage.setItem("chatName", user.name);
+
+    login({ token: res.data.token, user: user });
+    navigate("/admin/home");
+  } catch (err) {
+    alert("Invalid credentials or user does not exist for selected role");
+  }
+};
+
 
   return (
     <div className='container-fluid p-0' style={{ minHeight: "100vh", background: "#f5f6fc" }}>
@@ -55,7 +68,8 @@ function AdminLogin() {
                 <option value="superadmin">Super Admin</option>
                 <option value="admin">Admin</option>
                 <option value="hr">HR</option>
-                <option value="account">Account</option>
+                <option value="account">Accountant</option>
+                <option value="manager">Manager</option>
               </select>
             </div>
             <button type="submit" className="btn btn-primary w-100 rounded-3 fw-bold py-2 mb-2">Login</button>
