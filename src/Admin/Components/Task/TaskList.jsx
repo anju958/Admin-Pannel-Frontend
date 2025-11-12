@@ -51,7 +51,7 @@ const TaskList = () => {
     return () => {
       socket.off("newNotification");
     };
-  }, []);
+  }, [fetchTasks]);
 
 
   // Open update modal
