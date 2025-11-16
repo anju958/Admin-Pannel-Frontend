@@ -1,194 +1,251 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import * as XLSX from "xlsx";
 import { API_URL } from "../../../config";
 
+const months = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
 function EmployeeAttendance() {
+
   const user = JSON.parse(localStorage.getItem("user"));
-  const today = new Date().toISOString().split("T")[0];
 
-  const [attendanceRecords, setAttendanceRecords] = useState([]);
-  const [previousAttendance, setPreviousAttendance] = useState([]);
-  const [loadingRecords, setLoadingRecords] = useState(false);
-  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [attendanceData, setAttendanceData] = useState([]);
+  const [summary, setSummary] = useState({});
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
-  // Fetch today's attendance records
-  const fetchAttendanceRecords = async () => {
-    setLoadingRecords(true);
+  const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+
+  // ================================
+  // FETCH ATTENDANCE
+  // ================================
+  const fetchAttendance = async () => {
     try {
-      const response = await axios.get(
-        `${API_URL}/api/employee/working-hours`,
-        {
-          params: {
-            employeeId: user._id,
-            date: today
-          }
+      const res = await axios.get(`${API_URL}/api/monthly`, {
+        params: {
+          employeeId: user._id,
+          month: selectedMonth,
+          year: selectedYear
         }
-      );
-      setAttendanceRecords([response.data]);
+      });
+
+      setAttendanceData(res.data.data || []);   // <-- FIXED
+      setSummary(res.data.summary || {});       // <-- NEW
+
     } catch (error) {
-      console.error("Error fetching attendance:", error);
-      setAttendanceRecords([]);
-    } finally {
-      setLoadingRecords(false);
+      console.error("Attendance Fetch Error:", error);
+      setAttendanceData([]);
     }
   };
 
-  // Fetch previous attendance records (last 30 days)
-  const fetchPreviousAttendance = async () => {
-    setLoadingHistory(true);
-    try {
-      const response = await axios.get(
-        `${API_URL}/api/attendance/history`,
-        {
-          params: {
-            employeeId: user._id,
-            limit: 30
-          }
-        }
-      );
-      setPreviousAttendance(response.data || []);
-    } catch (error) {
-      console.error("Error fetching attendance history:", error);
-      setPreviousAttendance([]);
-    } finally {
-      setLoadingHistory(false);
+
+  useEffect(() => {
+    fetchAttendance();
+  }, [selectedMonth, selectedYear]);
+
+
+  // ================================
+  // ICON GENERATOR
+  // ================================
+  const getIcon = (status) => {
+    if (!status) return "-";
+    switch (status.toLowerCase()) {
+      case "present": return <span className="text-success fw-bold">✔</span>;
+      case "absent": return <span className="text-danger fw-bold">✖</span>;
+      case "leave": return <span style={{ color: "red" }}>🛫</span>;
+      case "holiday": return <span className="text-warning fw-bold">⭐</span>;
+      case "half day": return <span className="text-primary fw-bold">⚠</span>;
+      default: return "-";
     }
   };
 
-  // Load attendance when component mounts
-  useEffect(() => {
-    if (user?._id) {
-      fetchAttendanceRecords();
-      fetchPreviousAttendance();
+
+  // ================================
+  // BACKGROUND COLORS
+  // ================================
+  const getBgColor = (status) => {
+    if (!status) return "transparent";
+
+    switch (status.toLowerCase()) {
+      case "present": return "#d4f8d4";
+      case "absent": return "#ffd6d6";
+      case "leave": return "#fff2c2";
+      case "holiday": return "#d9eaff";
+      case "half day": return "#ffeac7";
+      default: return "transparent";
     }
-  }, [user?._id]);
+  };
 
-  // Auto-refresh every 30 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (user?._id) {
-        fetchAttendanceRecords();
-      }
-    }, 30000);
 
-    return () => clearInterval(interval);
-  }, [user?._id]);
+  // ================================
+  // EXPORT TO EXCEL
+  // ================================
+  const exportToExcel = () => {
+    const row = { Employee: user.ename };
 
+    for (let i = 1; i <= daysInMonth; i++) {
+      const att = attendanceData.find(a => new Date(a.date).getDate() === i);
+      row[i] = att ? att.status : "";
+    }
+
+    const ws = XLSX.utils.json_to_sheet([row]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Attendance");
+    XLSX.writeFile(wb, `${user.ename}-Attendance.xlsx`);
+  };
+
+
+  // ================================
+  // RENDER
+  // ================================
   return (
-    <div className="container-fluid mt-4 mb-4">
-      {/* Row 1: Today's Attendance */}
-      <div className="row mb-4">
-        <div className="col-12">
-          <div className="card shadow-lg p-4 rounded-5 border-0" style={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" }}>
-            <h2 className="text-center mb-4 fw-bold text-white">Today's Attendance</h2>
+    <div className="container mt-4">
 
-            {loadingRecords ? (
-              <div className="text-center">
-                <div className="spinner-border text-light" role="status">
-                  <span className="visually-hidden">Loading...</span>
+      {/* Month-Year Selection */}
+      <div className="d-flex gap-3 align-items-center mb-4">
+        <select className="form-select w-auto"
+          value={selectedMonth}
+          onChange={(e) => setSelectedMonth(Number(e.target.value))}
+        >
+          {months.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+        </select>
+
+        <select className="form-select w-auto"
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(Number(e.target.value))}
+        >
+          {Array.from({ length: 6 }, (_, i) => new Date().getFullYear() - i)
+            .map((y) => <option key={y} value={y}>{y}</option>)}
+        </select>
+
+        <button className="btn btn-success" onClick={exportToExcel}>
+          Export Excel
+        </button>
+      </div>
+
+
+      {/* SUMMARY CARD */}
+      <div className="alert alert-info fw-bold">
+        <h6 className="mb-2">
+          Attendance Summary – {months[selectedMonth - 1]} {selectedYear}
+        </h6>
+
+        Present: <span className="text-success">{summary.present}</span> &nbsp; | &nbsp;
+        Absent: <span className="text-danger">{summary.absent}</span> &nbsp; | &nbsp;
+        Leave: <span style={{ color: "orange" }}>{summary.leave}</span> &nbsp; | &nbsp;
+        Holiday: <span style={{ color: "blue" }}>{summary.holiday}</span> &nbsp; | &nbsp;
+        Half Day: <span style={{ color: "brown" }}>{summary.halfday}</span>
+
+        <hr />
+
+        Late Count: <b>{summary.lateCount}</b> times &nbsp; | &nbsp;
+        Late Hours: <b>{summary.lateHours}</b> hr &nbsp; | &nbsp;
+        Deduction: <b className="text-danger">{summary.deduction}</b> day(s)
+      </div>
+
+
+      {/* NOTES */}
+      <div className="mt-4 px-2 mb-4">
+        <strong>Note:</strong>{" "}
+        ⭐ → Holiday &nbsp;&nbsp;
+        ✔ → Present &nbsp;&nbsp;
+        ✖ → Absent &nbsp;&nbsp;
+        🛫 → Leave &nbsp;&nbsp;
+        ⚠ → Half Day
+      </div>
+
+
+      {/* ATTENDANCE TABLE */}
+      <div className="card shadow-sm">
+        <div className="card-body" style={{ overflowX: "auto", whiteSpace: "nowrap" }}>
+
+          {/* HEADER */}
+          <div className="d-flex fw-bold mb-3">
+            <div style={{ width: "160px" }}>Employee</div>
+            <div className="d-flex flex-grow-1" style={{ minWidth: `${daysInMonth * 60}px`, gap: "1.5px"  }}>
+              {Array.from({ length: daysInMonth }).map((_, i) => (
+                <div key={i} className="text-center" style={{ width: "60px" }}>
+                  {i + 1}
                 </div>
-              </div>
-            ) : attendanceRecords.length > 0 ? (
-              <div className="text-white">
-                {attendanceRecords.map((record, idx) => (
-                  <div key={idx} className="rounded-4 p-4" style={{ background: "rgba(255,255,255,0.1)", backdropFilter: "blur(10px)" }}>
-                    <div className="row mb-3">
-                      <div className="col-md-4 text-center">
-                        <small className="text-white-50">Date</small>
-                        <p className="fw-bold fs-5">{new Date(record.date).toLocaleDateString('en-IN')}</p>
-                      </div>
-                      <div className="col-md-4 text-center">
-                        <small className="text-white-50">Status</small>
-                        <p className={`fw-bold fs-5 ${record.status === 'Present' ? 'text-success' : 'text-warning'}`}>
-                          {record.status}
-                        </p>
-                      </div>
-                      <div className="col-md-4 text-center">
-                        <small className="text-white-50">Check-In</small>
-                        <p className="fw-bold fs-5">{record.check_in || "N/A"}</p>
-                      </div>
-                    </div>
+              ))}
+            </div>
+          </div>
 
-                    <hr style={{ borderColor: "rgba(255,255,255,0.2)" }} />
+          <hr />
 
-                    <div className="row">
-                      <div className="col-md-6 text-center">
-                        <small className="text-white-50">Check-Out</small>
-                        <p className="fw-bold fs-5">{record.check_out || "Not Checked Out Yet"}</p>
-                      </div>
-                      <div className="col-md-6 text-center">
-                        <small className="text-white-50">Working Hours</small>
-                        <p className="fw-bold fs-5" style={{ color: "#FFD700" }}>{record.workingHours || "0"} hours</p>
-                      </div>
-                    </div>
+          {/* ROW */}
+          <div className="d-flex align-items-center">
+
+            <div style={{ width: "160px" }}>
+              <b>{user.ename}</b>
+            </div>
+
+            <div className="d-flex flex-grow-1" style={{ minWidth: `${daysInMonth * 60}px` , gap: "1.8px" }}>
+
+              {Array.from({ length: daysInMonth }).map((_, i) => {
+                const att = attendanceData.find(a => new Date(a.date).getDate() === i + 1);
+
+                return (
+                  <div
+                    key={i}
+                    className="text-center"
+                    style={{
+                      width: "60px",
+                      minWidth: "60px",
+                      padding: "4px",
+                      borderRadius: "8px",
+                      background: att ? getBgColor(att.status) : "transparent",
+                      boxShadow: att ? "0 0 5px rgba(0,0,0,0.1)" : "none",
+                      fontSize: "11px",
+                      cursor: "pointer",
+                      lineHeight: "14px"
+                    }}
+                    title={
+                      att
+                        ? `Status: ${att.status}
+                          IN: ${att.check_in || "--"}
+                          OUT: ${att.check_out || "--"}`
+                        : "No data"
+                    }
+                  >
+                    {att ? (
+                      <>
+                        {/* STATUS LABEL */}
+                        <div style={{ fontWeight: "600" }}>
+                          {getIcon(att.status)}
+                          {" "}
+                          {att.status === "Present" && "Present"}
+                          {att.status === "Absent" && "Absent"}
+                          {att.status === "Leave" && "Leave"}
+                          {att.status === "Holiday" && "Holiday"}
+                          {att.status === "Half Day" && "Half Day"}
+                        </div>
+
+                        {/* TIME BLOCK */}
+                        {att.status !== "Absent" && att.status !== "Holiday" && (
+                          <div style={{ marginTop: "3px", fontSize: "10px" }}>
+                            <div>IN: {att.check_in ? att.check_in.slice(0, 5) : "--"}</div>
+                            <div>OUT: {att.check_out ? att.check_out.slice(0, 5) : "--"}</div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <span style={{ color: "#777" }}>-</span>
+                    )}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="alert alert-light" role="alert">
-                No attendance record for today
-              </div>
-            )}
+
+                );
+              })}
+
+            </div>
           </div>
+
         </div>
       </div>
 
-      {/* Row 2: Previous Attendance History Table */}
-      <div className="row">
-        <div className="col-12">
-          <div className="card shadow-lg p-4 rounded-5 border-0">
-            <h2 className="mb-4 fw-bold text-primary">Attendance History (Last 30 Days)</h2>
-
-            {loadingHistory ? (
-              <div className="text-center">
-                <div className="spinner-border text-primary" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-              </div>
-            ) : previousAttendance.length > 0 ? (
-              <div className="table-responsive">
-                <table className="table table-hover table-bordered align-middle">
-                  <thead style={{ background: "linear-gradient(90deg, #667eea 0%, #764ba2 100%)" }} className="text-white">
-                    <tr>
-                      <th className="text-center">Date</th>
-                      <th className="text-center">Check-In</th>
-                      <th className="text-center">Check-Out</th>
-                      <th className="text-center">Status</th>
-                      <th className="text-center">Working Hours</th>
-                      <th className="text-center">Remarks</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {previousAttendance.map((record, idx) => (
-                      <tr key={idx} className={record.status === 'Present' ? '' : record.status === 'Absent' ? 'table-danger' : 'table-warning'}>
-                        <td className="fw-bold text-center">{new Date(record.date).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
-                        <td className="text-center">{record.check_in || "-"}</td>
-                        <td className="text-center">{record.check_out || "-"}</td>
-                        <td className="text-center">
-                          <span className={`badge fw-bold ${
-                            record.status === 'Present' ? 'bg-success' : 
-                            record.status === 'Absent' ? 'bg-danger' : 
-                            record.status === 'Half Day' ? 'bg-warning text-dark' : 
-                            'bg-info'
-                          }`}>
-                            {record.status}
-                          </span>
-                        </td>
-                        <td className="fw-bold text-primary text-center">{record.workingHours || "0"} hrs</td>
-                        <td className="text-center">{record.remark || "-"}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="alert alert-info" role="alert">
-                No attendance history available
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
