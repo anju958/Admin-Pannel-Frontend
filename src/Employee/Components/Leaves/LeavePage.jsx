@@ -322,7 +322,6 @@ function LeavePage() {
                           />
                           <div>
                             <strong>{employee?.ename}</strong>
-                            <div className="text-muted small">Team Lead</div>
                           </div>
                         </div>
                       </td>
