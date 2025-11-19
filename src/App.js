@@ -74,7 +74,8 @@ import UpdateUserForm from './Admin/Components/CreateUser/UpdateUserForm';
 import ClientHome from './ClientComponent/Home/ClientHome';
 import ClientLayout from './ClientComponent/ClientLayout/ClientLayout';
 import AdminAllChats from './chat/AdminAllChats';
-
+import TaskView from './Admin/Components/Task/TaskView';
+import EmployeeTaskView from './Employee/Components/Task/EmployeeTaskView';
 
 function App() {
   return (
@@ -118,8 +119,15 @@ function App() {
             <Route path="invoice/:clientId" element={<InvoiceGenerator />} />
             <Route path='PayPage/:invoiceId' element={<PayPage />} />
             <Route path='viewInvoice/:id' element={<ViewInvoice />} />
+            {/* task api start */}
             <Route path='TaskList' element={<TaskList />} />
-            <Route path='TaskList/assignTask' element={<AssignTask />} />
+
+
+            <Route path="/admin/task/assign" element={<AssignTask />} />
+            <Route path="/admin/task/:taskId" element={<TaskView />} />
+
+
+
             <Route path='PurposalList' element={<ProposalList />} />
             <Route path='updateInvoice/:id' element={<EditInvoice />} />
             <Route path='getAllprojects/edit/:id' element={<UpdateProject />} />
@@ -128,7 +136,7 @@ function App() {
             <Route path='getAllprojects/:id' element={<ShowProject />} />
             <Route path='getProjectList' element={<ProjectList />} />
             <Route path='updateProposal/:id' element={<EditProposal />} />
-            <Route path='view-all-chats' element={<AdminAllChats/>}/>
+            <Route path='view-all-chats' element={<AdminAllChats />} />
 
             <Route path='trainee' element={<Trainee />} />
             <Route path='Roles' element={<RolesAndResponsibilities />} />
@@ -152,12 +160,13 @@ function App() {
             <Route path='performance' element={<PerformancePage />} />
             <Route path='supportHelp' element={<SupportHelp />} />
             <Route path='profile' element={<EmployeeProfile />} />
+            <Route path='TaskView/:taskId' element={<EmployeeTaskView/>}/>
           </Route>
           <Route path="client" element={<ClientLayout />}>
             <Route index element={<ClientHome />} />
             <Route path="ClientPage" element={<ClientLogin />} />
             <Route path="CreatePassword" element={<ClientPasswordSetup />} />
-            
+
           </Route>
 
 

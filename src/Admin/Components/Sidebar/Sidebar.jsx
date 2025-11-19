@@ -252,6 +252,21 @@ export default function Sidebar() {
               </Link>
             </li>
           )}
+          {canView(user, "proposals") && (
+            <li className="nav-item">
+              <Link
+                to="/admin/TaskList"
+                className="nav-link text-white"
+                style={
+                  isActive("/admin/TaskList")
+                    ? activeLinkStyle
+                    : normalLinkStyle
+                }
+              >
+                📄 Task
+              </Link>
+            </li>
+          )}
 
           {canView(user, "invoices") && (
             <li className="nav-item">

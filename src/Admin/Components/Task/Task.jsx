@@ -15,6 +15,7 @@ function TaskAssign() {
     dueDate: "",
     status: "Pending",
     description: "",
+    priority: "Low",
   });
 
   const [clients, setClients] = useState([]);
@@ -22,124 +23,140 @@ function TaskAssign() {
   const [service, setService] = useState(null);
   const [employees, setEmployees] = useState([]);
 
-  // Fetch clients on load
+  // ===========================
+  //  LOAD CLIENTS
+  // ===========================
   useEffect(() => {
-    const fetchClients = async () => {
-      const res = await axios.get(`${API_URL}/api/getClientLead`);
+    axios.get(`${API_URL}/api/getClientLead`).then((res) => {
       setClients(res.data);
-    };
-    fetchClients();
+    });
   }, []);
 
-  // Fetch projects when client changes
+  // ===========================
+  // WHEN CLIENT CHANGES → LOAD PROJECTS
+  // ===========================
   useEffect(() => {
-    if (formData.clientId) {
-      const fetchProjects = async () => {
-        const res = await axios.get(
-          `${API_URL}/api/getProjectbyClient/${formData.clientId}`
-        );
-        setProjects(res.data);
-      };
-      fetchProjects();
+    if (!formData.clientId) return;
+
+    const loadProjects = async () => {
+      const res = await axios.get(
+        `${API_URL}/api/getProjectbyClient/${formData.clientId}`
+      );
+
+      setProjects(res.data);
+
+      // Reset dependent values safely
       setFormData((prev) => ({
         ...prev,
         projectId: "",
         serviceId: "",
         assignedTo: [],
+        category: "",
+        startDate: "",
+        dueDate: "",
       }));
+
       setService(null);
       setEmployees([]);
-    }
+    };
+
+    loadProjects();
   }, [formData.clientId]);
 
-  // Fetch service & employees when project changes
-
+  // ===========================
+  // WHEN PROJECT CHANGES → LOAD SERVICE + EMPLOYEES
+  // ===========================
   useEffect(() => {
-    if (formData.projectId) {
-      const fetchServiceAndEmployees = async () => {
-        try {
-          // Fetch service by project
-          const serviceRes = await axios.get(
-            `${API_URL}/api/getServices/${formData.projectId}`
-          );
-          const projectServices = serviceRes.data.services; // array
-          const projectService = projectServices[0]; // first service
-          setService(projectService);
+    if (!formData.projectId) return;
+
+    const loadProjectRelatedData = async () => {
+      try {
+        // 1. Load service
+        const serviceRes = await axios.get(
+          `${API_URL}/api/getServices/${formData.projectId}`
+        );
+        const projectServices = serviceRes.data.services || [];
+        const selectedService = projectServices[0] || null;
+
+        setService(selectedService);
+
+        if (selectedService?._id) {
           setFormData((prev) => ({
             ...prev,
-            serviceId: projectService?._id || "",
-            assignedTo: [],
+            serviceId: selectedService._id,
           }));
-
-          // Fetch employees
-          const empRes = await axios.get(
-            `${API_URL}/api/getEmployeeByProject/${formData.projectId}`
-          );
-          setEmployees(empRes.data.employees || []);
-        } catch (err) {
-          console.error(err);
-          setService(null);
-          setEmployees([]);
         }
-      };
-      fetchServiceAndEmployees();
-    } else {
-      setService(null);
-      setEmployees([]);
-      setFormData((prev) => ({ ...prev, serviceId: "", assignedTo: [] }));
-    }
+
+        // 2. Load employees
+        const empRes = await axios.get(
+          `${API_URL}/api/getEmployeeByProject/${formData.projectId}`
+        );
+        setEmployees(empRes.data.employees || []);
+      } catch (err) {
+        console.error("Error loading project data:", err);
+      }
+    };
+
+    loadProjectRelatedData();
   }, [formData.projectId]);
 
-
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-
-  // Separate useEffect to fetch project details
+  // ===========================
+  // LOAD PROJECT DETAILS (category, start date, end date)
+  // ===========================
   useEffect(() => {
-    if (formData.projectId) {
-      const fetchProjectDetails = async () => {
-        try {
-          const res = await axios.get(
-            `${API_URL}/api/getProjectDetails/${formData.projectId}`
-          );
+    if (!formData.projectId) return;
 
-          const { projectCategory, startDate, endDate } = res.data;
+    const loadProjectDetails = async () => {
+      try {
+        const res = await axios.get(
+          `${API_URL}/api/getProjectDetails/${formData.projectId}`
+        );
 
-          // Parse category if stored as JSON string
-          let categories = [];
-          if (projectCategory && projectCategory.length > 0) {
-            try {
-              categories = JSON.parse(projectCategory[0]);
-            } catch {
-              categories = projectCategory;
-            }
+        const { projectCategory, startDate, endDate } = res.data;
+
+        let categoryList = [];
+
+        if (projectCategory?.length > 0) {
+          try {
+            categoryList = JSON.parse(projectCategory[0]);
+          } catch {
+            categoryList = projectCategory;
           }
-
-          // Update formData with fetched details
-          setFormData((prev) => ({
-            ...prev,
-            category: categories.join(", "), // you can display multiple categories
-            startDate: startDate ? startDate.split("T")[0] : "",
-            dueDate: endDate ? endDate.split("T")[0] : "",
-          }));
-        } catch (err) {
-          console.error("Error fetching project details:", err);
         }
-      };
 
-      fetchProjectDetails();
-    }
+        setFormData((prev) => ({
+          ...prev,
+          category: categoryList.join(", "),
+          startDate: startDate ? startDate.split("T")[0] : "",
+          dueDate: endDate ? endDate.split("T")[0] : "",
+        }));
+      } catch (err) {
+        console.error("ERROR loading details:", err);
+      }
+    };
+
+    loadProjectDetails();
   }, [formData.projectId]);
 
+  // ===========================
+  // HANDLERS
+  // ===========================
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
       await axios.post(`${API_URL}/api/addTask`, formData);
-      alert("Task assigned successfully!");
+      alert("Task Assigned Successfully! 🎉");
+
       setFormData({
         clientId: "",
         projectId: "",
@@ -151,28 +168,34 @@ function TaskAssign() {
         dueDate: "",
         status: "Pending",
         description: "",
+        priority: "Low",
       });
+
       setProjects([]);
-      setService(null);
       setEmployees([]);
+      setService(null);
     } catch (err) {
+      alert("Error Assigning Task!");
       console.error(err);
-      alert("Failed to assign task.");
     }
   };
 
+  // ===========================
+  //   UI
+  // ===========================
   return (
     <div className="container mt-4">
-      <div className="card shadow-lg border-0">
+      <div className="card shadow-lg">
         <div className="card-header bg-primary text-white">
           <h4 className="mb-0">Assign Task</h4>
         </div>
+
         <div className="card-body">
           <form onSubmit={handleSubmit}>
-            <div className="row mb-3">
-              {/* Client */}
+            {/* Client - Project - Service */}
+            <div className="row g-3 mb-3">
               <div className="col-md-4">
-                <label className="form-label fw-bold">Client</label>
+                <label className="form-label fw-bold">Client *</label>
                 <select
                   className="form-select"
                   name="clientId"
@@ -189,16 +212,14 @@ function TaskAssign() {
                 </select>
               </div>
 
-              {/* Project */}
               <div className="col-md-4">
-                <label className="form-label fw-bold">Project</label>
+                <label className="form-label fw-bold">Project *</label>
                 <select
                   className="form-select"
                   name="projectId"
                   value={formData.projectId}
                   onChange={handleChange}
                   required
-                  disabled={!formData.clientId}
                 >
                   <option value="">-- Select Project --</option>
                   {projects.map((p) => (
@@ -209,28 +230,24 @@ function TaskAssign() {
                 </select>
               </div>
 
-              {/* Service */}
               <div className="col-md-4">
                 <label className="form-label fw-bold">Service</label>
-                <Select
-                  options={service ? [{ value: service._id, label: service.serviceName }] : []}
-                  value={service ? { value: service._id, label: service.serviceName } : null}
-                  onChange={(selected) =>
-                    setFormData((prev) => ({ ...prev, serviceId: selected.value }))
-                  }
-                  isDisabled={!service}
+                <input
+                  type="text"
+                  className="form-control"
+                  value={service?.serviceName || ""}
+                  disabled
                 />
               </div>
             </div>
 
-            {/* Task Info */}
+            {/* Title */}
             <div className="mb-3">
               <label className="form-label fw-bold">Task Title *</label>
               <input
                 type="text"
-                className="form-control"
                 name="title"
-                placeholder="Enter task title"
+                className="form-control"
                 value={formData.title}
                 onChange={handleChange}
                 required
@@ -242,56 +259,58 @@ function TaskAssign() {
               <label className="form-label fw-bold">Category</label>
               <input
                 type="text"
-                className="form-control"
                 name="category"
-                value={formData.category}  // <-- shows fetched category
-                onChange={handleChange}
-              />
-            </div>
-          
-            {/* Start Date */}
-            <div className="col-md-6">
-              <label className="form-label fw-bold">Start Date *</label>
-              <input
-                type="date"
                 className="form-control"
-                name="startDate"
-                value={formData.startDate}  // <-- shows fetched start date
+                value={formData.category}
                 onChange={handleChange}
-                required
               />
             </div>
 
-            {/* Due Date */}
-            <div className="col-md-6">
-              <label className="form-label fw-bold">Due Date *</label>
-              <input
-                type="date"
-                className="form-control"
-                name="dueDate"
-                value={formData.dueDate}  // <-- shows fetched end date
-                onChange={handleChange}
-                required
-              />
+            {/* Start + Due Date */}
+            <div className="row g-3 mb-3">
+              <div className="col-md-6">
+                <label className="form-label fw-bold">Start Date *</label>
+                <input
+                  type="date"
+                  name="startDate"
+                  className="form-control"
+                  value={formData.startDate}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="col-md-6">
+                <label className="form-label fw-bold">Due Date *</label>
+                <input
+                  type="date"
+                  name="dueDate"
+                  className="form-control"
+                  value={formData.dueDate}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
 
+            {/* Priority */}
             <div className="mb-3">
-              <label className="form-label fw-bold">Status</label>
+              <label className="form-label fw-bold">Priority</label>
               <select
                 className="form-select"
-                name="status"
-                value={formData.status}
+                name="priority"
+                value={formData.priority}
                 onChange={handleChange}
               >
-                <option value="Pending">Pending</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Completed">Completed</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
               </select>
             </div>
 
-            {/* Assign Employees */}
+            {/* Employee Assign */}
             <div className="mb-3">
-              <label className="form-label fw-bold">Assign Employees</label>
+              <label className="form-label fw-bold">Assign Employees *</label>
               <Select
                 isMulti
                 options={employees.map((e) => ({
@@ -307,10 +326,10 @@ function TaskAssign() {
                     assignedTo: selected.map((s) => s.value),
                   }))
                 }
-                isDisabled={!formData.projectId}
               />
             </div>
 
+            {/* Description */}
             <div className="mb-3">
               <label className="form-label fw-bold">Description</label>
               <textarea
@@ -319,11 +338,11 @@ function TaskAssign() {
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                placeholder="Enter task description"
               ></textarea>
             </div>
 
-            <button type="submit" className="btn btn-success w-100">
+            {/* Submit */}
+            <button className="btn btn-success w-100" type="submit">
               Assign Task 🚀
             </button>
           </form>
