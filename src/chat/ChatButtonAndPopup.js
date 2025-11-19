@@ -1,38 +1,3 @@
-// import React, { useState } from "react";
-// import UserList from "./UserList";
-// import ChatBox from "./ChatBox";
-
-// export default function ChatButtonAndPopup() {
-//   const [open, setOpen] = useState(false);
-//   const [activeUser, setActiveUser] = useState(null);
-
-//   return (
-//     <>
-//       <button
-//         className="chat-fab"
-//         onClick={() => setOpen((v) => !v)}
-//         title="Open chat"
-//       >
-//         💬 Chat
-//       </button>
-
-//       {open && (
-//         <div className="chat-popup">
-//           <div className="chat-sidebar">
-//             <UserList onSelectUser={(u) => setActiveUser(u)} />
-//           </div>
-//           <div className="chat-main">
-//             <ChatBox
-//               peerId={activeUser?._id}
-//               peerName={activeUser?.name || activeUser?.ename}
-//             />
-//           </div>
-//         </div>
-//       )}
-//     </>
-//   );
-// }
-
 import React, { useState } from "react";
 import { useChat } from "./ChatContext";
 import UserList from "./UserList";

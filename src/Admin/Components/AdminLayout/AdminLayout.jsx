@@ -60,7 +60,7 @@ function AdminLayout() {
       </div>
 
       {/* Floating Chat Popup */}
-      <ChatButtonAndPopup />
+      {/* <ChatButtonAndPopup /> */}
     </div>
   );
 }

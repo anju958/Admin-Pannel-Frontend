@@ -78,15 +78,7 @@ function InvoiceDetail() {
             <span className="fw-bold">Paid Amount:</span> ₹{(invoice.paidAmount || 0).toLocaleString()}<br />
             <span className="fw-bold">Remaining:</span> ₹{(invoice.remainingAmount !== undefined ? invoice.remainingAmount : invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString()}
           </div>
-          {/* <div>
-            <span className="fw-bold">Bank Details:</span>
-            <ul>
-              <li><b>Bank:</b> YOUR_BANK_NAME</li>
-              <li><b>Account Number:</b> XXXXX1234567</li>
-              <li><b>IFSC:</b> IFSC0000123</li>
-              <li><b>Account Holder:</b> YOUR_NAME</li>
-            </ul>
-          </div> */}
+         
         </div>
       </div>
     </div>

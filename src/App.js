@@ -76,6 +76,7 @@ import ClientLayout from './ClientComponent/ClientLayout/ClientLayout';
 import AdminAllChats from './chat/AdminAllChats';
 import TaskView from './Admin/Components/Task/TaskView';
 import EmployeeTaskView from './Employee/Components/Task/EmployeeTaskView';
+import HRIS from './Admin/Components/HRIS/Hris';
 
 function App() {
   return (
@@ -90,6 +91,7 @@ function App() {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Admin />} />
             <Route path="home" element={<Admin />} />
+            <Route path='HRIS' element={<HRIS/>}/>
             <Route path="jobopening" element={<Opening />} />
             <Route path='department' element={<Department />} />
             <Route path="addService" element={<AddServices />} />

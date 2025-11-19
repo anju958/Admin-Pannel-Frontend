@@ -151,34 +151,35 @@ function TaskAssign() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      await axios.post(`${API_URL}/api/addTask`, formData);
-      alert("Task Assigned Successfully! 🎉");
+  try {
+    await axios.post(`${API_URL}/api/tasks/add`, formData);   // ✅ FIXED
+    alert("Task Assigned Successfully! 🎉");
 
-      setFormData({
-        clientId: "",
-        projectId: "",
-        serviceId: "",
-        assignedTo: [],
-        title: "",
-        category: "",
-        startDate: "",
-        dueDate: "",
-        status: "Pending",
-        description: "",
-        priority: "Low",
-      });
+    setFormData({
+      clientId: "",
+      projectId: "",
+      serviceId: "",
+      assignedTo: [],
+      title: "",
+      category: "",
+      startDate: "",
+      dueDate: "",
+      status: "Pending",
+      description: "",
+      priority: "Low",
+    });
 
-      setProjects([]);
-      setEmployees([]);
-      setService(null);
-    } catch (err) {
-      alert("Error Assigning Task!");
-      console.error(err);
-    }
-  };
+    setProjects([]);
+    setEmployees([]);
+    setService(null);
+  } catch (err) {
+    alert("Error Assigning Task!");
+    console.error(err);
+  }
+};
+
 
   // ===========================
   //   UI

@@ -109,32 +109,6 @@ function NoticeBoard() {
 
       {/* Notices */}
       {notices.map(notice => (
-        // <Card key={notice.NotificationId} className="mb-3 shadow-sm">
-        //   <Card.Body>
-        //     <div className="d-flex justify-content-between align-items-start">
-        //       <div>
-        //         <Card.Title className="mb-1">
-        //           {notice.title}{" "}
-        //           <span className="badge bg-info">{notice.category}</span>
-        //         </Card.Title>
-        //         <small className="text-muted">
-        //           📅 {new Date(notice.createdAt).toLocaleString()}
-        //         </small>
-        //       </div>
-
-        //       <div>
-        //         <Button
-        //           variant="danger"
-        //           size="sm"
-        //           onClick={() => handleDeleteNotice(notice._id)}
-        //         >
-        //           Delete
-        //         </Button>
-        //       </div>
-        //     </div>
-        //     <Card.Text className="mt-2">{notice.body}</Card.Text>
-        //   </Card.Body>
-        // </Card>
         <Card key={notice.NotificationId} className="mb-3 shadow-sm">
           <Card.Body>
             <div className="d-flex justify-content-between align-items-start">

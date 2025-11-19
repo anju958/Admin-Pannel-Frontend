@@ -52,20 +52,6 @@ function ViewClientPage() {
       });
   }, [formData._id]);
 
-  // ✅ Fetch invoices for this client
-  // useEffect(() => {
-  //   if (!formData._id) return;
-  //   axios
-  //     .get(`${API_URL}/api/getInvoicesByClient/${formData._id}`)
-  //     .then((res) => {
-  //       if (res.data && res.data.success) {
-  //         setInvoices(res.data.invoices);
-  //       } else {
-  //         setInvoices([]);
-  //       }
-  //     })
-  //     .catch(() => setInvoices([]));
-  // }, [formData._id]);
   useEffect(() => {
   if (!formData._id) return;
   axios
@@ -136,18 +122,6 @@ function ViewClientPage() {
             📂 View Projects
           </button>
 
-          {/* View Invoice Button: Opens latest invoice */}
-          {/* <button
-            className="btn btn-secondary"
-            disabled={invoices.length === 0}
-            onClick={() =>
-              invoices.length > 0
-                ? navigate(`/admin/clientInvoicesList/${invoices[0]._id}`)
-                : alert("No invoice found for this client.")
-            }
-          >
-            👁️ View Invoice
-          </button> */}
           <button
   className="btn btn-secondary"
   disabled={!formData._id}

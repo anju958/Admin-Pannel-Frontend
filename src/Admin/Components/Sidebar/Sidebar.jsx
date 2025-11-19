@@ -313,6 +313,21 @@ export default function Sidebar() {
               </Link>
             </li>
           )}
+          {canView(user, "projects") && (
+            <li className="nav-item">
+              <Link
+                to="/admin/HRIS"
+                className="nav-link text-white"
+                style={
+                  isActive("/admin/HRIS")
+                    ? activeLinkStyle
+                    : normalLinkStyle
+                }
+              >
+                HRIS
+              </Link>
+            </li>
+          )}
 
           {canView(user, "users") && (
             <li className="nav-item">

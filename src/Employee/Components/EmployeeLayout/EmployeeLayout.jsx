@@ -19,7 +19,7 @@ function EmployeeLayout() {
       </div>
 
       {/* Floating Chat Button */}
-      <ChatButtonAndPopup />
+      {/* <ChatButtonAndPopup /> */}
     </div>
   );
 }
