@@ -144,24 +144,269 @@ function InvoiceList() {
     );
   }
 
-  return (
-    <div className="container mt-4">
-      <h2>🧾 Invoice List {clientId && "(Client Invoices)"}</h2>
+  // return (
+  //   <div className="container mt-4">
+  //     <h2>🧾 Invoice List {clientId && "(Client Invoices)"}</h2>
 
-      <div
-        style={{
-          width: "100%",
-          overflowX: "auto",
-          background: "#fff",
-          borderRadius: "6px",
-          border: "1px solid #eee"
-        }}
-      >
-        <table
-          className="table table-striped table-bordered shadow-sm"
-          style={{ minWidth: "1400px" }}
-        >
-          <thead className="table-dark">
+  //     <div
+  //       style={{
+  //         width: "100%",
+  //         overflowX: "auto",
+  //         background: "#fff",
+  //         borderRadius: "6px",
+  //         border: "1px solid #eee"
+  //       }}
+  //     >
+  //       <table
+  //         className="table table-striped table-bordered shadow-sm"
+  //         style={{ minWidth: "1400px" }}
+  //       >
+  //         <thead className="table-dark">
+  //           <tr>
+  //             <th>#</th>
+  //             <th>Invoice No</th>
+  //             <th>Client</th>
+  //             <th>Total</th>
+  //             <th>Paid</th>
+  //             <th>Unpaid</th>
+  //             <th>Payment Details</th>
+  //             <th>Pay Now</th>
+  //             <th>Status</th>
+  //             <th>Due Date</th>
+  //             <th>Created On</th>
+  //             <th>Actions</th>
+  //           </tr>
+  //         </thead>
+
+  //         <tbody>
+  //           {invoices.map((invoice, idx) => {
+  //             const paid = invoice.paidAmount || 0;
+  //             const unpaid = invoice.totalAmount - paid;
+
+  //             return (
+  //               <tr key={invoice._id}>
+  //                 <td>{idx + 1}</td>
+
+  //                 {/* ✅ View Invoice */}
+  //                 <td
+  //                   className="text-primary text-decoration-underline"
+  //                   style={{ cursor: "pointer" }}
+  //                   onClick={() =>
+  //                     canDo(user, "invoices", "view") &&
+  //                     navigate(`/admin/viewInvoice/${invoice._id}`)
+  //                   }
+  //                 >
+  //                   {invoice.invoiceNumber}
+  //                 </td>
+
+  //                 <td>{invoice.clientName}</td>
+  //                 <td><b>₹{invoice.totalAmount.toLocaleString()}</b></td>
+  //                 <td style={{ color: "#2e7d32", fontWeight: 600 }}>
+  //                   ₹{paid.toLocaleString()}
+  //                 </td>
+  //                 <td style={{ color: "#c62828", fontWeight: 600 }}>
+  //                   ₹{unpaid.toLocaleString()}
+  //                 </td>
+
+  //                 {/* ✅ Payment history */}
+  //                 <td>
+  //                   <button
+  //                     className="btn btn-sm btn-secondary"
+  //                     onClick={() =>
+  //                       handleShowPayments(invoice._id, invoice.invoiceNumber)
+  //                     }
+  //                   >
+  //                     Payment History
+  //                   </button>
+  //                 </td>
+
+  //                 {/* ✅ Pay Now (Edit permission required) */}
+  //                 <td>
+  //                   {canDo(user, "invoices", "edit") && (
+  //                     <div style={{ display: "flex", gap: "8px" }}>
+  //                       <select
+  //                         value={payNowMethod[invoice._id]}
+  //                         onChange={(e) =>
+  //                           setPayNowMethod((prev) => ({
+  //                             ...prev,
+  //                             [invoice._id]: e.target.value
+  //                           }))
+  //                         }
+  //                         disabled={invoice.status === "Paid"}
+  //                       >
+  //                         <option value="UPI">UPI</option>
+  //                         <option value="Bank Account">Bank</option>
+  //                         <option value="Cash">Cash</option>
+  //                         <option value="Cheque">Cheque</option>
+  //                       </select>
+
+  //                       <input
+  //                         type="number"
+  //                         value={payNow[invoice._id]}
+  //                         disabled={invoice.status === "Paid"}
+  //                         onChange={(e) =>
+  //                           setPayNow((prev) => ({
+  //                             ...prev,
+  //                             [invoice._id]: e.target.value
+  //                           }))
+  //                         }
+  //                         placeholder="₹"
+  //                         style={{ width: "75px" }}
+  //                       />
+
+  //                       <button
+  //                         className="btn btn-sm btn-success"
+  //                         disabled={invoice.status === "Paid"}
+  //                         onClick={() => handleMarkPaid(invoice)}
+  //                       >
+  //                         ✓ Pay
+  //                       </button>
+  //                     </div>
+  //                   )}
+  //                 </td>
+
+  //                 {/* Status */}
+  //                 <td>
+  //                   <span
+  //                     className={`badge ${
+  //                       invoice.status === "Paid"
+  //                         ? "bg-success"
+  //                         : invoice.status === "Partial"
+  //                         ? "bg-info text-dark"
+  //                         : "bg-warning text-dark"
+  //                     }`}
+  //                   >
+  //                     {invoice.status}
+  //                   </span>
+  //                 </td>
+
+  //                 <td>
+  //                   {invoice.dueDate
+  //                     ? new Date(invoice.dueDate).toLocaleDateString()
+  //                     : "-"}
+  //                 </td>
+
+  //                 <td>
+  //                   {invoice.date
+  //                     ? new Date(invoice.date).toLocaleDateString()
+  //                     : "-"}
+  //                 </td>
+
+  //                 {/* ✅ Action Buttons */}
+  //                 <td>
+  //                   {/* View */}
+  //                   {canDo(user, "invoices", "view") && (
+  //                     <button
+  //                       className="btn btn-sm btn-info me-2"
+  //                       onClick={() =>
+  //                         navigate(`/admin/viewInvoice/${invoice._id}`)
+  //                       }
+  //                     >
+  //                       👁️ View
+  //                     </button>
+  //                   )}
+
+  //                   {/* Delete */}
+  //                   {canDo(user, "invoices", "delete") && (
+  //                     <button
+  //                       className="btn btn-sm btn-danger"
+  //                       onClick={() => handleDelete(invoice._id)}
+  //                     >
+  //                       🗑️ Delete
+  //                     </button>
+  //                   )}
+  //                 </td>
+  //               </tr>
+  //             );
+  //           })}
+
+  //           {invoices.length === 0 && (
+  //             <tr>
+  //               <td colSpan="12" className="text-center text-muted">
+  //                 No invoices found.
+  //               </td>
+  //             </tr>
+  //           )}
+  //         </tbody>
+  //       </table>
+  //     </div>
+
+  //     {/* ✅ Payment History Modal */}
+  //     {showPaymentsModal && (
+  //       <div
+  //         className="modal show fade d-block"
+  //         style={{ background: "rgba(0,0,0,0.5)" }}
+  //       >
+  //         <div className="modal-dialog modal-lg">
+  //           <div className="modal-content">
+  //             <div className="modal-header">
+  //               <h5>Payment History: {activeInvoiceNumber}</h5>
+  //               <button
+  //                 className="btn-close"
+  //                 onClick={() => setShowPaymentsModal(false)}
+  //               ></button>
+  //             </div>
+
+  //             <div className="modal-body">
+  //               <table className="table table-bordered table-sm">
+  //                 <thead>
+  //                   <tr>
+  //                     <th>#</th>
+  //                     <th>Amount</th>
+  //                     <th>Method</th>
+  //                     <th>Date</th>
+  //                     <th>Note</th>
+  //                   </tr>
+  //                 </thead>
+
+  //                 <tbody>
+  //                   {activePayments.length > 0 ? (
+  //                     activePayments.map((p, i) => (
+  //                       <tr key={i}>
+  //                         <td>{i + 1}</td>
+  //                         <td>₹{p.amount}</td>
+  //                         <td>{p.method || "-"}</td>
+  //                         <td>
+  //                           {p.date
+  //                             ? new Date(p.date).toLocaleString()
+  //                             : "-"}
+  //                         </td>
+  //                         <td>{p.note || "-"}</td>
+  //                       </tr>
+  //                     ))
+  //                   ) : (
+  //                     <tr>
+  //                       <td colSpan="5" className="text-center">
+  //                         No payment records
+  //                       </td>
+  //                     </tr>
+  //                   )}
+  //                 </tbody>
+  //               </table>
+  //             </div>
+
+  //           </div>
+  //         </div>
+  //       </div>
+  //     )}
+  //   </div>
+
+  // );
+return (
+  <div className="invoice-page">
+
+    {/* Gradient Header */}
+    <div className="gradient-header mb-4">
+      <h2 className="m-0 text-white fw-bold">🧾 Invoice List {clientId && "(Client Invoices)"}</h2>
+    </div>
+
+    {/* White Card Container */}
+    <div className="card border-0 shadow-sm rounded-4 p-0">
+
+      <div className="table-responsive">
+        <table className="table modern-invoice-table align-middle">
+
+          <thead>
             <tr>
               <th>#</th>
               <th>Invoice No</th>
@@ -169,7 +414,7 @@ function InvoiceList() {
               <th>Total</th>
               <th>Paid</th>
               <th>Unpaid</th>
-              <th>Payment Details</th>
+              <th>Payments</th>
               <th>Pay Now</th>
               <th>Status</th>
               <th>Due Date</th>
@@ -184,13 +429,12 @@ function InvoiceList() {
               const unpaid = invoice.totalAmount - paid;
 
               return (
-                <tr key={invoice._id}>
+                <tr key={invoice._id} className="invoice-row">
+
                   <td>{idx + 1}</td>
 
-                  {/* ✅ View Invoice */}
                   <td
-                    className="text-primary text-decoration-underline"
-                    style={{ cursor: "pointer" }}
+                    className="invoice-link"
                     onClick={() =>
                       canDo(user, "invoices", "view") &&
                       navigate(`/admin/viewInvoice/${invoice._id}`)
@@ -200,197 +444,168 @@ function InvoiceList() {
                   </td>
 
                   <td>{invoice.clientName}</td>
-                  <td><b>₹{invoice.totalAmount.toLocaleString()}</b></td>
-                  <td style={{ color: "#2e7d32", fontWeight: 600 }}>
+
+                  <td className="fw-bold">₹{invoice.totalAmount.toLocaleString()}</td>
+
+                  <td className="text-success fw-bold">
                     ₹{paid.toLocaleString()}
                   </td>
-                  <td style={{ color: "#c62828", fontWeight: 600 }}>
+
+                  <td className="text-danger fw-bold">
                     ₹{unpaid.toLocaleString()}
                   </td>
 
-                  {/* ✅ Payment history */}
+                  {/* Payment History */}
                   <td>
                     <button
-                      className="btn btn-sm btn-secondary"
+                      className="btn btn-sm btn-history"
                       onClick={() =>
                         handleShowPayments(invoice._id, invoice.invoiceNumber)
                       }
                     >
-                      Payment History
+                      View History
                     </button>
                   </td>
 
-                  {/* ✅ Pay Now (Edit permission required) */}
-                  <td>
-                    {canDo(user, "invoices", "edit") && (
-                      <div style={{ display: "flex", gap: "8px" }}>
-                        <select
-                          value={payNowMethod[invoice._id]}
-                          onChange={(e) =>
-                            setPayNowMethod((prev) => ({
-                              ...prev,
-                              [invoice._id]: e.target.value
-                            }))
-                          }
-                          disabled={invoice.status === "Paid"}
-                        >
-                          <option value="UPI">UPI</option>
-                          <option value="Bank Account">Bank</option>
-                          <option value="Cash">Cash</option>
-                          <option value="Cheque">Cheque</option>
-                        </select>
+                  {/* PAY NOW */}
+                  <td style={{ minWidth: "240px" }}>
+                    <div className="d-flex gap-2">
 
-                        <input
-                          type="number"
-                          value={payNow[invoice._id]}
-                          disabled={invoice.status === "Paid"}
-                          onChange={(e) =>
-                            setPayNow((prev) => ({
-                              ...prev,
-                              [invoice._id]: e.target.value
-                            }))
-                          }
-                          placeholder="₹"
-                          style={{ width: "75px" }}
-                        />
+                      <select
+                        className="form-select form-select-sm"
+                        value={payNowMethod[invoice._id]}
+                        onChange={(e) =>
+                          setPayNowMethod((prev) => ({
+                            ...prev,
+                            [invoice._id]: e.target.value,
+                          }))
+                        }
+                      >
+                        <option value="UPI">UPI</option>
+                        <option value="Bank Account">Bank</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Cheque">Cheque</option>
+                      </select>
 
-                        <button
-                          className="btn btn-sm btn-success"
-                          disabled={invoice.status === "Paid"}
-                          onClick={() => handleMarkPaid(invoice)}
-                        >
-                          ✓ Pay
-                        </button>
-                      </div>
-                    )}
+                      <input
+                        className="form-control form-control-sm"
+                        type="number"
+                        placeholder="₹"
+                        value={payNow[invoice._id]}
+                        onChange={(e) =>
+                          setPayNow((prev) => ({
+                            ...prev,
+                            [invoice._id]: e.target.value,
+                          }))
+                        }
+                      />
+
+                      <button
+                        className="btn btn-sm btn-gradient"
+                        onClick={() => handleMarkPaid(invoice)}
+                      >
+                        ✓
+                      </button>
+                    </div>
                   </td>
 
-                  {/* Status */}
+                  {/* STATUS */}
                   <td>
                     <span
-                      className={`badge ${
+                      className={`status-chip ${
                         invoice.status === "Paid"
-                          ? "bg-success"
+                          ? "chip-paid"
                           : invoice.status === "Partial"
-                          ? "bg-info text-dark"
-                          : "bg-warning text-dark"
+                          ? "chip-partial"
+                          : "chip-pending"
                       }`}
                     >
                       {invoice.status}
                     </span>
                   </td>
 
-                  <td>
-                    {invoice.dueDate
-                      ? new Date(invoice.dueDate).toLocaleDateString()
-                      : "-"}
-                  </td>
+                  <td>{invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : "-"}</td>
 
-                  <td>
-                    {invoice.date
-                      ? new Date(invoice.date).toLocaleDateString()
-                      : "-"}
-                  </td>
+                  <td>{invoice.date ? new Date(invoice.date).toLocaleDateString() : "-"}</td>
 
-                  {/* ✅ Action Buttons */}
-                  <td>
-                    {/* View */}
-                    {canDo(user, "invoices", "view") && (
-                      <button
-                        className="btn btn-sm btn-info me-2"
-                        onClick={() =>
-                          navigate(`/admin/viewInvoice/${invoice._id}`)
-                        }
-                      >
-                        👁️ View
-                      </button>
-                    )}
+                  <td className=" flex-column gap-1">
 
-                    {/* Delete */}
-                    {canDo(user, "invoices", "delete") && (
-                      <button
-                        className="btn btn-sm btn-danger"
-                        onClick={() => handleDelete(invoice._id)}
-                      >
-                        🗑️ Delete
-                      </button>
-                    )}
+                    <button
+                      className="btn btn-sm btn-view"
+                      onClick={() =>
+                        navigate(`/admin/viewInvoice/${invoice._id}`)
+                      }
+                    >
+                      View
+                    </button>
+
+                    <button
+                      className="btn btn-sm btn-delete"
+                      onClick={() => handleDelete(invoice._id)}
+                    >
+                      Delete
+                    </button>
+
                   </td>
                 </tr>
               );
             })}
-
-            {invoices.length === 0 && (
-              <tr>
-                <td colSpan="12" className="text-center text-muted">
-                  No invoices found.
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
       </div>
+    </div>
 
-      {/* ✅ Payment History Modal */}
-      {showPaymentsModal && (
-        <div
-          className="modal show fade d-block"
-          style={{ background: "rgba(0,0,0,0.5)" }}
-        >
-          <div className="modal-dialog modal-lg">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5>Payment History: {activeInvoiceNumber}</h5>
-                <button
-                  className="btn-close"
-                  onClick={() => setShowPaymentsModal(false)}
-                ></button>
-              </div>
+    {/* PAYMENT HISTORY MODAL (unchanged) */}
+    {showPaymentsModal && (
+      <div className="modal show fade d-block" style={{ background: "rgba(0,0,0,0.5)" }}>
+        <div className="modal-dialog modal-lg">
+          <div className="modal-content">
 
-              <div className="modal-body">
-                <table className="table table-bordered table-sm">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Amount</th>
-                      <th>Method</th>
-                      <th>Date</th>
-                      <th>Note</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {activePayments.length > 0 ? (
-                      activePayments.map((p, i) => (
-                        <tr key={i}>
-                          <td>{i + 1}</td>
-                          <td>₹{p.amount}</td>
-                          <td>{p.method || "-"}</td>
-                          <td>
-                            {p.date
-                              ? new Date(p.date).toLocaleString()
-                              : "-"}
-                          </td>
-                          <td>{p.note || "-"}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="5" className="text-center">
-                          No payment records
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
+            <div className="modal-header">
+              <h5>Payment History: {activeInvoiceNumber}</h5>
+              <button className="btn-close" onClick={() => setShowPaymentsModal(false)} />
             </div>
+
+            <div className="modal-body">
+              <table className="table table-bordered table-sm">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Date</th>
+                    <th>Note</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {activePayments.length > 0 ? (
+                    activePayments.map((p, i) => (
+                      <tr key={i}>
+                        <td>{i + 1}</td>
+                        <td>₹{p.amount}</td>
+                        <td>{p.method}</td>
+                        <td>{new Date(p.date).toLocaleString()}</td>
+                        <td>{p.note}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="5" className="text-center">No payment records</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
           </div>
         </div>
-      )}
-    </div>
-  );
+      </div>
+    )}
+  </div>
+);
+
+
 }
 
 export default InvoiceList;

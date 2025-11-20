@@ -180,6 +180,21 @@ export default function Sidebar() {
                         </Link>
                       </li>
                     )}
+                     {canView(user, "salaries") && (
+                      <li className="nav-item">
+                        <Link
+                          to="/admin/AdminLeavePage"
+                          className="nav-link text-white"
+                          style={
+                            isActive("/admin/AdminLeavePage")
+                              ? activeLinkStyle
+                              : normalLinkStyle
+                          }
+                        >
+                          Leaves
+                        </Link>
+                      </li>
+                    )}
                   </ul>
                 )}
               </li>
@@ -360,13 +375,13 @@ export default function Sidebar() {
               </Link>
             </li>
           )}
-          {canView(user, "noticeBoard") && (
+          {/* {canView(user, "noticeBoard") && (
             <li className="nav-item">
               <Link to="/admin/view-all-chats"  className="nav-link text-white" style={{ color: '#fff', fontWeight: 600 }}>
                 <i className="bi bi-chat-dots" /> View All Chats
               </Link>
             </li>
-          )}
+          )} */}
 
           {canView(user, "company") && (
             <li className="nav-item">

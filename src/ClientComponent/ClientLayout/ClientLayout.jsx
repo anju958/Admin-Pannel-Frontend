@@ -24,7 +24,7 @@ function ClientLayout() {
         <div style={{ flex: 1, minWidth: 0 }}>
           <Outlet />
         </div>
-        <ChatButtonAndPopup/>
+        {/* <ChatButtonAndPopup/> */}
       </div>
     </div>
   );

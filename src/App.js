@@ -77,6 +77,14 @@ import AdminAllChats from './chat/AdminAllChats';
 import TaskView from './Admin/Components/Task/TaskView';
 import EmployeeTaskView from './Employee/Components/Task/EmployeeTaskView';
 import HRIS from './Admin/Components/HRIS/Hris';
+import ClientProjectDetail from './ClientComponent/Projects/ClientProjectDetail';
+import ClientProposals from './ClientComponent/Proposals/ClientProposals';
+import ClientProposalView from './ClientComponent/Proposals/ClientProposalView';
+import ClientProfile from './ClientComponent/Profile/ClientProfile';
+import ClientTasks from './ClientComponent/Task/ClientTasks';
+import ClientTaskView from './ClientComponent/Task/ClientTaskView';
+import ClientProjectsPage from './ClientComponent/Projects/ClientProjects';
+import AdminLeavePage from './Admin/Components/Leave/AdminLeavePage';
 
 function App() {
   return (
@@ -123,6 +131,7 @@ function App() {
             <Route path='viewInvoice/:id' element={<ViewInvoice />} />
             {/* task api start */}
             <Route path='TaskList' element={<TaskList />} />
+            <Route path='AdminLeavePage' element={<AdminLeavePage/>}/>
 
 
             <Route path="/admin/task/assign" element={<AssignTask />} />
@@ -168,6 +177,13 @@ function App() {
             <Route index element={<ClientHome />} />
             <Route path="ClientPage" element={<ClientLogin />} />
             <Route path="CreatePassword" element={<ClientPasswordSetup />} />
+            <Route path='projects' element={<ClientProjectsPage/>}/>
+            <Route path='project/:projectId' element={<ClientProjectDetail/>}/>
+            <Route path='proposals' element={<ClientProposals/>}/>
+            <Route path='proposal/:proposalId' element={<ClientProposalView/>}/>
+            <Route path='profile' element={<ClientProfile/>}/>
+            <Route path='tasks' element={<ClientTasks/>}/>
+            <Route path='task/:taskId' element={<ClientTaskView/>}/>
 
           </Route>
 

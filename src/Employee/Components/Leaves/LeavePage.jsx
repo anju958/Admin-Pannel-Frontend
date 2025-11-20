@@ -65,47 +65,47 @@ function LeavePage() {
     saveAs(fileData, "LeaveReport.xlsx");
   };
 
-   const exportSelectedMonth = () => {
-      const filteredData = leaveList.filter((lv) => {
-        const d = new Date(lv.from_date);
-        return (
-          d.getMonth() === selectedMonth &&
-          d.getFullYear() === selectedYear
-        );
-      });
+  const exportSelectedMonth = () => {
+    const filteredData = leaveList.filter((lv) => {
+      const d = new Date(lv.from_date);
+      return (
+        d.getMonth() === selectedMonth &&
+        d.getFullYear() === selectedYear
+      );
+    });
 
-      if (filteredData.length === 0) {
-        alert("No data to export for selected month");
-        return;
-      }
+    if (filteredData.length === 0) {
+      alert("No data to export for selected month");
+      return;
+    }
 
-      const worksheetData = filteredData.map((lv, index) => ({
-        "S.No": index + 1,
-        "Leave ID": lv.leaveId,
-        "Employee Name": employee?.ename,
-        "Leave Type": `${lv.leave_type} (${lv.leave_category})`,
-        "From Date": new Date(lv.from_date).toDateString(),
-        "To Date": new Date(lv.to_date).toDateString(),
-        "Total Days": lv.days,
-        "Paid/Unpaid": lv.paid ? "Paid" : "Unpaid",
-        "Status": lv.status,
-      }));
+    const worksheetData = filteredData.map((lv, index) => ({
+      "S.No": index + 1,
+      "Leave ID": lv.leaveId,
+      "Employee Name": employee?.ename,
+      "Leave Type": `${lv.leave_type} (${lv.leave_category})`,
+      "From Date": new Date(lv.from_date).toDateString(),
+      "To Date": new Date(lv.to_date).toDateString(),
+      "Total Days": lv.days,
+      "Paid/Unpaid": lv.paid ? "Paid" : "Unpaid",
+      "Status": lv.status,
+    }));
 
-      const worksheet = XLSX.utils.json_to_sheet(worksheetData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Selected Month Leaves");
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Selected Month Leaves");
 
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: "xlsx",
-        type: "array",
-      });
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
 
-      const fileData = new Blob([excelBuffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
+    const fileData = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
 
-      saveAs(fileData, `LeaveReport_${selectedYear}_${selectedMonth + 1}.xlsx`);
-    };
+    saveAs(fileData, `LeaveReport_${selectedYear}_${selectedMonth + 1}.xlsx`);
+  };
   /* ------------------------------------
       FETCH EMPLOYEE DETAILS
   -------------------------------------- */
@@ -276,77 +276,77 @@ function LeavePage() {
               <th>Type</th>
               <th>Paid</th>
               <th>Status</th>
-              
+              <th>Reason</th>
+              <th>Admin Note</th>
             </tr>
           </thead>
-
           <tbody>
             {loading ? (
               <tr>
                 <td colSpan="8" className="text-center">Loading...</td>
               </tr>
-            ) :
-
-              leaveList.filter((lv) => {
-                const d = new Date(lv.from_date);
-                return (
-                  d.getMonth() === selectedMonth &&
-                  d.getFullYear() === selectedYear
-                );
-              }).length === 0 ? (
-
-                <tr>
-                  <td colSpan="8" className="text-center">
-                    No Leave Found For This Month
-                  </td>
-                </tr>
-
-              ) : (
-
-                leaveList
-                  .filter((lv) => {
-                    const d = new Date(lv.from_date);
-                    return (
-                      d.getMonth() === selectedMonth &&
-                      d.getFullYear() === selectedYear
-                    );
-                  })
-                  .map((lv, i) => (
-                    <tr key={i}>
-                      <td>
-                        <div className="emp-box">
-                          <img
-                            src={employee?.img || "/user.png"}
-                            className="emp-img"
-                            alt=""
-                          />
-                          <div>
-                            <strong>{employee?.ename}</strong>
-                          </div>
+            ) : leaveList.filter((lv) => {
+              const d = new Date(lv.from_date);
+              return (
+                d.getMonth() === selectedMonth &&
+                d.getFullYear() === selectedYear
+              );
+            }).length === 0 ? (
+              <tr>
+                <td colSpan="8" className="text-center">No Leave Found For This Month</td>
+              </tr>
+            ) : (
+              leaveList
+                .filter((lv) => {
+                  const d = new Date(lv.from_date);
+                  return (
+                    d.getMonth() === selectedMonth &&
+                    d.getFullYear() === selectedYear
+                  );
+                })
+                .map((lv, i) => (
+                  <tr key={i}>
+                    <td>
+                      <div className="emp-box">
+                        <img
+                          src={employee?.img || "/user.png"}
+                          className="emp-img"
+                          alt=""
+                        />
+                        <div>
+                          <strong>{employee?.ename}</strong>
                         </div>
-                      </td>
-
-                      <td>{lv.leaveId}</td>
-                      <td>{new Date(lv.from_date).toLocaleDateString()}</td>
-                      <td>{lv.leave_type}</td>
-                      <td>{lv.leave_category}</td>
-
-                      <td>
-                        <span className={lv.paid ? "badge bg-success" : "badge bg-danger"}>
-                          {lv.paid ? "Paid" : "Unpaid"}
-                        </span>
-                      </td>
-
-                      <td>
-                        <span className={getStatusDot(lv.status)}></span>
-                        {lv.status}
-                      </td>
-                    </tr>
-                  ))
-
-              )}
+                      </div>
+                    </td>
+                    <td>{lv.leaveId}</td>
+                    <td>{new Date(lv.from_date).toLocaleDateString()}</td>
+                    <td>{lv.leave_type}</td>
+                    <td>{lv.leave_category}</td>
+                    <td>
+                      <span className={lv.paid ? "badge bg-success" : "badge bg-danger"}>
+                        {lv.paid ? "Paid" : "Unpaid"}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={getStatusDot(lv.status)}></span>
+                      {lv.status}
+                    </td>
+                    
+                    <td>{lv.reason}</td>
+                    <td>
+                      {lv.status === "Rejected"
+                        ? lv.adminNote || "No reason given"
+                        : lv.status === "Approved"
+                          ? lv.adminNote || "-"
+                          : "-"}
+                    </td>
+                  </tr>
+                ))
+            )}
           </tbody>
         </table>
+
+
       </div>
 
 
