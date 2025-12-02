@@ -85,6 +85,9 @@ import ClientTasks from './ClientComponent/Task/ClientTasks';
 import ClientTaskView from './ClientComponent/Task/ClientTaskView';
 import ClientProjectsPage from './ClientComponent/Projects/ClientProjects';
 import AdminLeavePage from './Admin/Components/Leave/AdminLeavePage';
+import ForgetPassword from './Login/ForgetPassword';
+import ResetPassword from './Login/ResetPassword';
+import AdminSalaryPage from './Admin/Components/Salary/AdminSalaryPage';
 
 function App() {
   return (
@@ -160,11 +163,15 @@ function App() {
             <Route path='updateUserPermission/:id' element={<UpdateUserForm />} />
             <Route path='updateLeadClient/:leadId' element={<UpdateLeadClient />} />
             <Route path='companyDetails' element={<CompanyDetailsPage />} />
+            <Route path='AdminSalaryPage' element={<AdminSalaryPage/>}/>
           </Route>
           {/* Employee Routes */}
+           <Route path='forgot-password' element={<ForgetPassword/>}/>
+           <Route path='/reset-password/:token' element={<ResetPassword/>}/>
           <Route path='employee' element={<EmployeeLayout />}>
             <Route index element={<EmployeeHome />} />
             <Route path='employeeattendance' element={<EmployeeAttendance />} />
+           
             <Route path='LeavePage' element={<LeavePage />} />
             <Route path='salaryPage' element={<SalaryPage />} />
             <Route path='employeeTask' element={<EmployeeTask />} />

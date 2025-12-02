@@ -4,12 +4,15 @@ import { MdEmail, MdLock } from "react-icons/md";
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assessts/premier-logo.png';
 import { API_URL } from "../config";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 function Login() {
   const [formData, setFormData] = useState({
     official_email: '',
     password: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -25,9 +28,8 @@ function Login() {
     setError('');
 
     try {
-      const res = await axios.post(`${API_URL}/api/employee/login`, formData);
+      const res = await axios.post(`${API_URL}/api/userLogin`, formData);
 
-      // Store token and user info
       localStorage.setItem('token', res.data.token);
       const user = {
         _id: res.data.employeeId,
@@ -40,8 +42,6 @@ function Login() {
       localStorage.setItem("chatRole", "employee");
       localStorage.setItem("chatName", res.data.ename);
 
-
-      // Redirect to employee dashboard
       navigate("/employee");
     } catch (err) {
       console.error('Login error:', err);
@@ -69,27 +69,103 @@ function Login() {
     }
   };
 
+  // Inline style objects
+  const leftPanelStyle = {
+    minHeight: '100vh',
+    background: '#5fa0ff',
+    color: '#fff',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '40px 30px',
+    borderTopRightRadius: '120px',
+    borderBottomRightRadius: '120px',
+    boxSizing: 'border-box',
+    textAlign: 'center'
+  };
+
+  const leftInnerStyle = {
+    maxWidth: '520px',
+    margin: '0 auto'
+  };
+
+  const rightWrapperStyle = {
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '40px 20px',
+    background: '#f8f9fa' // light background to match screenshot
+  };
+
+  const cardStyle = {
+    width: '100%',
+    maxWidth: '420px',
+    borderRadius: '12px',
+    boxShadow: '0 12px 30px rgba(24,37,84,0.10)',
+    padding: '28px',
+    background: '#fff'
+  };
+
+  const logoSmallStyle = {
+    width: '120px',
+    display: 'block',
+    margin: '0 auto 8px'
+  };
+
+  const inputIconStyle = {
+    minWidth: '44px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: '#f1f6ff'
+  };
+
   return (
-    <div className='container-fluid bg-body-secondary'>
-      <div className='row'>
+    <div className='container-fluid' style={{ padding: 0 }}>
+      {/* small style block for responsive behaviour (keeps inside component) */}
+      <style>{`
+        @media (max-width: 767.98px) {
+          .left-panel-rounded {
+            border-top-right-radius: 40px !important;
+            border-bottom-right-radius: 40px !important;
+            padding: 24px !important;
+          }
+          .login-card {
+            margin-top: 20px;
+            box-shadow: none !important;
+            border-radius: 8px !important;
+          }
+        }
+      `}</style>
+
+      <div className='row g-0'>
+        {/* Left welcome panel */}
         <div className='col-md-6'>
-          <div className='register'>
-            <img src={logo} alt="Premier Logo" width="160" className="mb-4 shadow-sm" />
-            <h1>Welcome, Premier Webtech</h1>
-            <p className="text-center mt-2">Your trusted partner for IT & Digital Marketing solutions.</p>
-            <h5>Don't have an account?</h5>
-            <Link to="/RegisterationForm" className="btn btn-light" type='submit'>Register</Link>
+          <div style={leftPanelStyle} className="left-panel-rounded">
+            <div style={leftInnerStyle}>
+              <img src={logo} alt="Premier Logo" width="160" className="mb-4 shadow-sm" />
+              <h1 style={{ fontSize: '38px', fontWeight: 700, marginBottom: '8px' }}>Welcome, Premier Webtech</h1>
+              <p style={{ marginTop: 8, opacity: 0.95, fontSize: '16px' }}>
+                Your trusted partner for IT & Digital Marketing solutions.
+              </p>
+              <h5 style={{ marginTop: 22, fontWeight: 600 }}>Don't have an account?</h5>
+              <Link to="/RegisterationForm" className="btn btn-outline-light mt-2" style={{ padding: '8px 26px', borderRadius: 8 }}>
+                Register
+              </Link>
+            </div>
           </div>
         </div>
+
+        {/* Right login panel */}
         <div className='col-md-6'>
-          <div className='d-flex justify-content-center align-items-center vh-100 bg-light login'>
-            <div className='card shadow-lg border-0 rounded-4 px-4 py-4' style={{ width: '100%', maxWidth: '420px' }}>
-              <div className='text-center mb-4'>
-                <img src={logo} alt="Premier Logo" width="120" className="mb-3" />
-                <h2 className='fw-bold mb-2'>Login</h2>
+          <div style={rightWrapperStyle}>
+            <div style={cardStyle} className="login-card">
+              <div className='text-center mb-3'>
+                <img src={logo} alt="Premier Logo" style={logoSmallStyle} />
+                <h2 className='fw-bold mb-1' style={{ fontSize: '26px' }}>Login</h2>
               </div>
 
-              {/* Error Message */}
               {error && (
                 <div className="alert alert-danger alert-dismissible fade show" role="alert">
                   {error}
@@ -98,8 +174,8 @@ function Login() {
               )}
 
               <form onSubmit={handleSubmit}>
-                <div className="input-group mb-3">
-                  <span className="input-group-text bg-light rounded-3 border-end-0">
+                <div className="input-group mb-3" style={{ alignItems: 'stretch' }}>
+                  <span className="input-group-text rounded-3 border-end-0" style={inputIconStyle}>
                     <MdEmail />
                   </span>
                   <input
@@ -110,24 +186,48 @@ function Login() {
                     value={formData.official_email}
                     onChange={handleChange}
                     required
+                    style={{ height: 48 }}
                   />
                 </div>
-                <div className="input-group mb-2">
-                  <span className="input-group-text bg-light rounded-3 border-end-0">
+
+                <div className="input-group mb-2" style={{ alignItems: 'stretch' }}>
+                  <span className="input-group-text rounded-3 border-end-0" style={{ minWidth: "44px", display: "flex", justifyContent: "center", background: "#f1f6ff" }}>
                     <MdLock />
                   </span>
+
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     className="form-control rounded-3 border-start-0"
-                    name='password'
+                    name="password"
                     placeholder="Enter your Password"
                     value={formData.password}
                     onChange={handleChange}
                     required
+                    style={{ height: 48 }}
                   />
+
+                  <span
+
+                    style={{
+                      cursor: "pointer", position: "absolute",
+                      right: "12px",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      cursor: "pointer",
+                      color: "#555",
+                      background: "transparent"
+                    }}
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </span>
                 </div>
+
+
                 <div className='mb-3 text-end'>
-                  <span className="text-muted small">Forget Password?</span>
+                  <span className="text-muted small">
+                    <Link to="forgot-password">
+                    Forget Password</Link></span>
                 </div>
 
                 <button
@@ -145,7 +245,6 @@ function Login() {
                   )}
                 </button>
 
-                {/* Admin Login Button */}
                 <div className="text-center mb-3">
                   <button
                     type="button"

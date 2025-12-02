@@ -46,12 +46,17 @@ export default function Sidebar() {
   return (
     <div className="sidebar">
       <div
-        className="text-white vh-100 shadow"
+        className="text-white shadow"
         style={{
           width: 250,
+          minHeight: "100vh",
+          height: "auto",
           background: "linear-gradient(180deg, #1A2A6C, #6A11CB, #2575FC)",
+          overflowY: "auto",
+          paddingBottom: "20px"
         }}
       >
+
         <h4 className="p-3 fw-bold border-bottom border-light">Admin Dashboard</h4>
         <ul className="nav flex-column">
 
@@ -168,10 +173,10 @@ export default function Sidebar() {
                     {canView(user, "salaries") && (
                       <li className="nav-item">
                         <Link
-                          to="/admin/salary"
+                          to="/admin/AdminSalaryPage"
                           className="nav-link text-white"
                           style={
-                            isActive("/admin/salary")
+                            isActive("/admin/AdminSalaryPage")
                               ? activeLinkStyle
                               : normalLinkStyle
                           }
@@ -180,7 +185,7 @@ export default function Sidebar() {
                         </Link>
                       </li>
                     )}
-                     {canView(user, "salaries") && (
+                    {canView(user, "salaries") && (
                       <li className="nav-item">
                         <Link
                           to="/admin/AdminLeavePage"

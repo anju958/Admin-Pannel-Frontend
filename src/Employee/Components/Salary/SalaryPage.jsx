@@ -1,141 +1,190 @@
-
-
 import React, { useState, useEffect } from "react";
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
-import CardActionArea from "@mui/material/CardActionArea";
 import axios from "axios";
 import { API_URL } from "../../../config";
 
 function SalaryPage() {
   const user = JSON.parse(localStorage.getItem("user"));
-  const [selectedCard, setSelectedCard] = useState(0);
 
-  const [cards, setCards] = useState([
-    { id: 1, title: "Total Salary", number: 0 },
-    { id: 2, title: "Total Deductions", number: 0 },
-    { id: 3, title: "Net Pay", number: 0 },
-  ]);
+  const [salaryHistory, setSalaryHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [salaryDetails, setSalaryDetails] = useState([]);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   useEffect(() => {
-  if (user?._id) {
-    const currentMonth = new Date().toLocaleString("default", { month: "long" });
-    const currentYear = new Date().getFullYear();
+    if (user?._id) fetchSalaryHistory();
+  }, [user?._id, selectedYear]);
 
-    // 1️⃣ Fetch summary for top cards
-    axios.get(`${API_URL}/api/getSalaryStats/${user._id}/${currentMonth}/${currentYear}`)
-      .then(res => {
-        const stats = res.data;
-        setCards([
-          { id: 1, title: "Total Salary", number: stats.totalSalary || 0 },
-          { id: 2, title: "Total Deductions", number: stats.totalDeductions || 0 },
-          { id: 3, title: "Net Pay", number: stats.netPay || 0 },
-        ]);
-      })
-      .catch(err => console.error(err));
+  const fetchSalaryHistory = async () => {
+    setLoading(true);
 
-    // 2️⃣ Fetch salary table data
-    axios.get(`${API_URL}/api/getSalaryDetails/${user._id}`)
-      .then(res => {
-        setSalaryDetails(res.data || []);
-      })
-      .catch(err => console.error(err));
-  }
-}, [user]);
+    try {
+      const res = await axios.get(
+        `${API_URL}/api/salaryhistory/${user._id}?year=${selectedYear}`
+      );
+
+      let data = Array.isArray(res.data) ? res.data : [];
+
+      // -----------------------------------------
+      // REMOVE DUPLICATES → ONLY KEEP LATEST
+      // -----------------------------------------
+      const latestSalary = {};
+
+      data.forEach((item) => {
+        const key = `${item.month}-${item.year}`;
+
+        if (!latestSalary[key]) {
+          latestSalary[key] = item;
+        } else {
+          const old = new Date(latestSalary[key].createdAt);
+          const newer = new Date(item.createdAt);
+
+          if (newer > old) {
+            latestSalary[key] = item;
+          }
+        }
+      });
+
+      // Convert back to array
+      const uniqueList = Object.values(latestSalary);
+
+      // Sort newest first
+      uniqueList.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+
+      setSalaryHistory(uniqueList);
+
+    } catch (err) {
+      console.error("Error fetching salary:", err);
+      setSalaryHistory([]);
+    }
+
+    setLoading(false);
+  };
+
+  const currentMonth = new Date().toLocaleString("en-US", { month: "long" }).toLowerCase();
+
+  const requestAccess = (month, year) => {
+    alert(`Request sent to admin for ${month} ${year}`);
+  };
 
   return (
     <div className="container-fluid">
-      {/* Employee Info */}
-      <div style={{ marginBottom: "1.5rem", marginTop: "1rem" }}>
-        <span style={{ fontWeight: 500, fontSize: "1.1rem" }}>
-          Employee ID: {user?.empId || "—"}
-        </span>
-        <span style={{ marginLeft: "2em", fontWeight: 500, fontSize: "1.1rem" }}>
-          Employee Name: {user?.ename || user?.name || "—"}
-        </span>
-      </div>
+      <div style={{ height: "30px" }}></div>
 
-      {/* Top Cards */}
-      <div className="p-4">
-        <Box
-          sx={{
-            width: "100%",
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(min(200px, 100%), 1fr))",
-            gap: 2,
-          }}
+      {/* ---------- YEAR FILTER ON LEFT SIDE ---------- */}
+      <div className="d-flex justify-content-start mb-3">
+        <select
+          className="form-select w-auto"
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(Number(e.target.value))}
         >
-          {cards.map((card, index) => (
-            <Card key={card.id}>
-              <CardActionArea
-                onClick={() => setSelectedCard(index)}
-                data-active={selectedCard === index ? "" : undefined}
-                sx={{
-                  height: "100%",
-                  "&[data-active]": {
-                    backgroundColor: "action.selected",
-                    "&:hover": { backgroundColor: "action.selectedHover" },
-                  },
-                }}
-              >
-                <CardContent sx={{ height: "100%" }}>
-                  <Typography variant="h6">{card.title}</Typography>
-                  <Typography variant="h5" color="text.primary" fontWeight="bold">
-                    ₹{card.number.toFixed(2)}
-                  </Typography>
-                </CardContent>
-              </CardActionArea>
-            </Card>
-          ))}
-        </Box>
+          <option value={2023}>2023</option>
+          <option value={2024}>2024</option>
+          <option value={2025}>2025</option>
+          <option value={2026}>2026</option>
+        </select>
       </div>
 
-      {/* Salary Table */}
-      <h2 className="text-center">Salary Details</h2>
-      <table className="table table-bordered table-striped">
-        <thead>
+      <h2 className="text-center mb-4">Salary Details ({selectedYear})</h2>
+
+      <table className="table table-bordered table-striped shadow-sm">
+        <thead className="table-light">
           <tr>
             <th>Month</th>
             <th>Year</th>
             <th>Basic Pay</th>
-            <th>Allowances</th>
             <th>Deductions</th>
             <th>Net Salary</th>
             <th>Status</th>
+            <th>Action</th>
           </tr>
         </thead>
+
         <tbody>
-          {salaryDetails.length > 0 ? (
-            salaryDetails.map((item, idx) => (
-              <tr key={idx}>
-                <td>{item.month}</td>
-                <td>{item.year}</td>
-                <td>₹{item.basicPay}</td>
-                <td>₹{item.allowances}</td>
-                <td>₹{item.deductions}</td>
-                <td>₹{item.netPay}</td>
-                <td>
-                  {item.status === "Paid" ? (
-                    <span className="badge bg-success">Paid</span>
-                  ) : (
-                    <span className="badge bg-warning text-dark">Pending</span>
-                  )}
-                </td>
-              </tr>
-            ))
+          {!loading && salaryHistory.length > 0 ? (
+            salaryHistory.map((item, idx) => {
+              const isCurrentMonth = item.month.toLowerCase() === currentMonth;
+
+              return (
+                <tr key={idx}>
+                  <td>{item.month}</td>
+                  <td>{item.year}</td>
+
+                  <td className={!isCurrentMonth ? "blurred" : ""}>₹{item.basicPay}</td>
+
+                  <td className={!isCurrentMonth ? "blurred" : ""}>
+                    <div className="deduction-box">
+                      <div className="deduction-total">Total: ₹{item.deductions}</div>
+                      <div className="deduction-list">
+                        <div><span>Absent:</span> ₹{item.deductionDetails.absent}</div>
+                        <div><span>Half Day:</span> ₹{item.deductionDetails.halfDay}</div>
+                        <div><span>Late:</span> ₹{item.deductionDetails.late}</div>
+                        <div><span>Unpaid Leave:</span> ₹{item.deductionDetails.unpaidLeave}</div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td className={!isCurrentMonth ? "blurred" : ""}>₹{item.netPay}</td>
+
+                  <td>
+                    <span className={item.status === "Paid" ? "badge bg-success" : "badge bg-warning text-dark"}>
+                      {item.status}
+                    </span>
+                  </td>
+
+                  <td>
+                    {!isCurrentMonth ? (
+                      <button
+                        className="btn btn-warning btn-sm"
+                        onClick={() => requestAccess(item.month, item.year)}
+                      >
+                        Request Access
+                      </button>
+                    ) : (
+                      <span className="text-success">Available</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })
           ) : (
             <tr>
-              <td colSpan={7} className="text-center">
-                No salary records found
+              <td colSpan="7" className="text-center">
+                {loading ? "Loading salary records..." : "No salary data found"}
               </td>
             </tr>
           )}
         </tbody>
       </table>
+
+      <style>
+        {`
+          .deduction-box {
+            background: #f8f9fc;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #e4e6ef;
+          }
+          .deduction-total {
+            font-weight: 700;
+            margin-bottom: 8px;
+          }
+          .deduction-list div {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
+            border-bottom: 1px dashed #ddd;
+          }
+          .deduction-list div:last-child {
+            border-bottom: none;
+          }
+          .blurred {
+            filter: blur(4px);
+            opacity: 0.4;
+          }
+        `}
+      </style>
     </div>
   );
 }

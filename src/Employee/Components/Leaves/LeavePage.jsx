@@ -165,6 +165,26 @@ function LeavePage() {
     setLeave((prev) => ({ ...prev, [name]: value }));
   };
 
+
+
+
+
+  const hasShortLeaveThisMonth = useMemo(() => {
+    if (!leaveList.length) return false;
+
+    const month = new Date().getMonth();
+    const year = new Date().getFullYear();
+
+    return leaveList.some((lv) => {
+      const d = new Date(lv.from_date);
+      return (
+        lv.leave_category === "Short Leave" &&
+        d.getMonth() === month &&
+        d.getFullYear() === year
+      );
+    });
+  }, [leaveList]);
+
   /* ------------------------------------
       SUBMIT LEAVE
   -------------------------------------- */
@@ -331,7 +351,7 @@ function LeavePage() {
                       <span className={getStatusDot(lv.status)}></span>
                       {lv.status}
                     </td>
-                    
+
                     <td>{lv.reason}</td>
                     <td>
                       {lv.status === "Rejected"
@@ -384,10 +404,20 @@ function LeavePage() {
                 required
               >
                 <option value="">Select Category</option>
-                <option value="Earned Leave">Earned Leave</option>
+
+                {/* Short Leave Logic */}
+                {!hasShortLeaveThisMonth ? (
+                  <option value="Short Leave">Short Leave</option>
+                ) : (
+                  <option value="Short Leave" disabled>
+                    Short Leave (Already Taken This Month)
+                  </option>
+                )}
+
                 <option value="Sick Leave">Sick Leave</option>
                 <option value="Casual Leave">Casual Leave</option>
               </select>
+
 
               {/* Dates */}
               <label>From Date</label>

@@ -1,6 +1,8 @@
 import axios from "axios";
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import * as XLSX from "xlsx";
+
 import { API_URL } from "../../../config";
 import { AuthContext } from "../../../Context/AuthContext";
 
@@ -17,6 +19,7 @@ const canViewPage = (user, module) => {
 
 const ProjectList = () => {
   const [projects, setProjects] = useState([]);
+  const [search, setSearch] = useState("");
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
 
@@ -72,9 +75,52 @@ const ProjectList = () => {
     );
   }
 
+  // ✅ Excel Export
+  const exportExcel = () => {
+    const rows = projects.map((proj, i) => ({
+      S_No: i + 1,
+      Project_ID: proj.projectId,
+      Project_Name: proj.projectName,
+      Client: proj.clientId?.leadName || "N/A",
+      Start_Date: proj.startDate ? new Date(proj.startDate).toLocaleDateString() : "-",
+      End_Date: proj.endDate ? new Date(proj.endDate).toLocaleDateString() : "-",
+      Category: Array.isArray(proj.projectCategory)
+        ? proj.projectCategory.join(", ")
+        : proj.projectCategory,
+      Members: proj.addMember?.map((m) => m.ename).join(", ") || "N/A",
+      Budget: proj.price || 0,
+    }));
+
+    const sheet = XLSX.utils.json_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, sheet, "Projects");
+    XLSX.writeFile(workbook, "Projects_List.xlsx");
+  };
+
+
   return (
     <div className="container mt-4">
       <h2 className="text-center mb-4">📋 All Projects</h2>
+      {/* Search + Excel Download */}
+      <div className="d-flex justify-content-between align-items-center mb-3">
+
+        {/* Search Input */}
+        <input
+          type="text"
+          className="form-control w-50"
+          placeholder="Search project..."
+          
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
+        {/* Excel Button */}
+        <button className="btn btn-success px-4" onClick={exportExcel}>
+          ⬇️ Download Excel
+        </button>
+
+      </div>
+
 
       <div className="table-responsive shadow-lg rounded">
         <table className="table table-striped table-hover align-middle text-center">
@@ -118,15 +164,15 @@ const ProjectList = () => {
                   <span className="badge bg-info text-dark">
                     {project.projectCategory && project.projectCategory.length > 0
                       ? (() => {
-                          try {
-                            const parsed = JSON.parse(project.projectCategory[0]);
-                            return Array.isArray(parsed)
-                              ? parsed.join(", ")
-                              : parsed;
-                          } catch (e) {
-                            return project.projectCategory[0];
-                          }
-                        })()
+                        try {
+                          const parsed = JSON.parse(project.projectCategory[0]);
+                          return Array.isArray(parsed)
+                            ? parsed.join(", ")
+                            : parsed;
+                        } catch (e) {
+                          return project.projectCategory[0];
+                        }
+                      })()
                       : "N/A"}
                   </span>
                 </td>

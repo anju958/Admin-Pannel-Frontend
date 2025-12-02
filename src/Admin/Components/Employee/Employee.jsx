@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import * as XLSX from "xlsx";
 import { API_URL } from "../../../config";
 import { AuthContext } from "../../../Context/AuthContext";
 
@@ -10,6 +11,7 @@ const canDo = (user, module, action) => {
   return user?.permissions?.[module]?.[action] === true;
 };
 
+
 const canViewPage = (user, module) => {
   if (user?.role === "superadmin" || user?.role === "manager") return true;
   return user?.permissions?.[module]?.view === true;
@@ -17,6 +19,7 @@ const canViewPage = (user, module) => {
 
 function Employee() {
   const [employee, setEmployee] = useState([]);
+  const [search, setSearch] = useState("");
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
 
@@ -56,10 +59,42 @@ function Employee() {
     );
   }
 
+  // ✅ Export Employee List to Excel
+  const exportToExcel = () => {
+    const filteredData = employee
+      .filter((emp) => {
+        const q = search.toLowerCase();
+        return (
+          emp.employeeId?.toLowerCase().includes(q) ||
+          emp.ename?.toLowerCase().includes(q) ||
+          emp.phoneNo?.toLowerCase().includes(q) ||
+          emp.official_email?.toLowerCase().includes(q) ||
+          emp.department?.deptName?.toLowerCase().includes(q) ||
+          emp.service?.serviceName?.toLowerCase().includes(q)
+        );
+      })
+      .map((emp) => ({
+        Employee_ID: emp.employeeId,
+        Name: emp.ename,
+        Phone: emp.phoneNo,
+        Official_Email: emp.official_email,
+        Last_Experience: emp.lastExp,
+        Department: emp.department?.deptName || "",
+        Service: emp.service?.serviceName || "",
+      }));
+
+    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Employees");
+
+    XLSX.writeFile(workbook, "Employee_List.xlsx");
+  };
+
+
   return (
     <div className="container-fluid py-4" style={{ background: "#f9faff", minHeight: "100vh" }}>
       <div className="card shadow-lg border-0 rounded-4">
-        
+
         {/* Header */}
         <div
           className="card-header text-white text-center py-3 rounded-top-4"
@@ -69,8 +104,6 @@ function Employee() {
         </div>
 
         <div className="card-body">
-
-          {/* ✅ Add Employee Button (permission-based) */}
           {canDo(user, "employees", "add") && (
             <div className="d-flex mb-3">
               <Link to="/admin/addemployee" className="btn btn-primary rounded-pill fw-bold shadow-sm">
@@ -78,6 +111,34 @@ function Employee() {
               </Link>
             </div>
           )}
+          <div className="d-flex justify-content-end mb-3 mt-4">
+            <input
+              type="text"
+              style={{
+                
+                height: "38px",        // 🔥 Reduced height
+                fontSize: "14px"
+              }}
+              className="form-control mb-3 shadow-sm"
+              placeholder="🔍 Search by Name, ID, Phone, Email, Department, Service..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <button
+              style={{
+                height: "45px",        // 🔥 Match height to search box
+                padding: "0 20px",
+                fontSize: "14px"
+              }}
+              className="btn btn-success shadow-sm mb-3 "
+              onClick={exportToExcel}
+            >
+              ⬇️ Export Excel
+            </button>
+          </div>
+
+          {/* ✅ Add Employee Button (permission-based) */}
+
 
           {/* Table */}
           <div className="table-responsive" style={{ maxHeight: "70vh", overflowY: "auto" }}>
@@ -96,7 +157,17 @@ function Employee() {
               </thead>
 
               <tbody>
-                {employee.map((emp) => (
+                {employee.filter((emp) => {
+                  const q = search.toLowerCase();
+                  return (
+                    emp.employeeId?.toLowerCase().includes(q) ||
+                    emp.ename?.toLowerCase().includes(q) ||
+                    emp.phoneNo?.toLowerCase().includes(q) ||
+                    emp.official_email?.toLowerCase().includes(q) ||
+                    emp.department?.deptName?.toLowerCase().includes(q) ||
+                    emp.service?.serviceName?.toLowerCase().includes(q)
+                  );
+                }).map((emp) => (
                   <tr key={emp.employeeId}>
                     <td>{emp.employeeId}</td>
                     <td>{emp.ename}</td>

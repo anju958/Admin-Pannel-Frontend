@@ -5,7 +5,7 @@ import { formatDate } from "../../../utils/dateFormatter";
 import { API_URL } from "../../../config";
 import { AuthContext } from "../../../Context/AuthContext";
 
-// ✅ Permission helpers
+// Permission helpers
 const canDo = (user, module, action) => {
   if (user?.role === "superadmin" || user?.role === "manager") return true;
   return user?.permissions?.[module]?.[action] === true;
@@ -18,16 +18,20 @@ const canViewPage = (user, module) => {
 
 function Clients() {
   const [Client, setClient] = useState([]);
+  const [search, setSearch] = useState("");   // ✅ NEW
+  const [filtered, setFiltered] = useState([]); // ✅ NEW
+
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
 
-  // ✅ Fetch all clients
+  // Fetch all clients
   useEffect(() => {
     axios
       .get(`${API_URL}/api/getClientData`)
       .then((res) => {
         if (res.data) {
           setClient(res.data);
+          setFiltered(res.data); // ✅ set filtered also
         } else {
           alert("Failed to load clients");
         }
@@ -35,7 +39,7 @@ function Clients() {
       .catch((err) => console.error(err));
   }, []);
 
-  // ✅ Delete client
+  // Delete client
   const handleDelete = async (leadId) => {
     if (!canDo(user, "clients", "delete")) {
       return alert("You do not have permission to delete clients.");
@@ -48,7 +52,12 @@ function Clients() {
 
     try {
       await axios.delete(`${API_URL}/api/DeleteLead/${leadId}`);
-      setClient((prev) => prev.filter((c) => c.leadId !== leadId));
+
+      const updated = Client.filter((c) => c.leadId !== leadId);
+
+      setClient(updated);
+      setFiltered(updated); // 🔥 update filtered also
+
       alert("Client deleted successfully!");
     } catch (error) {
       console.error(error);
@@ -56,7 +65,7 @@ function Clients() {
     }
   };
 
-  // ✅ PAGE ACCESS CHECK
+  // Page access check
   if (!canViewPage(user, "clients")) {
     return (
       <div className="container py-5 text-center">
@@ -68,6 +77,7 @@ function Clients() {
 
   return (
     <div className="container-fluid">
+
       {/* Page Header */}
       <div className="row">
         <div className="col-md-12">
@@ -77,7 +87,7 @@ function Clients() {
         </div>
       </div>
 
-      {/* ✅ Add Client Button (permission controlled) */}
+      {/* Add Client */}
       {canDo(user, "clients", "add") && (
         <div className="d-flex justify-content-start mt-3 mb-2">
           <Link
@@ -88,6 +98,15 @@ function Clients() {
           </Link>
         </div>
       )}
+
+      {/* ✅ SEARCH INPUT */}
+      <input
+        type="text"
+        className="form-control mb-3"
+        placeholder="Search client..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
 
       {/* Table */}
       <div className="table-responsive">
@@ -107,65 +126,76 @@ function Clients() {
           </thead>
 
           <tbody>
-            {Client.map((clients, index) => (
-              <tr key={index}>
-                <td>{clients.leadId}</td>
-                <td>{clients.leadName}</td>
+            {filtered
+              .filter((c) => {
+                const q = search.toLowerCase();
+                return (
+                  c.leadId?.toLowerCase().includes(q) ||
+                  c.leadName?.toLowerCase().includes(q) ||
+                  c.emailId?.toLowerCase().includes(q) ||
+                  c.phoneNo?.toLowerCase().includes(q) ||
+                  c.department?.deptName?.toLowerCase().includes(q) ||
+                  c.service?.serviceName?.toLowerCase().includes(q)
+                );
+              })
+              .map((clients, index) => (
+                <tr key={index}>
+                  <td>{clients.leadId}</td>
+                  <td>{clients.leadName}</td>
 
-                <td
-                  className="text-truncate"
-                  style={{ maxWidth: "180px" }}
-                  title={clients.emailId}
-                >
-                  {clients.emailId}
-                </td>
+                  <td
+                    className="text-truncate"
+                    style={{ maxWidth: "180px" }}
+                    title={clients.emailId}
+                  >
+                    {clients.emailId}
+                  </td>
 
-                <td>{clients.phoneNo}</td>
-                <td>{clients.department?.deptName}</td>
-                <td>{clients.service?.serviceName}</td>
-                <td>{clients.project_price}</td>
-                <td>{formatDate(clients.date)}</td>
+                  <td>{clients.phoneNo}</td>
+                  <td>{clients.department?.deptName}</td>
+                  <td>{clients.service?.serviceName}</td>
+                  <td>{clients.project_price}</td>
+                  <td>{formatDate(clients.date)}</td>
 
-                {/* ✅ BUTTON PERMISSIONS */}
-                <td>
-                  <div className="d-flex justify-content-center gap-2">
-                    {/* View */}
-                    {canDo(user, "clients", "view") && (
-                      <button
-                        className="btn btn-sm btn-primary rounded-pill"
-                        onClick={() =>
-                          navigate(`/admin/viewclientpage/${clients.leadId}`)
-                        }
-                      >
-                        View
-                      </button>
-                    )}
+                  <td>
+                    <div className="d-flex justify-content-center gap-2">
+                      {/* View */}
+                      {canDo(user, "clients", "view") && (
+                        <button
+                          className="btn btn-sm btn-primary rounded-pill"
+                          onClick={() =>
+                            navigate(`/admin/viewclientpage/${clients.leadId}`)
+                          }
+                        >
+                          View
+                        </button>
+                      )}
 
-                    {/* Update */}
-                    {canDo(user, "clients", "edit") && (
-                      <button
-                        className="btn btn-sm btn-primary rounded-pill"
-                        onClick={() =>
-                          navigate(`/admin/updateLeadClient/${clients.leadId}`)
-                        }
-                      >
-                        Update
-                      </button>
-                    )}
+                      {/* Update */}
+                      {canDo(user, "clients", "edit") && (
+                        <button
+                          className="btn btn-sm btn-primary rounded-pill"
+                          onClick={() =>
+                            navigate(`/admin/updateLeadClient/${clients.leadId}`)
+                          }
+                        >
+                          Update
+                        </button>
+                      )}
 
-                    {/* Delete */}
-                    {canDo(user, "clients", "delete") && (
-                      <button
-                        className="btn btn-sm btn-danger rounded-pill"
-                        onClick={() => handleDelete(clients.leadId)}
-                      >
-                        Delete
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
+                      {/* Delete */}
+                      {canDo(user, "clients", "delete") && (
+                        <button
+                          className="btn btn-sm btn-danger rounded-pill"
+                          onClick={() => handleDelete(clients.leadId)}
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
           </tbody>
 
         </table>

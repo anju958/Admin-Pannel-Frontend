@@ -18,6 +18,7 @@ const canViewPage = (user, module) => {
 
 function Lead() {
   const [Client, setClient] = useState([]);
+  const [search, setSearch] = useState("");
   const [filtered, setFiltered] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [stats, setStats] = useState({
@@ -57,18 +58,29 @@ function Lead() {
   }
 
   // ✅ Calculate Status Summary
-  const calculateStats = (data) => {
-    const total = data.length;
-    const cold = data.filter((l) => l.status === "Cold").length;
-    const warm = data.filter((l) => ["Warm", "Hot"].includes(l.status)).length;
-    const inProgress = data.filter((l) =>
-      ["Schedule Appointment", "Proposal sent", "Hold"].includes(l.status)
-    ).length;
-    const win = data.filter((l) => l.status === "Win").length;
-    const closed = data.filter((l) => ["Close", "Other"].includes(l.status)).length;
+const calculateStats = (data) => {
+  const total = data.length;
 
-    setStats({ total, cold, warm, inProgress, win, closed });
-  };
+  const cold = data.filter((l) => l.status?.toLowerCase() === "cold").length;
+
+  const warm = data.filter((l) =>
+    ["warm", "hot"].includes(l.status?.toLowerCase())
+  ).length;
+
+  const inProgress = data.filter((l) =>
+    ["pending", "followup", "in progress"].includes(l.status?.toLowerCase())
+  ).length;
+
+  const win = data.filter((l) =>
+    l.status?.toLowerCase() === "win"
+  ).length;
+
+  const closed = data.filter((l) =>
+    ["close", "closed", "other"].includes(l.status?.toLowerCase())
+  ).length;
+
+  setStats({ total, cold, warm, inProgress, win, closed });
+};
 
   // ✅ Filter Data by Status Box
   const handleCardClick = (statusKey) => {
@@ -169,15 +181,22 @@ function Lead() {
           </Link>
         </div>
       )}
+      <input
+        type="text"
+        className="form-control mb-3"
+        placeholder="Search lead..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
 
       {/* ✅ Filter Cards */}
       <div className="row mt-4 mb-4 text-center">
         {/* Total */}
         <div className="col-md-2 mb-3">
           <div
-            className={`card shadow border-primary ${
-              selectedStatus === "All" ? "bg-light" : ""
-            }`}
+            className={`card shadow border-primary ${selectedStatus === "All" ? "bg-light" : ""
+              }`}
             style={{ cursor: "pointer" }}
             onClick={() => handleCardClick("All")}
           >
@@ -191,9 +210,8 @@ function Lead() {
         {/* Cold */}
         <div className="col-md-2 mb-3">
           <div
-            className={`card shadow border-info ${
-              selectedStatus === "Cold" ? "bg-info-subtle" : ""
-            }`}
+            className={`card shadow border-info ${selectedStatus === "Cold" ? "bg-info-subtle" : ""
+              }`}
             style={{ cursor: "pointer" }}
             onClick={() => handleCardClick("Cold")}
           >
@@ -207,9 +225,8 @@ function Lead() {
         {/* Warm/Hot */}
         <div className="col-md-2 mb-3">
           <div
-            className={`card shadow border-warning ${
-              selectedStatus === "Warm" ? "bg-warning-subtle" : ""
-            }`}
+            className={`card shadow border-warning ${selectedStatus === "Warm" ? "bg-warning-subtle" : ""
+              }`}
             style={{ cursor: "pointer" }}
             onClick={() => handleCardClick("Warm")}
           >
@@ -223,9 +240,8 @@ function Lead() {
         {/* In Progress */}
         <div className="col-md-2 mb-3">
           <div
-            className={`card shadow border-secondary ${
-              selectedStatus === "InProgress" ? "bg-secondary-subtle" : ""
-            }`}
+            className={`card shadow border-secondary ${selectedStatus === "InProgress" ? "bg-secondary-subtle" : ""
+              }`}
             style={{ cursor: "pointer" }}
             onClick={() => handleCardClick("InProgress")}
           >
@@ -239,9 +255,8 @@ function Lead() {
         {/* Win */}
         <div className="col-md-2 mb-3">
           <div
-            className={`card shadow border-success ${
-              selectedStatus === "Win" ? "bg-success-subtle" : ""
-            }`}
+            className={`card shadow border-success ${selectedStatus === "Win" ? "bg-success-subtle" : ""
+              }`}
             onClick={() => handleCardClick("Win")}
             style={{ cursor: "pointer" }}
           >
@@ -255,9 +270,8 @@ function Lead() {
         {/* Closed */}
         <div className="col-md-2 mb-3">
           <div
-            className={`card shadow border-danger ${
-              selectedStatus === "Closed" ? "bg-danger-subtle" : ""
-            }`}
+            className={`card shadow border-danger ${selectedStatus === "Closed" ? "bg-danger-subtle" : ""
+              }`}
             onClick={() => handleCardClick("Closed")}
             style={{ cursor: "pointer" }}
           >
@@ -289,69 +303,81 @@ function Lead() {
 
           <tbody>
             {filtered.length > 0 ? (
-              filtered.map((clients, index) => (
-                <tr key={index}>
-                  <td>{clients.leadId}</td>
-                  <td>{clients.leadName}</td>
-                  <td>{clients.emailId}</td>
-                  <td>{clients.phoneNo}</td>
-                  <td>{clients.department?.deptName}</td>
-                  <td>{clients.service?.serviceName}</td>
-                  <td>{clients.project_price}</td>
-                  <td>{formatDate(clients.date)}</td>
-                  <td>{clients.status}</td>
+              filtered.filter((c) => {
+                const q = search.toLowerCase();
+                return (
+                  c.leadId?.toLowerCase().includes(q) ||
+                  c.leadName?.toLowerCase().includes(q) ||
+                  c.emailId?.toLowerCase().includes(q) ||
+                  c.phoneNo?.toLowerCase().includes(q) ||
+                  c.department?.deptName?.toLowerCase().includes(q) ||
+                  c.service?.serviceName?.toLowerCase().includes(q) ||
+                  c.status?.toLowerCase().includes(q)
+                );
+              })
+                .map((clients, index) => (
+                  <tr key={index}>
+                    <td>{clients.leadId}</td>
+                    <td>{clients.leadName}</td>
+                    <td>{clients.emailId}</td>
+                    <td>{clients.phoneNo}</td>
+                    <td>{clients.department?.deptName}</td>
+                    <td>{clients.service?.serviceName}</td>
+                    <td>{clients.project_price}</td>
+                    <td>{formatDate(clients.date)}</td>
+                    <td>{clients.status}</td>
 
-                  <td>
-                    <div className="d-flex justify-content-center gap-2">
+                    <td>
+                      <div className="d-flex justify-content-center gap-2">
 
-                      {/* View */}
-                      {canDo(user, "leads", "view") && (
-                        <button
-                          className="btn btn-sm btn-primary rounded-pill"
-                          onClick={() =>
-                            navigate(`/admin/leadPage/${clients.leadId}`)
-                          }
-                        >
-                          View
-                        </button>
-                      )}
+                        {/* View */}
+                        {canDo(user, "leads", "view") && (
+                          <button
+                            className="btn btn-sm btn-primary rounded-pill"
+                            onClick={() =>
+                              navigate(`/admin/leadPage/${clients.leadId}`)
+                            }
+                          >
+                            View
+                          </button>
+                        )}
 
-                      {/* Update */}
-                      {canDo(user, "leads", "edit") && (
-                        <button
-                          className="btn btn-sm btn-primary rounded-pill"
-                          onClick={() =>
-                            navigate(`/admin/updateLeadClient/${clients.leadId}`)
-                          }
-                        >
-                          Update
-                        </button>
-                      )}
+                        {/* Update */}
+                        {canDo(user, "leads", "edit") && (
+                          <button
+                            className="btn btn-sm btn-primary rounded-pill"
+                            onClick={() =>
+                              navigate(`/admin/updateLeadClient/${clients.leadId}`)
+                            }
+                          >
+                            Update
+                          </button>
+                        )}
 
-                      {/* Move to Client */}
-                      {canDo(user, "leads", "edit") && (
-                        <button
-                          className="btn btn-sm btn-primary rounded-pill"
-                          onClick={() => moveToClient(clients.leadId)}
-                        >
-                          M → Client
-                        </button>
-                      )}
+                        {/* Move to Client */}
+                        {canDo(user, "leads", "edit") && (
+                          <button
+                            className="btn btn-sm btn-primary rounded-pill"
+                            onClick={() => moveToClient(clients.leadId)}
+                          >
+                            M → Client
+                          </button>
+                        )}
 
-                      {/* Delete */}
-                      {canDo(user, "leads", "delete") && (
-                        <button
-                          className="btn btn-sm btn-danger rounded-pill"
-                          onClick={() => handleDelete(clients.leadId)}
-                        >
-                          Delete
-                        </button>
-                      )}
+                        {/* Delete */}
+                        {canDo(user, "leads", "delete") && (
+                          <button
+                            className="btn btn-sm btn-danger rounded-pill"
+                            onClick={() => handleDelete(clients.leadId)}
+                          >
+                            Delete
+                          </button>
+                        )}
 
-                    </div>
-                  </td>
-                </tr>
-              ))
+                      </div>
+                    </td>
+                  </tr>
+                ))
             ) : (
               <tr>
                 <td colSpan="10" className="text-center text-muted">
