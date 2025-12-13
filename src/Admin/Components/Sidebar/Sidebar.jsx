@@ -10,10 +10,11 @@ export default function Sidebar() {
   const location = useLocation();
   const { user } = useContext(AuthContext);
 
-  const [openMenu, setOpenMenu] = useState({
+ const [openMenu, setOpenMenu] = useState({
     people: false,
     leads: false,
-  });
+    taskMenu: false,   // <-- ADD THIS
+});
 
   const isActive = (p) => location.pathname === p;
   const isParentActive = (paths) => paths.some((p) => isActive(p));
@@ -96,6 +97,19 @@ export default function Sidebar() {
                 }
               >
                 🏢 Departments
+              </Link>
+            </li>
+          )}
+           {canView(user, "services") && (
+            <li className="nav-item">
+              <Link
+                to="/admin/Service"
+                className="nav-link text-white"
+                style={
+                  isActive("/admin/Service") ? activeLinkStyle : normalLinkStyle
+                }
+              >
+                🏢 Service
               </Link>
             </li>
           )}
@@ -272,21 +286,61 @@ export default function Sidebar() {
               </Link>
             </li>
           )}
-          {canView(user, "proposals") && (
+          {canView(user, "tasks") && (
             <li className="nav-item">
-              <Link
-                to="/admin/TaskList"
-                className="nav-link text-white"
+              <div
+                className="nav-link text-white d-flex justify-content-between align-items-center"
                 style={
-                  isActive("/admin/TaskList")
-                    ? activeLinkStyle
+                  isParentActive([
+                    "/admin/TaskList",
+                    "/admin/EmployeeTaskList",
+                  ])
+                    ? activeParentStyle
                     : normalLinkStyle
                 }
+                onClick={() => toggle("taskMenu")}
               >
-                📄 Task
-              </Link>
+                📌 Task
+                {openMenu.taskMenu ? <FaChevronDown /> : <FaChevronRight />}
+              </div>
+
+              {/* Dropdown Items */}
+              {openMenu.taskMenu && (
+                <ul className="nav flex-column ms-3">
+
+                  <li className="nav-item">
+                    <Link
+                      to="/admin/TaskList"
+                      className="nav-link text-white"
+                      style={
+                        isActive("/admin/TaskList")
+                          ? activeLinkStyle
+                          : normalLinkStyle
+                      }
+                    >
+                      🗂️ Task List
+                    </Link>
+                  </li>
+
+                  <li className="nav-item">
+                    <Link
+                      to="/admin/EmployeeTask"
+                      className="nav-link text-white"
+                      style={
+                        isActive("/admin/EmployeeTask")
+                          ? activeLinkStyle
+                          : normalLinkStyle
+                      }
+                    >
+                      👨‍💼 Employee Task List
+                    </Link>
+                  </li>
+
+                </ul>
+              )}
             </li>
           )}
+
 
           {canView(user, "invoices") && (
             <li className="nav-item">

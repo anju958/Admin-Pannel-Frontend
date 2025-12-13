@@ -118,6 +118,10 @@ function LeavePage() {
       .catch((err) => console.log(err));
   }, [user]);
 
+
+
+
+
   /* ------------------------------------
       FETCH LEAVES
   -------------------------------------- */
@@ -193,6 +197,21 @@ function LeavePage() {
     if (!employee) return;
 
     try {
+      // 🔥 CHECK IF SELECTED DATE IS HOLIDAY
+      const holidayRes = await axios.get(`${API_URL}/api/holiday`);
+      const holidays = holidayRes.data;
+
+      const isHoliday = holidays.some(h => {
+        const holidayDate = new Date(h.date).toDateString();
+        const fromDate = new Date(leave.from_date).toDateString();
+        const toDate = new Date(leave.to_date).toDateString();
+        return holidayDate === fromDate || holidayDate === toDate;
+      });
+
+      if (isHoliday) {
+        alert("❌ You cannot apply leave on a Holiday");
+        return; // stop leave submit
+      }
       await axios.post(`${API_URL}/api/addLeave`, {
         employeeId: employee.employeeId,
         leave_type: leave.leave_type,

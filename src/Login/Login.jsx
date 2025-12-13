@@ -23,51 +23,57 @@ function Login() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-    try {
-      const res = await axios.post(`${API_URL}/api/userLogin`, formData);
+  try {
+    const res = await axios.post(`${API_URL}/api/userLogin`, formData);
 
-      localStorage.setItem('token', res.data.token);
-      const user = {
-        _id: res.data.employeeId,
-        employeeId: res.data.employeeId,
-        ename: res.data.ename,
-        official_email: res.data.official_email,
-      };
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("chatUserId", res.data.employeeId);
-      localStorage.setItem("chatRole", "employee");
-      localStorage.setItem("chatName", res.data.ename);
+    // Extract attendance info
+    const { attendanceStatus, check_in } = res.data;
 
-      navigate("/employee");
-    } catch (err) {
-      console.error('Login error:', err);
-      setError(err.response?.data?.message || "Invalid login credentials");
-    } finally {
-      setLoading(false);
+    // Show messages based on status
+    if (attendanceStatus === "not_marked_out_of_office_time") {
+      alert("Logged in, but attendance not marked (outside office time).");
     }
-  };
 
-  // Handle logout
-  const handleLogout = async () => {
-    try {
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (user?.employeeId) {
-        await axios.post(`${API_URL}/api/employee/logout`, {
-          employeeId: user.employeeId
-        });
-      }
-
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      navigate("/");
-    } catch (err) {
-      console.error('Logout error:', err);
+    if (attendanceStatus === "already_marked") {
+      console.log("Attendance already marked today.");
     }
-  };
+
+    if (attendanceStatus === "attendance_error") {
+      alert("Attendance marking failed, but login successful.");
+    }
+
+    // Store user info
+    localStorage.setItem('token', res.data.token);
+    const user = {
+      _id: res.data.employeeId,
+      employeeId: res.data.employeeId,
+      ename: res.data.ename,
+      official_email: res.data.official_email,
+    };
+
+    localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("chatUserId", res.data.employeeId);
+    localStorage.setItem("chatRole", "employee");
+    localStorage.setItem("chatName", res.data.ename);
+
+    // store check-in time
+    localStorage.setItem("loginTime", check_in);
+
+    navigate("/employee");
+
+  } catch (err) {
+    console.error("Login error:", err);
+    setError(err.response?.data?.message || "Invalid login credentials");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   // Inline style objects
   const leftPanelStyle = {

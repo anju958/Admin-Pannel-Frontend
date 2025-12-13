@@ -88,6 +88,9 @@ import AdminLeavePage from './Admin/Components/Leave/AdminLeavePage';
 import ForgetPassword from './Login/ForgetPassword';
 import ResetPassword from './Login/ResetPassword';
 import AdminSalaryPage from './Admin/Components/Salary/AdminSalaryPage';
+import EmployeeListPage from './Admin/Components/Task/EmployeeListPage';
+import EmployeeTaskPage from './Admin/Components/Task/EmployeeTaskPage';
+import TaskDetailsPage from './Admin/Components/Task/TaskDetailsPage';
 
 function App() {
   return (
@@ -139,6 +142,9 @@ function App() {
 
             <Route path="/admin/task/assign" element={<AssignTask />} />
             <Route path="/admin/task/:taskId" element={<TaskView />} />
+            <Route path="/admin/EmployeeTask" element={<EmployeeListPage/>}/>
+            <Route path="/admin/EmployeeTasks/:id" element={<EmployeeTaskPage/>}/>
+            <Route path='/admin/TaskDetails/:taskId' element={<TaskDetailsPage/>}/>
 
 
 

@@ -1270,3 +1270,108 @@ nav .btn:hover {
   pointer-events: none;
   user-select: none;
 }
+/* ==============================
+   TASK MANAGEMENT TABLE (SAFE)
+   ============================== */
+
+.task-table-container {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+
+/* Clean modern table */
+.task-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}
+
+.task-table thead th {
+  background: #f7f7f7;
+  font-weight: 600;
+  padding: 12px;
+  font-size: 14px;
+  color: #333;
+}
+
+.task-table tbody tr {
+  background: #fff;
+  box-shadow: 0px 2px 6px rgba(0,0,0,0.05);
+  border-radius: 10px;
+}
+
+.task-table tbody tr td {
+  padding: 14px;
+  font-size: 14px;
+  color: #222;
+}
+
+/* Rounded first/last column */
+.task-table tbody tr td:first-child {
+  border-radius: 10px 0 0 10px;
+}
+
+.task-table tbody tr td:last-child {
+  border-radius: 0 10px 10px 0;
+}
+
+/* Fix View / Delete buttons */
+.task-btn-view {
+  background: #eaf3ff;
+  color: #0065ff;
+  border: 1px solid #c8dfff;
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 13px;
+}
+
+.task-btn-delete {
+  background: #ffe7e7;
+  color: #d62828;
+  border: 1px solid #ffb9b9;
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 13px;
+}
+
+/* Status chip */
+.task-chip {
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.task-chip.pending {
+  background: #fff3cd;
+  color: #664d03;
+}
+
+.task-chip.progress {
+  background: #cfe2ff;
+  color: #084298;
+}
+
+.task-chip.completed {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+/* priority chip */
+.task-chip.high {
+  background: #ffd5d5;
+  color: #b30000;
+}
+
+.task-chip.medium {
+  background: #ffeab6;
+  color: #a56e00;
+}
+
+.task-chip.low {
+  background: #e5e8ef;
+  color: #333;
+}

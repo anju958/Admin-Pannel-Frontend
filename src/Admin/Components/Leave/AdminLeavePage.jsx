@@ -5,7 +5,7 @@ import { API_URL } from "../../../config";
 function AdminLeavePage() {
   const [leaves, setLeaves] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  
   const [month, setMonth] = useState(new Date().getMonth());
   const [year, setYear] = useState(new Date().getFullYear());
 
@@ -28,6 +28,10 @@ function AdminLeavePage() {
   useEffect(() => {
     loadLeaves();
   }, []);
+
+
+ 
+
 
   /* ----------------------------------------
       UPDATE ADMIN LEAVE STATUS + PAID/UNPAID
@@ -92,7 +96,9 @@ function AdminLeavePage() {
             </option>
           ))}
         </select>
+        
       </div>
+
 
       {/* Table */}
       <div className="table-responsive">
@@ -249,6 +255,8 @@ function AdminLeavePage() {
           </div>
         </div>
       )}
+      
+
 
     </div>
   );
