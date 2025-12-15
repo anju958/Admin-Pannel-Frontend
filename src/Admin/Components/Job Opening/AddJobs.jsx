@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom'
 import { API_URL } from "../../../config";
 
 function AddJobs() {
@@ -193,6 +194,17 @@ function AddJobs() {
                       <option key={srv._id} value={srv._id}>{srv.serviceName}</option>
                     ))}
                   </select>
+                  <Link
+                    to="/admin/addService"
+                    className="btn px-4 py-2 mt-2 fw-bold rounded-pill"
+                    style={{
+                      background: "linear-gradient(90deg,#1f3b98,#3f65d6)",
+                      color: "white",
+                      boxShadow: "0px 4px 10px rgba(0,0,0,0.15)"
+                    }}
+                  >
+                    ➕ Add  more Service
+                  </Link>
                 </div>
 
                 {/* Openings */}

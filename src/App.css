@@ -1375,3 +1375,47 @@ nav .btn:hover {
   background: #e5e8ef;
   color: #333;
 }
+
+
+
+
+
+
+
+/* global css */
+
+/* ===== FIX DROPDOWN INSIDE TABLE ===== */
+
+/* Allow dropdown to overflow table cells */
+.table-responsive {
+  overflow: visible !important;
+}
+
+/* Ensure table cells allow dropdown overflow */
+.table td,
+.table th {
+  position: relative;
+  overflow: visible !important;
+}
+
+/* Dropdown menu should appear above everything */
+.table .dropdown-menu {
+  position: absolute !important;
+  z-index: 1055 !important; /* higher than navbar */
+  min-width: 160px;
+}
+
+/* Prevent dropdown button from stretching column */
+.table .dropdown-toggle {
+  white-space: nowrap;
+}
+
+/* Keep Status Action column aligned */
+.table .status-action-col {
+  min-width: 170px;
+}
+
+/* Keep Actions column aligned */
+.table .actions-col {
+  min-width: 200px;
+}
