@@ -22,12 +22,16 @@ export default function EmployeeTaskPage() {
   }, [id]);
 
   // 🔍 Filter tasks by search
-  const filteredTasks = tasks.filter((t) =>
-    t.taskName.toLowerCase().includes(search.toLowerCase()) ||
-    t.projectName.toLowerCase().includes(search.toLowerCase()) ||
-    t.status.toLowerCase().includes(search.toLowerCase()) ||
-    t.priority.toLowerCase().includes(search.toLowerCase())
+ const filteredTasks = tasks.filter((t) => {
+  const q = search.toLowerCase();
+
+  return (
+    (t.title ?? "").toLowerCase().includes(q) ||
+    (t.projectId?.projectName ?? "").toLowerCase().includes(q) ||
+    (t.status ?? "").toLowerCase().includes(q) ||
+    (t.priority ?? "").toLowerCase().includes(q)
   );
+});
 
   // 📤 Export Excel
   const exportToExcel = () => {
@@ -43,6 +47,9 @@ export default function EmployeeTaskPage() {
     });
     saveAs(file, `${emp?.ename}_tasks.xlsx`);
   };
+  useEffect(() => {
+  console.log(tasks);
+}, [tasks]);
 
   return (
     <div className="container mt-4">
@@ -78,7 +85,7 @@ export default function EmployeeTaskPage() {
 
         <tbody>
           {filteredTasks.map((t) => (
-            <tr key={t.taskId}>
+            <tr key={t._id}>
               <td>{t.taskName}</td>
               <td>{t.projectName}</td>
               <td>{t.status}</td>

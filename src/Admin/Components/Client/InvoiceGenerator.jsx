@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { API_URL } from "../../../config";
 
 // For project selection list only
@@ -29,9 +29,11 @@ function getProjectDisplayName(project) {
 function InvoiceGenerator() {
   const { clientId } = useParams();
   const location = useLocation();
+    const navigate = useNavigate();
   const client = location.state?.client || {};
 
   const [projects, setProjects] = useState([]);
+  const [companyEmail, setCompanyEmail] = useState("");
   const [selectedProjects, setSelectedProjects] = useState([]);
   const [dueDate, setDueDate] = useState("");
   const [loading, setLoading] = useState(false);
@@ -65,37 +67,57 @@ function InvoiceGenerator() {
     );
   };
 
-  const handleGenerateInvoice = () => {
-    const e = {};
-    if (!client?.emailId) e.clientEmail = "Client email is required.";
-    if (!dueDate) e.dueDate = "Due date is required.";
-    if (!selectedProjects.length) e.projects = "Select at least one project.";
-    setErrors(e);
-    if (Object.keys(e).length > 0) {
-      alert("Please fill all required fields before previewing the invoice.");
-      return;
-    }
+  useEffect(() => {
+    axios
+      .get(`${API_URL}/api/getCompnayDetails`)
+      .then((res) => {
+        if (res.data?.[0]?.email) {
+          setCompanyEmail(res.data[0].email);
+        }
+      })
+      .catch(() => {
+        console.warn("Company email not found");
+      });
+  }, []);
 
-    const payloadProjects = selectedProjects.map((id) => {
-      const proj = projects.find((p) => `${p._id}` === `${id}`);
-      return {
-        projectId: id,
-        amount: Number(proj?.project_price || proj?.price || proj?.amount || 0),
-        projectName: getProjectDisplayName(proj)
-      };
-    });
+ const handleGenerateInvoice = () => {
+  const e = {};
 
-    setInvoice({
-      clientId,
-      clientName: client?.leadName || "Unnamed Client",
-      clientEmail: client?.emailId,
-      projects: payloadProjects,
-      dueDate,
-      createdBy: creatorEmail || "admin@example.com",
-    });
+  if (!client?.emailId) e.clientEmail = "Client email missing.";
+  if (!companyEmail) e.companyEmail = "Company email missing.";
+  if (!dueDate) e.dueDate = "Due date required.";
+  if (!selectedProjects.length) e.projects = "Select at least one project.";
 
-    setShowPreview(true);
-  };
+  setErrors(e);
+  if (Object.keys(e).length > 0) {
+    alert("Please fill all required fields.");
+    return;
+  }
+
+  // ✅ DEFINE payloadProjects (THIS WAS MISSING)
+  const payloadProjects = selectedProjects.map((id) => {
+    const proj = projects.find((p) => `${p._id}` === `${id}`);
+    return {
+      projectId: id,
+      projectName: getProjectDisplayName(proj),
+      amount: Number(
+        proj?.project_price || proj?.price || proj?.amount || 0
+      ),
+    };
+  });
+
+  setInvoice({
+    clientId,
+    clientName: client.leadName,
+    clientEmail: client.emailId,
+    companyEmail,
+    projects: payloadProjects, // ✅ now defined
+    dueDate,
+    createdBy: creatorEmail,
+  });
+
+  setShowPreview(true);
+};
 
   const handleConfirmAndSend = async () => {
     if (!invoice) return;
@@ -141,6 +163,14 @@ function InvoiceGenerator() {
 
   return (
     <div className="container mt-4" style={{ maxWidth: "750px" }}>
+      <div className="mb-3">
+        <button
+          className="btn btn-outline-secondary"
+          onClick={() => navigate(-1)}
+        >
+          ← Back
+        </button>
+      </div>
       <h2 className="mb-4 text-center">Generate Invoice</h2>
       <div className="mb-2">
         <strong>Client:</strong> {client?.leadName || "Unknown"}
@@ -229,7 +259,7 @@ function InvoiceGenerator() {
                 <p><strong>Client:</strong> {invoice.clientName}</p>
                 <p><strong>Email:</strong> {invoice.clientEmail}</p>
                 <p><strong>Due Date:</strong> {invoice.dueDate}</p>
-                <p><strong>Created By:</strong> {invoice.createdBy}</p>
+                <p><strong>Created By:</strong> {invoice.companyEmail}</p>
                 <hr />
                 <h6>Projects:</h6>
                 <ul className="list-group mb-3">
@@ -300,15 +330,7 @@ function InvoiceGenerator() {
               .reduce((sum, p) => sum + Number(p.amount), 0)
               .toLocaleString()}
           </p>
-          <h6 className="mt-3">Projects:</h6>
-          <ul className="list-group mb-3">
-            {invoice.projects.map((p, i) => (
-              <li key={i} className="list-group-item d-flex justify-content-between">
-                <span>{p.projectName || "Unnamed Project"}</span>
-                <span>₹{Number(p.amount).toLocaleString()}</span>
-              </li>
-            ))}
-          </ul>
+        
           <div className="mt-3 d-flex align-items-center">
             {emailSent ? (
               <span className="badge bg-success me-2">Email Sent ✔️</span>

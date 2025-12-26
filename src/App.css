@@ -1419,3 +1419,31 @@ nav .btn:hover {
 .table .actions-col {
   min-width: 200px;
 }
+
+.actions-col {
+  white-space: nowrap;
+  min-width: 180px;
+}
+
+.actions-col button {
+  white-space: nowrap;
+}
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
+  text-decoration: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.sidebar-link.active {
+  background: rgba(255, 255, 255, 0.25);
+  font-weight: 600;
+}

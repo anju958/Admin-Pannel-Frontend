@@ -30,7 +30,6 @@ function AddProject() {
     budget: "",
     projectDescription: "",
     price: "",
-    assign: [],
   });
 
   const [errors, setErrors] = useState({});
@@ -220,7 +219,7 @@ function AddProject() {
         budget: "",
         projectDescription: "",
         price: "",
-        assign: [],
+        
       });
       setErrors({});
     } catch (err) {
@@ -301,10 +300,6 @@ function AddProject() {
                   <option value="">-- Select Project Type --</option>
                   <option value="One-time Project">One-time Project</option>
                   <option value="Recurring Project">Recurring Project</option>
-                  <option value="Dedicated Resource">Dedicated Resource</option>
-                  <option value="Time & Material">Time & Material</option>
-                  <option value="Fixed Price">Fixed Price</option>
-                  <option value="Maintenance & Support">Maintenance & Support</option>
                   <option value="Other">Other</option>
                 </select>
                 {formData.projectType === "Other" && (
@@ -432,7 +427,7 @@ function AddProject() {
             </div>
 
             {/* Assign Members */}
-            <h5 className="text-secondary mb-3">Assign Members</h5>
+            {/* <h5 className="text-secondary mb-3">Assign Members</h5>
             <div className="mb-4">
               <Select
                 isMulti
@@ -450,7 +445,7 @@ function AddProject() {
                   }));
                 }}
               />
-            </div>
+            </div> */}
 
             {/* File Upload */}
             <div className="mb-4">

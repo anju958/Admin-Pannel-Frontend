@@ -91,6 +91,7 @@ import AdminSalaryPage from './Admin/Components/Salary/AdminSalaryPage';
 import EmployeeListPage from './Admin/Components/Task/EmployeeListPage';
 import EmployeeTaskPage from './Admin/Components/Task/EmployeeTaskPage';
 import TaskDetailsPage from './Admin/Components/Task/TaskDetailsPage';
+import EmployeeNotifications from './Employee/Components/EmployeeNotifications';
 
 function App() {
   return (
@@ -174,6 +175,7 @@ function App() {
           {/* Employee Routes */}
            <Route path='forgot-password' element={<ForgetPassword/>}/>
            <Route path='/reset-password/:token' element={<ResetPassword/>}/>
+           
           <Route path='employee' element={<EmployeeLayout />}>
             <Route index element={<EmployeeHome />} />
             <Route path='employeeattendance' element={<EmployeeAttendance />} />
@@ -181,6 +183,7 @@ function App() {
             <Route path='LeavePage' element={<LeavePage />} />
             <Route path='salaryPage' element={<SalaryPage />} />
             <Route path='employeeTask' element={<EmployeeTask />} />
+            <Route path='employeeNotification' element={<EmployeeNotifications/>}/>
             <Route path='performance' element={<PerformancePage />} />
             <Route path='supportHelp' element={<SupportHelp />} />
             <Route path='profile' element={<EmployeeProfile />} />

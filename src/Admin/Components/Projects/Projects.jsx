@@ -27,13 +27,14 @@ const ShowProject = () => {
     navigate(`/project/edit/${id}`);
   };
 
-  
+
   if (!project) return <p className="text-center mt-5">Loading project...</p>;
 
   return (
     <div className="container mt-4">
       <div className="card shadow-lg border-0">
         <div className="card-header bg-primary text-white">
+         
           <h3 className="mb-0">Project Details: {project.projectName}</h3>
         </div>
         <div className="card-body">
@@ -115,7 +116,7 @@ const ShowProject = () => {
           <button className="btn btn-warning me-2" onClick={() => navigate(`/admin/getAllprojects/edit/${id}`)}>
             <i className="bi bi-pencil-square"></i> Update
           </button>
-          
+
         </div>
       </div>
     </div>

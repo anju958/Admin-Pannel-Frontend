@@ -9,8 +9,10 @@ const TaskView = () => {
   const navigate = useNavigate();
 
   const [task, setTask] = useState(null);
+  const [adminMessage, setAdminMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [employees, setEmployees] = useState([]);
+  const [adminMessages, setAdminMessages] = useState([]);
 
   const [commentText, setCommentText] = useState("");
 
@@ -40,6 +42,22 @@ const TaskView = () => {
     }
   };
 
+  const loadAdminMessages = async () => {
+    try {
+      const res = await axios.get(
+        `${API_URL}/api/tasks/adminMessages/${taskId}`
+      );
+      setAdminMessages(res.data || []);
+    } catch (err) {
+      console.error("ADMIN MESSAGE LOAD ERROR:", err);
+    }
+  };
+
+  useEffect(() => {
+    loadEmployees();
+    loadTask();
+    loadAdminMessages();   // 👈 ADD THIS
+  }, []);
   // ================================
   // Load Task
   // ================================
@@ -63,6 +81,24 @@ const TaskView = () => {
     } catch (err) {
       console.error("TASK LOAD ERROR:", err);
       setLoading(false);
+    }
+  };
+
+
+  const notifyEmployees = async () => {
+    try {
+      await axios.post(
+        `${API_URL}/api/tasks/notify/${task._id}`,
+        { message: adminMessage }
+      );
+
+      alert("Employee notified successfully");
+      setAdminMessage("");
+
+      loadAdminMessages(); // 👈 refresh list
+    } catch (err) {
+      console.error(err);
+      alert("Failed to notify employee");
     }
   };
 
@@ -124,6 +160,7 @@ const TaskView = () => {
   if (loading) return <h3 className="text-center mt-5">Loading...</h3>;
   if (!task) return <h3 className="text-center mt-5">Task not found</h3>;
 
+  console.log(employees)
   return (
     <div className="container mt-4">
 
@@ -135,7 +172,7 @@ const TaskView = () => {
 
         <div>
           <button className="btn btn-secondary me-2" onClick={() => navigate(-1)}>Back</button>
-          <button className="btn btn-info" onClick={notifyEmployee}>Notify</button>
+
         </div>
       </div>
 
@@ -159,9 +196,56 @@ const TaskView = () => {
           {/* ASSIGNED EMPLOYEES */}
           <div className="card mb-4">
             <div className="card-header">Assigned To</div>
-            <div className="card-body">
+            {/* <div className="card-body">
               {task?.assignedTo?.map((u) => u.ename).join(", ")}
+            </div> */}
+            <div style={{ position: "relative", zIndex: 9999 }}>
+              <Select
+                isMulti
+                menuPortalTarget={document.body}
+                styles={{
+                  menuPortal: (base) => ({ ...base, zIndex: 99999 }),
+                  menu: (base) => ({ ...base, zIndex: 99999 }),
+                }}
+
+                /* ✅ SAFE OPTIONS */
+                options={employees
+                  .filter((e) => e && e._id && typeof e.ename === "string")
+                  .map((e) => ({
+                    value: e._id,
+                    label: e.ename, // always string now
+                  }))
+                }
+
+                /* ✅ SAFE VALUE */
+                value={employees
+                  .filter(
+                    (e) =>
+                      e &&
+                      e._id &&
+                      typeof e.ename === "string" &&
+                      form.assignedToArray.includes(e._id)
+                  )
+                  .map((e) => ({
+                    value: e._id,
+                    label: e.ename,
+                  }))
+                }
+
+                onChange={(selected = []) =>
+                  setForm({
+                    ...form,
+                    assignedToArray: selected.map((s) => s.value),
+                  })
+                }
+
+                /* ✅ EXTRA SAFETY (prevents future crashes) */
+                filterOption={(option, input) =>
+                  option?.label?.toLowerCase().includes(input.toLowerCase())
+                }
+              />
             </div>
+
           </div>
 
           {/* TIME LOGS */}
@@ -189,31 +273,56 @@ const TaskView = () => {
           {/* COMMENTS */}
           <div className="card mb-4">
             <div className="card-header">Comments</div>
-            <div className="card-body">
 
-              <textarea
-                className="form-control"
-                rows="3"
-                placeholder="Write comment..."
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-              ></textarea>
+            <div className="card mb-4">
+              <div className="card-header bg-info text-white">
+                Admin Message to Employee
+              </div>
 
-              <button className="btn btn-primary mt-2" onClick={addComment}>
-                Add Comment
-              </button>
+              <div className="card-body">
+                <textarea
+                  className="form-control"
+                  rows="3"
+                  placeholder="Write message for employee..."
+                  value={adminMessage}
+                  onChange={(e) => setAdminMessage(e.target.value)}
+                />
 
-              <hr />
-
-              {task?.comments?.map((c, i) => (
-                <div key={i} className="mb-3">
-                  <strong>{c?.user?.ename || "User"}</strong>
-                  <small className="ms-2">({new Date(c.createdAt).toLocaleString()})</small>
-                  <p className="mt-1">{c.text}</p>
-                </div>
-              ))}
-
+                <button
+                  className="btn btn-info mt-2"
+                  onClick={notifyEmployees}
+                  disabled={!adminMessage.trim()}
+                >
+                  Notify Employee
+                </button>
+              </div>
             </div>
+
+            {/* ADMIN MESSAGE HISTORY */}
+            <div className="card mb-4">
+              <div className="card-header bg-secondary text-white">
+                Admin Messages (Sent to Employee)
+              </div>
+
+              <div className="card-body">
+                {adminMessages.length === 0 ? (
+                  <p className="text-muted">No admin messages sent yet.</p>
+                ) : (
+                  adminMessages.map((m) => (
+                    <div key={m._id} className="border rounded p-2 mb-2">
+                      <strong>{m.user?.ename || "Admin"}</strong>
+                      <small className="ms-2 text-muted">
+                        ({new Date(m.createdAt).toLocaleString()})
+                      </small>
+
+                      <p className="mt-1 mb-0">{m.message}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+
           </div>
 
         </div>

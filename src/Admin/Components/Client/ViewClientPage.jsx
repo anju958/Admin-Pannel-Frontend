@@ -174,18 +174,7 @@ function ViewClientPage() {
                         <strong>Service:</strong>{" "}
                         {proj.service?.serviceName || "N/A"}
                       </p>
-                      <p>
-                        <strong>Assigned To:</strong>{" "}
-                        {Array.isArray(proj.addMember) &&
-                        proj.addMember.length > 0
-                          ? proj.addMember
-                              .map(
-                                (m) =>
-                                  m.ename?.replace(/^[, ]+/, "") || "Unknown"
-                              )
-                              .join(", ")
-                          : "Unassigned"}
-                      </p>
+                      
                     </div>
                   ))}
                 </>
@@ -203,15 +192,6 @@ function ViewClientPage() {
         <div className="card-body">
           <p>
             <strong>Status:</strong> {formData.status}
-          </p>
-          <p>
-            <strong>Assigned To:</strong>{" "}
-            {projects.length > 0
-              ? projects
-                  .flatMap((proj) => proj.addMember || [])
-                  .map((m) => m.ename?.replace(/^[, ]+/, "") || "Unknown")
-                  .join(", ")
-              : "Unassigned"}
           </p>
           <p>
             <strong>User Type:</strong> {formData.userType}

@@ -164,7 +164,7 @@ function Clients() {
                         <button
                           className="btn btn-sm btn-primary rounded-pill"
                           onClick={() =>
-                            navigate(`/admin/viewclientpage/${clients.leadId}`)
+                            navigate(`/admin/viewclientpage/${clients._id}`)
                           }
                         >
                           View

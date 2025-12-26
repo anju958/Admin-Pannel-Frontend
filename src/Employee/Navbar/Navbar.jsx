@@ -1,104 +1,89 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from "react";
 import { FaUserCircle } from "react-icons/fa";
-import Button from '@mui/material/Button';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { API_URL } from '../../config';
+import Button from "@mui/material/Button";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { API_URL } from "../../config";
 
 function Navbar() {
-  const user = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
-  const employeeId = user?._id;
 
-  /* ---------------------- HOLIDAY STATES ---------------------- */
-  const [isHoliday, setIsHoliday] = useState(false);
-  const [holidayTitle, setHolidayTitle] = useState("");
+  /* ================= SAFE USER ================= */
+  const user = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user")) || null;
+    } catch {
+      return null;
+    }
+  }, []);
 
-  /* ---------------------- WORKING TIME STATES ---------------------- */
-  const [loginTime, setLoginTime] = useState(localStorage.getItem("loginTime"));
-  const [officeStart, setOfficeStart] = useState(localStorage.getItem("officeStart"));
-  const [officeEnd, setOfficeEnd] = useState(localStorage.getItem("officeEnd"));
-  const [dailyWorkingHours, setDailyWorkingHours] = useState(Number(localStorage.getItem("dailyWorkingHours") || 9));
+  const employeeId = user?.employeeId || user?._id || null;
 
+  /* ================= STATES ================= */
+  const [loginTime, setLoginTime] = useState("00:00:00");
   const [workingHours, setWorkingHours] = useState("00:00:00");
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isHoliday, setIsHoliday] = useState(false);
+  const [holidayTitle, setHolidayTitle] = useState("");
+  const [notification, setNotification] = useState(null);
 
-  /* -----------------------------------------------------
-        FETCH LOGIN TIME + CHECK HOLIDAY
-  ----------------------------------------------------- */
+  const [officeStart, setOfficeStart] = useState("09:30");
+  const [officeEnd, setOfficeEnd] = useState("18:30");
+  const [dailyWorkingHours, setDailyWorkingHours] = useState(9);
+
+  /* ================= FETCH LOGIN INFO ================= */
   useEffect(() => {
     if (!employeeId) return;
 
-    const fetchLogin = async () => {
+    const today = new Date().toISOString().split("T")[0];
+
+    const fetchLoginData = async () => {
       try {
-        const today = new Date().toISOString().split("T")[0];
-        const res = await axios.get(`${API_URL}/api/employee/working-hours`, {
-          params: { employeeId, date: today },
-        });
+        const res = await axios.get(
+          `${API_URL}/api/employee/working-hours`,
+          { params: { employeeId, date: today } }
+        );
 
-        if (res.data?.check_in) {
-          let timeStr = res.data.check_in;
+        let time = res.data?.check_in;
+        if (time && time.includes("T")) time = time.split("T")[1];
+        if (time && time.length === 5) time = `${time}:00`;
 
-          // Convert "YYYY-MM-DDTHH:mm:ss" → "HH:mm:ss"
-          if (timeStr.includes("T")) {
-            timeStr = timeStr.split("T")[1];
-          }
+        setLoginTime(time || "00:00:00");
 
-          setLoginTime(timeStr);
-          localStorage.setItem("loginTime", timeStr);
-        } else {
-          setLoginTime(null);
-          localStorage.setItem("loginTime", "00:00:00");
-        }
-
-        if (res.data?.officeStart) {
-          setOfficeStart(res.data.officeStart);
-          localStorage.setItem("officeStart", res.data.officeStart);
-        }
-
-        if (res.data?.officeEnd) {
-          setOfficeEnd(res.data.officeEnd);
-          localStorage.setItem("officeEnd", res.data.officeEnd);
-        }
-
-        if (res.data?.dailyWorkingHours) {
+        if (res.data?.officeStart) setOfficeStart(res.data.officeStart);
+        if (res.data?.officeEnd) setOfficeEnd(res.data.officeEnd);
+        if (res.data?.dailyWorkingHours)
           setDailyWorkingHours(res.data.dailyWorkingHours);
-          localStorage.setItem("dailyWorkingHours", res.data.dailyWorkingHours);
-        }
-
       } catch (err) {
-        console.error("Login fetch error:", err);
+        console.error("Login fetch error", err.message);
       }
     };
 
     const checkHoliday = async () => {
       try {
-        const today = new Date().toISOString().split("T")[0];
+        const res = await axios.get(
+          `${API_URL}/api/employee/IsHoliday`,
+          { params: { date: today } }
+        );
 
-        const res = await axios.get(`${API_URL}/api/employee/IsHoliday`, {
-          params: { date: today }
-        });
-
-        if (res.data.isHoliday) {
+        if (res.data?.isHoliday) {
           setIsHoliday(true);
           setHolidayTitle(res.data.title);
         } else {
           setIsHoliday(false);
         }
       } catch (err) {
-        console.error("Holiday fetch error:", err);
+        console.error("Holiday error", err.message);
       }
     };
 
-    fetchLogin();
+    fetchLoginData();
     checkHoliday();
   }, [employeeId]);
 
-  /* -----------------------------------------------------
-        WORKING HOURS TIMER
-  ----------------------------------------------------- */
+  /* ================= WORKING HOURS TIMER ================= */
   useEffect(() => {
-    if (isHoliday) {
+    if (isHoliday || loginTime === "00:00:00") {
       setWorkingHours("00:00:00");
       return;
     }
@@ -107,24 +92,12 @@ function Navbar() {
       const now = new Date();
       setCurrentTime(now);
 
-      if (!loginTime || loginTime === "null") {
-        setWorkingHours("00:00:00");
-        return;
-      }
-
-      const parts = loginTime.split(":");
-      if (parts.length < 2) {
-        setWorkingHours("00:00:00");
-        return;
-      }
-
-      const [lh, lm, ls] = parts.map(x => Number(x) || 0);
-
+      const [lh, lm, ls] = loginTime.split(":").map(Number);
       const loginDT = new Date();
       loginDT.setHours(lh, lm, ls || 0, 0);
 
-      const [osH, osM] = (officeStart || "09:30").split(":").map(Number);
-      const [oeH, oeM] = (officeEnd || "18:30").split(":").map(Number);
+      const [osH, osM] = officeStart.split(":").map(Number);
+      const [oeH, oeM] = officeEnd.split(":").map(Number);
 
       const officeStartDT = new Date();
       officeStartDT.setHours(osH, osM, 0, 0);
@@ -132,135 +105,134 @@ function Navbar() {
       const officeEndDT = new Date();
       officeEndDT.setHours(oeH, oeM, 0, 0);
 
-      // Start working from office start or login time
       let workStart = loginDT < officeStartDT ? officeStartDT : loginDT;
+      let workEnd = now;
 
-      const maxEnd = new Date(workStart.getTime() + dailyWorkingHours * 3600 * 1000);
+      const maxEnd = new Date(
+        workStart.getTime() + dailyWorkingHours * 3600 * 1000
+      );
 
-      let effectiveEnd = now;
-      if (effectiveEnd > officeEndDT) effectiveEnd = officeEndDT;
-      if (effectiveEnd > maxEnd) effectiveEnd = maxEnd;
+      if (workEnd > officeEndDT) workEnd = officeEndDT;
+      if (workEnd > maxEnd) workEnd = maxEnd;
 
-      if (effectiveEnd <= workStart) {
-        setWorkingHours("00:00:00");
-        return;
-      }
+      const diff = Math.max(0, Math.floor((workEnd - workStart) / 1000));
+      const h = Math.floor(diff / 3600);
+      const m = Math.floor((diff % 3600) / 60);
+      const s = diff % 60;
 
-      const diffSec = Math.floor((effectiveEnd - workStart) / 1000);
-      const hrs = Math.floor(diffSec / 3600);
-      const mins = Math.floor((diffSec % 3600) / 60);
-      const secs = diffSec % 60;
-
-      setWorkingHours(`${hrs}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`);
+      setWorkingHours(
+        `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+      );
     }, 1000);
 
     return () => clearInterval(interval);
   }, [loginTime, officeStart, officeEnd, dailyWorkingHours, isHoliday]);
 
+  /* ================= FETCH NOTIFICATION (ONLY ONE) ================= */
+  useEffect(() => {
+    if (!employeeId) return;
 
-  /* -----------------------------------------------------
-        LOGOUT
-  ----------------------------------------------------- */
-  const handleLogout = async () => {
+    axios
+      .get(`${API_URL}/api/notifications/employee/${employeeId}`)
+      .then((res) => {
+        if (res.data?.length > 0) {
+          setNotification(res.data[0]); // only latest
+        }
+      })
+      .catch(() => {});
+  }, [employeeId]);
+
+  /* ================= CLICK NOTIFICATION ================= */
+  const handleNotificationClick = async () => {
     try {
-      await axios.post(`${API_URL}/api/employee/logout`, {
-        employeeId: user._id,
-      });
-    } catch (err) {}
+      await axios.patch(
+        `${API_URL}/api/notifications/read/${notification._id}`
+      );
 
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/");
+      setNotification(null);
+      navigate(`/employee/TaskView/${notification.task}`);
+    } catch (err) {
+      console.error("Notification click error", err);
+    }
   };
 
-  const formatCurrentTime = () =>
-    new Date().toLocaleTimeString("en-IN", { hour12: false });
+  /* ================= LOGOUT ================= */
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
 
-
-  /* -----------------------------------------------------
-        NAVBAR UI
-  ----------------------------------------------------- */
+  /* ================= UI ================= */
   return (
     <nav
       className="navbar navbar-expand-lg px-4 py-3 shadow-sm"
       style={{
-        background: "linear-gradient(90deg, #1A2A6C 0%, #6A11CB 50%, #2575FC 100%)",
+        background:
+          "linear-gradient(90deg, #1A2A6C 0%, #6A11CB 50%, #2575FC 100%)",
         color: "white",
-        minHeight: "65px",
       }}
     >
-      <div className="container-fluid d-flex align-items-center justify-content-between">
+      <div className="container-fluid d-flex justify-content-between align-items-center">
 
-        {/* CENTER TITLE */}
-        <div className="mx-auto text-center" style={{ flex: 1 }}>
-          <span className="fw-bold text-white" style={{ fontSize: "2rem" }}>
-            Employee Dashboard
-          </span>
-        </div>
+        <div className="mx-auto fw-bold fs-3">Employee Dashboard</div>
 
-        {/* RIGHT SECTION */}
-        <div className="d-flex align-items-center gap-4 me-4">
-
-          {/* Current Time */}
-          <div className="text-white text-center">
-            <div style={{ fontSize: "0.85rem" }}>Current Time</div>
-            <div style={{ fontSize: "1.1rem", fontWeight: "bold" }}>
-              {formatCurrentTime()}
+        {notification && (
+          <div
+            className="px-4 py-2 rounded shadow"
+            style={{ background: "white", color: "#333", cursor: "pointer" }}
+            onClick={handleNotificationClick}
+          >
+            🔔 <strong>{notification.title}</strong>
+            <div className="small text-muted">
+              {notification.message}
             </div>
           </div>
+        )}
 
-          <div style={{ borderLeft: "2px solid rgba(255,255,255,0.3)", height: "40px" }} />
+        <div className="d-flex align-items-center gap-4">
+          <div className="text-center">
+            <small>Current Time</small>
+            <div>{currentTime.toLocaleTimeString("en-IN", { hour12: false })}</div>
+          </div>
 
-          {/* ------------------ HOLIDAY ------------------ */}
-          {isHoliday ? (
-            <div className="text-warning fw-bold text-center px-3">
-              ⭐ Today is Holiday – {holidayTitle}
-            </div>
-          ) : (
+          {!isHoliday && (
             <>
-              {/* Login Time */}
-              <div className="text-white text-center">
-                <div style={{ fontSize: "0.85rem" }}>Login Time</div>
-                <div style={{ fontSize: "1.1rem", fontWeight: "bold" }}>
-                  {(loginTime && loginTime !== "null") ? loginTime : "00:00:00"}
-                </div>
+              <div className="text-center">
+                <small>Login Time</small>
+                <div>{loginTime}</div>
               </div>
 
-              <div style={{ borderLeft: "2px solid rgba(255,255,255,0.3)", height: "40px" }} />
-
-              {/* Working Hours */}
-              <div className="text-white text-center">
-                <div style={{ fontSize: "0.85rem" }}>Working Hours</div>
-                <div style={{ fontSize: "1.1rem", fontWeight: "bold", color: "#FFD700" }}>
+              <div className="text-center">
+                <small>Working Hours</small>
+                <div style={{ color: "#FFD700", fontWeight: "bold" }}>
                   {workingHours}
                 </div>
               </div>
             </>
           )}
+
+          <div className="dropdown">
+            <button
+              className="btn btn-light dropdown-toggle d-flex align-items-center"
+              data-bs-toggle="dropdown"
+            >
+              <FaUserCircle size={28} className="me-2 text-primary" />
+              {user?.ename || "Employee"}
+            </button>
+
+            <ul className="dropdown-menu dropdown-menu-end">
+              <li>
+                <Button
+                  className="dropdown-item text-danger"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </Button>
+              </li>
+            </ul>
+          </div>
         </div>
 
-        {/* USER DROPDOWN */}
-        <div className="dropdown">
-          <button
-            className="btn btn-light dropdown-toggle d-flex align-items-center px-3 fw-bold"
-            type="button"
-            data-bs-toggle="dropdown"
-          >
-            <FaUserCircle size={30} className="me-2 text-primary" />
-            <span>{user?.ename || "Employee"}</span>
-          </button>
-
-          <ul className="dropdown-menu dropdown-menu-end shadow-sm">
-            <li>
-              <Button
-                onClick={handleLogout}
-                className="dropdown-item text-danger fw-bold"
-              >
-                Logout
-              </Button>
-            </li>
-          </ul>
-        </div>
       </div>
     </nav>
   );

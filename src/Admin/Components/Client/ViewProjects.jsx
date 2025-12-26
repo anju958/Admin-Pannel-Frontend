@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useLocation, Link } from "react-router-dom";
 import { API_URL } from "../../../config";
-
+import { useNavigate } from "react-router-dom";
 
 function ViewProjects() {
     const location = useLocation();
     const client = location.state?.client;
+    const navigate = useNavigate();
     const clientId = client?._id;
     const [projects, setProjects] = useState([]);
 
@@ -19,6 +20,14 @@ function ViewProjects() {
     console.log(projects)
     return (
         <div className="container mt-4">
+            <div className="mb-3">
+        <button
+          className="btn btn-outline-secondary"
+          onClick={() => navigate(-1)}
+        >
+          ← Back
+        </button>
+      </div>
             <h2 className="text-center mb-4">Projects List</h2>
            <h5 className="text-muted">Client: {client?.leadName || "Unknown"}</h5>
             <div className="card p-3 shadow-lg">

@@ -11,7 +11,8 @@ const months = [
 ];
 
 function EmployeeAttendance() {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem("user")) || {};
+const employeeId = user.employeeId || user._id;
 
   const [attendanceData, setAttendanceData] = useState([]);
   const [summary, setSummary] = useState({});
@@ -23,16 +24,15 @@ function EmployeeAttendance() {
   const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
 
   const getDateKey = (d) => {
-    if (!d) return null;
-    if (typeof d === "string") return d;
-    return new Date(d).toLocaleDateString("en-CA");
-  };
+  if (!d) return null;
+  return new Date(d).toISOString().split("T")[0];
+};
 
   const fetchAttendance = async () => {
     try {
       const res = await axios.get(`${API_URL}/api/monthly`, {
         params: {
-          employeeId: user._id,
+          employeeId,
           month: selectedMonth,
           year: selectedYear
         }
@@ -40,6 +40,7 @@ function EmployeeAttendance() {
 
       setAttendanceData(res.data.data || []);
       setSummary(res.data.summary || {});
+      console.log("Attendance API response:", res.data.data);
     } catch (error) {
       console.error("Attendance Fetch Error:", error);
     }
@@ -160,7 +161,7 @@ function EmployeeAttendance() {
 
             {/* Attendance Row */}
             <div className="d-flex align-items-center">
-              <div style={{ width: "110px", fontWeight: 600 }}>{user.ename}</div>
+              <div style={{ fontWeight: 400 }}>{user.ename}</div>
 
               <div className="d-flex flex-grow-1">
                 {Array.from({ length: daysInMonth }).map((_, i) => {

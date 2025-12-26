@@ -24,12 +24,13 @@ function TaskAssign() {
   const [employees, setEmployees] = useState([]);
 
   // ===========================
-  //  LOAD CLIENTS
+  // LOAD CLIENTS
   // ===========================
   useEffect(() => {
-    axios.get(`${API_URL}/api/getClientLead`).then((res) => {
-      setClients(res.data);
-    });
+    axios
+      .get(`${API_URL}/api/getClientLead`)
+      .then((res) => setClients(res.data))
+      .catch((err) => console.error(err));
   }, []);
 
   // ===========================
@@ -39,25 +40,29 @@ function TaskAssign() {
     if (!formData.clientId) return;
 
     const loadProjects = async () => {
-      const res = await axios.get(
-        `${API_URL}/api/getProjectbyClient/${formData.clientId}`
-      );
+      try {
+        const res = await axios.get(
+          `${API_URL}/api/getProjectbyClient/${formData.clientId}`
+        );
 
-      setProjects(res.data);
+        setProjects(res.data);
 
-      // Reset dependent values safely
-      setFormData((prev) => ({
-        ...prev,
-        projectId: "",
-        serviceId: "",
-        assignedTo: [],
-        category: "",
-        startDate: "",
-        dueDate: "",
-      }));
+        // reset dependent fields
+        setFormData((prev) => ({
+          ...prev,
+          projectId: "",
+          serviceId: "",
+          assignedTo: [],
+          category: "",
+          startDate: "",
+          dueDate: "",
+        }));
 
-      setService(null);
-      setEmployees([]);
+        setService(null);
+        setEmployees([]);
+      } catch (err) {
+        console.error(err);
+      }
     };
 
     loadProjects();
@@ -71,26 +76,30 @@ function TaskAssign() {
 
     const loadProjectRelatedData = async () => {
       try {
-        // 1. Load service
+        // 1️⃣ Get service of project
         const serviceRes = await axios.get(
           `${API_URL}/api/getServices/${formData.projectId}`
         );
-        const projectServices = serviceRes.data.services || [];
-        const selectedService = projectServices[0] || null;
 
-        setService(selectedService);
+        const projectService = serviceRes.data.services?.[0] || null;
+        setService(projectService);
 
-        if (selectedService?._id) {
-          setFormData((prev) => ({
-            ...prev,
-            serviceId: selectedService._id,
-          }));
+        if (!projectService?._id) {
+          setEmployees([]);
+          return;
         }
 
-        // 2. Load employees
+        setFormData((prev) => ({
+          ...prev,
+          serviceId: projectService._id,
+          assignedTo: [],
+        }));
+
+        // 2️⃣ Get employees by service
         const empRes = await axios.get(
-          `${API_URL}/api/getEmployeeByProject/${formData.projectId}`
+          `${API_URL}/api/getEmployeesByService/${projectService._id}`
         );
+
         setEmployees(empRes.data.employees || []);
       } catch (err) {
         console.error("Error loading project data:", err);
@@ -101,7 +110,7 @@ function TaskAssign() {
   }, [formData.projectId]);
 
   // ===========================
-  // LOAD PROJECT DETAILS (category, start date, end date)
+  // LOAD PROJECT DETAILS
   // ===========================
   useEffect(() => {
     if (!formData.projectId) return;
@@ -131,7 +140,7 @@ function TaskAssign() {
           dueDate: endDate ? endDate.split("T")[0] : "",
         }));
       } catch (err) {
-        console.error("ERROR loading details:", err);
+        console.error(err);
       }
     };
 
@@ -143,46 +152,41 @@ function TaskAssign() {
   // ===========================
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    await axios.post(`${API_URL}/api/tasks/add`, formData);   // ✅ FIXED
-    alert("Task Assigned Successfully! 🎉");
+    try {
+      await axios.post(`${API_URL}/api/tasks/add`, formData);
+      alert("Task Assigned Successfully!");
 
-    setFormData({
-      clientId: "",
-      projectId: "",
-      serviceId: "",
-      assignedTo: [],
-      title: "",
-      category: "",
-      startDate: "",
-      dueDate: "",
-      status: "Pending",
-      description: "",
-      priority: "Low",
-    });
+      setFormData({
+        clientId: "",
+        projectId: "",
+        serviceId: "",
+        assignedTo: [],
+        title: "",
+        category: "",
+        startDate: "",
+        dueDate: "",
+        status: "Pending",
+        description: "",
+        priority: "Low",
+      });
 
-    setProjects([]);
-    setEmployees([]);
-    setService(null);
-  } catch (err) {
-    alert("Error Assigning Task!");
-    console.error(err);
-  }
-};
-
+      setProjects([]);
+      setEmployees([]);
+      setService(null);
+    } catch (err) {
+      console.error(err);
+      alert("Error assigning task");
+    }
+  };
 
   // ===========================
-  //   UI
+  // UI
   // ===========================
   return (
     <div className="container mt-4">
@@ -193,7 +197,7 @@ function TaskAssign() {
 
         <div className="card-body">
           <form onSubmit={handleSubmit}>
-            {/* Client - Project - Service */}
+            {/* Client / Project / Service */}
             <div className="row g-3 mb-3">
               <div className="col-md-4">
                 <label className="form-label fw-bold">Client *</label>
@@ -242,7 +246,7 @@ function TaskAssign() {
               </div>
             </div>
 
-            {/* Title */}
+            {/* Task Title */}
             <div className="mb-3">
               <label className="form-label fw-bold">Task Title *</label>
               <input
@@ -267,7 +271,7 @@ function TaskAssign() {
               />
             </div>
 
-            {/* Start + Due Date */}
+            {/* Dates */}
             <div className="row g-3 mb-3">
               <div className="col-md-6">
                 <label className="form-label fw-bold">Start Date *</label>
@@ -309,24 +313,30 @@ function TaskAssign() {
               </select>
             </div>
 
-            {/* Employee Assign */}
+            {/* Assign Employees */}
             <div className="mb-3">
               <label className="form-label fw-bold">Assign Employees *</label>
               <Select
                 isMulti
-                options={employees.map((e) => ({
-                  value: e._id,
-                  label: e.ename,
+                options={employees.map((emp) => ({
+                  value: emp._id,
+                  label: emp.ename || "Unnamed Employee",
                 }))}
                 value={employees
-                  .filter((e) => formData.assignedTo.includes(e._id))
-                  .map((e) => ({ value: e._id, label: e.ename }))}
+                  .filter((emp) =>
+                    formData.assignedTo.includes(emp._id)
+                  )
+                  .map((emp) => ({
+                    value: emp._id,
+                    label: emp.ename || "Unnamed Employee",
+                  }))}
                 onChange={(selected) =>
                   setFormData((prev) => ({
                     ...prev,
                     assignedTo: selected.map((s) => s.value),
                   }))
                 }
+                placeholder="Select employees"
               />
             </div>
 
@@ -339,10 +349,9 @@ function TaskAssign() {
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-              ></textarea>
+              />
             </div>
 
-            {/* Submit */}
             <button className="btn btn-success w-100" type="submit">
               Assign Task 🚀
             </button>

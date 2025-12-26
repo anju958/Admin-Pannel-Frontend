@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { API_URL } from "../../config";
+import { useNavigate } from "react-router-dom";
+
 
 function ClientProjectsPage() {
   const [client, setClient] = useState(null);
   const [projects, setProjects] = useState([]);
 
+  const navigate = useNavigate();
   // Load client
   useEffect(() => {
     const c = localStorage.getItem("clientUser");
@@ -27,6 +30,14 @@ function ClientProjectsPage() {
   return (
     <div className="container mt-4">
 
+      <div className="mb-3">
+        <button
+          className="btn btn-outline-secondary"
+          onClick={() => navigate(-1)}
+        >
+          ← Back
+        </button>
+      </div>
       {/* PAGE TITLE */}
       <h2 className="fw-bold mb-4" style={{ fontSize: "2rem" }}>
         My Projects
@@ -68,8 +79,8 @@ function ClientProjectsPage() {
                   p.status === "Completed"
                     ? "bg-success"
                     : p.status === "In Progress"
-                    ? "bg-info text-dark"
-                    : "bg-warning text-dark";
+                      ? "bg-info text-dark"
+                      : "bg-warning text-dark";
 
                 return (
                   <tr key={p._id}>

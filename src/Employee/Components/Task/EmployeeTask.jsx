@@ -15,32 +15,54 @@ const formatMinutes = (seconds = 0) => {
 
 export default function EmployeeTask() {
   const navigate = useNavigate();
-  const intervalsRef = useRef({});
+  const intervalsRef = useRef(null);
 
   const [tasks, setTasks] = useState([]);
-  const [filteredTasks, setFilteredTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  /* -------- STATUS MODAL STATE -------- */
+  const [showModal, setShowModal] = useState(false);
+  const [currentTask, setCurrentTask] = useState(null);
+  const [statusForm, setStatusForm] = useState({
+    status: "",
+    reason: "",
+    progress: "",
+    file: null,
+  });
 
   /* ---------------- FILTER STATE ---------------- */
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
-  const [month, setMonth] = useState(now.getMonth() + 1);
+  const [month, setMonth] = useState("all");
 
-  const employeeLocal = JSON.parse(localStorage.getItem("user")) || {};
-  const employeeId =
-    employeeLocal.employeeId || localStorage.getItem("employeeId");
+  /* ---------------- USER ---------------- */
+  const employeeLocal = JSON.parse(localStorage.getItem("user"));
+  const employeeId = employeeLocal?.employeeId;
 
   /* ---------------- FETCH TASKS ---------------- */
   const fetchTasks = async () => {
+    if (!employeeId) {
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await axios.get(
         `${API_URL}/api/tasks/employee/${employeeId}`
       );
 
-      const data = res.data.tasks || [];
+      const rawTasks = res.data.tasks || [];
 
-      const normalized = data.map((t) => {
+      const runningTask = rawTasks.find((t) => {
+        const last =
+          t.timeLogs?.length > 0
+            ? t.timeLogs[t.timeLogs.length - 1]
+            : null;
+        return last && !last.endAt;
+      });
+
+      const prepared = rawTasks.map((t) => {
         const last =
           t.timeLogs?.length > 0
             ? t.timeLogs[t.timeLogs.length - 1]
@@ -48,11 +70,16 @@ export default function EmployeeTask() {
 
         return {
           ...t,
-          running: last && last.startAt && !last.endAt,
+          running:
+            runningTask &&
+            runningTask._id === t._id &&
+            last &&
+            !last.endAt,
+          liveSeconds: 0,
         };
       });
 
-      setTasks(normalized);
+      setTasks(prepared);
     } catch (err) {
       console.error("Task fetch failed:", err);
     } finally {
@@ -61,109 +88,165 @@ export default function EmployeeTask() {
   };
 
 
+  const submitCompletedDirectly = async (task) => {
+    try {
+      await axios.patch(
+        `${API_URL}/api/tasks/TaskStatus/${task._id}`,
+        { status: "Completed" }
+      );
+
+      fetchTasks();
+    } catch (err) {
+      alert("Failed to mark task as completed");
+    }
+  };
+  // helper function 
+  const getStatusInfo = (task) => {
+    // 1️⃣ Latest status update
+    const lastStatus =
+      task.statusHistory?.length > 0
+        ? task.statusHistory[task.statusHistory.length - 1]
+        : null;
+
+    // 2️⃣ Latest comment
+    const lastComment =
+      task.comments?.length > 0
+        ? task.comments[task.comments.length - 1]
+        : null;
+
+    // Pending → show reason
+    if (task.status === "Pending" && lastStatus?.reason) {
+      return `Reason: ${lastStatus.reason}`;
+    }
+
+    // In Progress → show progress + reason
+    if (task.status === "In Progress") {
+      let text = "";
+      if (lastStatus?.progress) {
+        text += `Progress: ${lastStatus.progress}%`;
+      }
+      if (lastStatus?.reason) {
+        text += text ? ` | ${lastStatus.reason}` : lastStatus.reason;
+      }
+      return text || "Work in progress";
+    }
+
+    // Completed
+    if (task.status === "Completed") {
+      return "Completed";
+    }
+
+    // Fallback to comment
+    if (lastComment?.text) {
+      return `Comment: ${lastComment.text}`;
+    }
+
+    return "-";
+  };
+
+
+
+  /* ---------------- INITIAL LOAD ---------------- */
   useEffect(() => {
-    console.log(fetchTasks)
     fetchTasks();
+  }, [employeeId]);
+
+  /* ---------------- LIVE TIMER ---------------- */
+  useEffect(() => {
+    intervalsRef.current = setInterval(() => {
+      setTasks((prev) =>
+        prev.map((t) => {
+          if (!t.running) return t;
+
+          const last = t.timeLogs[t.timeLogs.length - 1];
+          const liveSeconds = Math.floor(
+            (Date.now() - new Date(last.startAt)) / 1000
+          );
+
+          return { ...t, liveSeconds };
+        })
+      );
+    }, 1000);
+
+    return () => clearInterval(intervalsRef.current);
+  }, []);
+
+  /* ---------------- AUTO STOP ON CLOSE ---------------- */
+  useEffect(() => {
+    const autoStop = () => {
+      if (!employeeId) return;
+      navigator.sendBeacon(
+        `${API_URL}/api/tasks/autoStopTimer/${employeeId}`
+      );
+    };
+
+    window.addEventListener("beforeunload", autoStop);
+    window.addEventListener("unload", autoStop);
+
     return () => {
-      Object.values(intervalsRef.current).forEach(clearInterval);
+      window.removeEventListener("beforeunload", autoStop);
+      window.removeEventListener("unload", autoStop);
     };
   }, [employeeId]);
 
-
-  /* ---------------- FILTER (YEAR & MONTH) ---------------- */
-  useEffect(() => {
-    const filtered = tasks.filter((t) => {
-      // ✅ USE startDate FIRST (your API field)
-      const date = new Date(
-        t.startDate || t.updatedAt || t.createdAt
-      );
-
-      if (isNaN(date)) return false;
-
-      const taskYear = date.getFullYear();
-      const taskMonth = date.getMonth() + 1;
-
-      if (Number(year) !== taskYear) return false;
-      if (month !== "all" && Number(month) !== taskMonth) return false;
-
-      return true;
-    });
-
-    setFilteredTasks(filtered);
-  }, [tasks, year, month]);
-
-
-  /* ---------------- START TIMER ---------------- */
+  /* ---------------- START / STOP TIMER ---------------- */
   const startTimer = async (task) => {
     try {
       await axios.post(`${API_URL}/api/tasks/timerStart/${task._id}`);
-
-      setTasks((prev) =>
-        prev.map((t) =>
-          t._id === task._id ? { ...t, running: true } : t
-        )
-      );
-
-      intervalsRef.current[task._id] = setInterval(() => {
-        setTasks((prev) =>
-          prev.map((t) =>
-            t._id === task._id
-              ? { ...t, timeSpent: (t.timeSpent || 0) + 1 }
-              : t
-          )
-        );
-      }, 1000);
-    } catch {
-      alert("Cannot start timer");
+      fetchTasks();
+    } catch (err) {
+      alert(err?.response?.data?.message || "Cannot start timer");
     }
   };
 
-  /* ---------------- STOP TIMER ---------------- */
   const stopTimer = async (task) => {
     try {
       await axios.post(`${API_URL}/api/tasks/stopTimer/${task._id}`);
-      clearInterval(intervalsRef.current[task._id]);
-      delete intervalsRef.current[task._id];
       fetchTasks();
-    } catch {
-      alert("Cannot stop timer");
+    } catch (err) {
+      alert(err?.response?.data?.message || "Cannot stop timer");
     }
   };
 
-  /* ---------------- UPDATE STATUS ---------------- */
-  const handleStatusChange = async (taskId, status) => {
-    try {
-      let reason = "";
-      if (status !== "Completed") {
-        reason = window.prompt("Reason?", "");
-      }
+  /* ---------------- STATUS MODAL ---------------- */
+  const openStatusModal = (task, status) => {
+    setCurrentTask(task);
+    setStatusForm({ status, reason: "", progress: "", file: null });
+    setShowModal(true);
+  };
 
-      await axios.patch(
-        `${API_URL}/api/tasks/TaskStatus/${taskId}`,
-        { status, reason }
-      );
+  const submitStatus = async () => {
+    const form = new FormData();
+    form.append("status", statusForm.status);
+    form.append("reason", statusForm.reason);
+    if (statusForm.progress) form.append("progress", statusForm.progress);
+    if (statusForm.file) form.append("attachment", statusForm.file);
 
-      fetchTasks();
-    } catch {
-      alert("Status update failed");
-    }
+    await axios.patch(
+      `${API_URL}/api/tasks/TaskStatus/${currentTask._id}`,
+      form
+    );
+
+    setShowModal(false);
+    fetchTasks();
   };
 
   const openTask = (id) => navigate(`/employee/TaskView/${id}`);
 
-  if (loading)
-    return <div className="p-4 text-center">Loading tasks...</div>;
+  /* ---------------- FILTER ---------------- */
+  const filteredTasks = tasks.filter((t) => {
+    const date = new Date(t.startDate || t.updatedAt);
+    if (isNaN(date)) return false;
+    if (Number(year) !== date.getFullYear()) return false;
+    if (month !== "all" && Number(month) !== date.getMonth() + 1) return false;
+    return true;
+  });
 
+  if (loading) return <div className="p-4 text-center">Loading tasks...</div>;
+
+  /* ---------------- UI ---------------- */
   return (
     <div className="container mt-3">
-      {/* -------- DROPDOWN FIX -------- */}
-      <style>{`
-        .status-dropdown.show ~ .view-btn,
-        .status-dropdown.show ~ .refresh-btn {
-          display: none !important;
-        }
-      `}</style>
-
       <h3 className="mb-3">My Tasks</h3>
 
       {/* -------- FILTERS -------- */}
@@ -176,9 +259,7 @@ export default function EmployeeTask() {
           >
             {[now.getFullYear(), now.getFullYear() - 1, now.getFullYear() - 2].map(
               (y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
+                <option key={y} value={y}>{y}</option>
               )
             )}
           </select>
@@ -193,16 +274,14 @@ export default function EmployeeTask() {
             <option value="all">All Months</option>
             {[...Array(12)].map((_, i) => (
               <option key={i} value={i + 1}>
-                {new Date(0, i).toLocaleString("default", {
-                  month: "long",
-                })}
+                {new Date(0, i).toLocaleString("default", { month: "long" })}
               </option>
             ))}
           </select>
         </div>
       </div>
 
-      {/* -------- TABLE -------- */}
+      {/* -------- TABLE (UNCHANGED) -------- */}
       <div className="table-responsive">
         <table className="table table-bordered table-hover align-middle">
           <thead className="table-dark">
@@ -214,8 +293,8 @@ export default function EmployeeTask() {
               <th>Due Date</th>
               <th>Time Spent</th>
               <th>Status</th>
-              <th  className="status-action-col">Status Action</th>
-              <th className="actions-col">Actions</th>
+              <th>Status Action</th>
+              <th>Actions</th>
               <th>Updated</th>
             </tr>
           </thead>
@@ -223,7 +302,7 @@ export default function EmployeeTask() {
           <tbody>
             {filteredTasks.length === 0 && (
               <tr>
-                <td colSpan="9" className="text-center text-muted">
+                <td colSpan="10" className="text-center text-muted">
                   No tasks found
                 </td>
               </tr>
@@ -232,47 +311,20 @@ export default function EmployeeTask() {
             {filteredTasks.map((t, index) => (
               <tr key={t._id}>
                 <td>{index + 1}</td>
-
-                {/* ✅ TASK NAME FIX */}
-                <td>{t.taskName || t.title || "-"}</td>
-
-                {/* ✅ PROJECT SAFE */}
-                <td>{t.projectName || t.projectId?.projectName || "-"}</td>
+                <td>{t.title}</td>
+                <td>{t.projectId?.projectName || "-"}</td>
+                <td>{t.priority}</td>
+                <td>{t.dueDate ? new Date(t.dueDate).toLocaleDateString() : "-"}</td>
 
                 <td>
-                  <span
-                    className={`badge ${t.priority === "High"
-                        ? "bg-danger"
-                        : t.priority === "Medium"
-                          ? "bg-warning text-dark"
-                          : "bg-secondary"
-                      }`}
-                  >
-                    {t.priority}
-                  </span>
+                  {formatMinutes(
+                    (t.timeSpent || 0) + (t.running ? t.liveSeconds : 0)
+                  )}
                 </td>
+
+                <td>{t.status}</td>
 
                 <td>
-                  {t.dueDate
-                    ? new Date(t.dueDate).toLocaleDateString()
-                    : "-"}
-                </td>
-
-                <td>{formatMinutes(t.timeSpent)}</td>
-
-                <td>
-                  <span
-                    className={`badge ${t.status === "Completed"
-                        ? "bg-success"
-                        : t.status === "In Progress"
-                          ? "bg-primary"
-                          : "bg-secondary"
-                      }`}
-                  >
-                    {t.status}
-                  </span>
-                </td>
-                <td className="status-action-col">
                   <div className="dropdown">
                     <button
                       className="btn btn-outline-secondary btn-sm dropdown-toggle"
@@ -285,7 +337,14 @@ export default function EmployeeTask() {
                         <li key={s}>
                           <button
                             className="dropdown-item"
-                            onClick={() => handleStatusChange(t._id, s)}
+                            disabled={t.status === "Completed" && s === "Completed"}
+                            onClick={() => {
+                              if (s === "Completed") {
+                                submitCompletedDirectly(t);
+                              } else {
+                                openStatusModal(t, s);
+                              }
+                            }}
                           >
                             {s}
                           </button>
@@ -295,13 +354,12 @@ export default function EmployeeTask() {
                   </div>
                 </td>
 
-
-                <td className="actions-col">
-                  <div className="d-flex gap-1 flex-wrap">
+                <td>
+                  <div className="d-flex gap-2">
                     {!t.running ? (
                       <button
                         className="btn btn-outline-primary btn-sm"
-                        disabled={t.status === "Completed"}
+                        disabled={tasks.some(x => x.running)}
                         onClick={() => startTimer(t)}
                       >
                         ▶ Start
@@ -321,27 +379,88 @@ export default function EmployeeTask() {
                     >
                       View
                     </button>
-
-                    <button
-                      className="btn btn-outline-secondary btn-sm"
-                      onClick={fetchTasks}
-                    >
-                      ⟳
-                    </button>
                   </div>
                 </td>
 
-
                 <td>
-                  {t.updatedAt
-                    ? new Date(t.updatedAt).toLocaleString()
-                    : "-"}
+                  <div>
+                    <div className="fw-semibold">
+                      {getStatusInfo(t)}
+                    </div>
+
+                    <small className="text-muted">
+                      {t.updatedAt
+                        ? new Date(t.updatedAt).toLocaleString()
+                        : ""}
+                    </small>
+                  </div>
                 </td>
+
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* -------- STATUS MODAL -------- */}
+      {showModal && (
+        <div className="modal show d-block" style={{ background: "#0006" }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5>Update Status → {statusForm.status}</h5>
+                <button className="btn-close" onClick={() => setShowModal(false)} />
+              </div>
+
+              <div className="modal-body">
+                <textarea
+                  className="form-control mb-2"
+                  placeholder="Reason"
+                  value={statusForm.reason}
+                  onChange={(e) =>
+                    setStatusForm({ ...statusForm, reason: e.target.value })
+                  }
+                />
+
+                {statusForm.status === "In Progress" && (
+                  <input
+                    type="number"
+                    className="form-control mb-2"
+                    placeholder="% Completed"
+                    min="1"
+                    max="100"
+                    value={statusForm.progress}
+                    onChange={(e) =>
+                      setStatusForm({ ...statusForm, progress: e.target.value })
+                    }
+                  />
+                )}
+
+                <input
+                  type="file"
+                  className="form-control"
+                  accept=".jpg,.png,.pdf"
+                  onChange={(e) =>
+                    setStatusForm({ ...statusForm, file: e.target.files[0] })
+                  }
+                />
+              </div>
+
+              <div className="modal-footer">
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setShowModal(false)}
+                >
+                  Cancel
+                </button>
+                <button className="btn btn-primary" onClick={submitStatus}>
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

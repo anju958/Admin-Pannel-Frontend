@@ -3,7 +3,8 @@ import axios from "axios";
 import { API_URL } from "../../../config";
 import { useParams, useNavigate } from "react-router-dom";
 
-const fmt = (seconds) => {
+/* ---------------- FORMAT TIME ---------------- */
+const fmt = (seconds = 0) => {
   const mins = Math.floor(seconds / 60);
   const hrs = Math.floor(mins / 60);
   const rmins = mins % 60;
@@ -13,136 +14,115 @@ const fmt = (seconds) => {
 export default function EmployeeTaskView() {
   const { taskId } = useParams();
   const navigate = useNavigate();
+  const intervalRef = useRef(null);
+  const [adminMessages, setAdminMessages] = useState([]);
 
   const [task, setTask] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [commentText, setCommentText] = useState("");
-  const [file, setFile] = useState(null);
-  const intervalRef = useRef(null);
 
-  const user = JSON.parse(localStorage.getItem("user")) || {};
-  const employeeId = user.employeeId || user._id;
-
-  // Load task details
+  /* ---------------- LOAD TASK ---------------- */
   const loadTask = async () => {
     try {
       const res = await axios.get(`${API_URL}/api/tasks/view/${taskId}`);
       const t = res.data.task;
 
-      // Handle missing id / _id
-      t._id = t._id || t.id;
-
-      // Detect running
       const last =
-        t.timeLogs && t.timeLogs.length
+        t.timeLogs?.length > 0
           ? t.timeLogs[t.timeLogs.length - 1]
           : null;
 
-      t.lastLogRunning = last && last.startAt && !last.endAt;
+      t.running = last && !last.endAt;
+      t.runningStartAt = t.running ? last.startAt : null;
 
       setTask(t);
     } catch (err) {
       console.error("TASK LOAD ERROR:", err);
       setTask(null);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
+  /* ---------------- INITIAL LOAD ---------------- */
   useEffect(() => {
     loadTask();
     return () => intervalRef.current && clearInterval(intervalRef.current);
   }, [taskId]);
 
-  // ---------------- START TIMER ----------------
+  /* ---------------- LIVE TIMER ---------------- */
+  useEffect(() => {
+    if (!task?.running || !task.runningStartAt) return;
+
+    intervalRef.current = setInterval(() => {
+      setTask((prev) => {
+        if (!prev?.running) return prev;
+
+        const liveSeconds = Math.floor(
+          (Date.now() - new Date(prev.runningStartAt)) / 1000
+        );
+
+        return { ...prev, liveSeconds };
+      });
+    }, 1000);
+
+    return () => clearInterval(intervalRef.current);
+  }, [task?.running]);
+
+  /* ---------------- START TIMER ---------------- */
   const startTimer = async () => {
     try {
       await axios.post(`${API_URL}/api/tasks/timerStart/${task._id}`);
-
-      // Start local ticking
-      intervalRef.current = setInterval(() => {
-        setTask((prev) =>
-          prev ? { ...prev, timeSpent: (prev.timeSpent || 0) + 1 } : prev
-        );
-      }, 1000);
-
       loadTask();
     } catch (err) {
-      console.error("START ERROR", err);
-      alert("Cannot start timer");
+      alert(err?.response?.data?.message || "Cannot start timer");
     }
   };
 
-  // ---------------- STOP TIMER ----------------
+  /* ---------------- STOP TIMER ---------------- */
   const stopTimer = async () => {
     try {
       await axios.post(`${API_URL}/api/tasks/stopTimer/${task._id}`);
-
-      if (intervalRef.current) clearInterval(intervalRef.current);
-
+      clearInterval(intervalRef.current);
       loadTask();
     } catch (err) {
-      console.error("STOP ERROR", err);
-      alert("Cannot stop timer");
+      alert(err?.response?.data?.message || "Cannot stop timer");
     }
   };
 
-  // ---------------- ADD COMMENT ----------------
-  const addComment = async () => {
-    if (!commentText && !file) {
-      alert("Write a comment or upload file");
-      return;
-    }
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user")) || {};
+    const employeeId = user.employeeId || user._id;
 
-    const form = new FormData();
-    form.append("userId", employeeId);
-    form.append("text", commentText);
-    form.append("visibleToClient", false);
+    if (!employeeId || !taskId) return;
 
-    if (file) form.append("attachment", file);
+    axios
+      .get(`${API_URL}/api/notifications/task/${taskId}/employee/${employeeId}`)
+      .then((res) => {
+        console.log("ADMIN MESSAGE RESPONSE:", res.data);
+        setAdminMessages(res.data || []);
+      })
+      .catch(() => setAdminMessages([]));
+  }, [taskId]);
 
-    try {
-      await axios.post(`${API_URL}/api/tasks/comment/${taskId}`, form, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
 
-      setCommentText("");
-      setFile(null);
-
-      loadTask();
-    } catch (err) {
-      console.error("COMMENT ERROR:", err);
-      alert("Comment upload failed");
-    }
-  };
-
-  // ---------------- VIEW UI ----------------
+  /* ---------------- UI STATES ---------------- */
   if (loading) return <h3 className="text-center mt-5">Loading task…</h3>;
   if (!task) return <h3 className="text-center mt-5">Task Not Found</h3>;
+
+  const totalSeconds =
+    (task.timeSpent || 0) + (task.running ? task.liveSeconds || 0 : 0);
+
+  /* 🔑 Latest Status Update */
+  const lastStatus =
+    task.statusHistory?.length > 0
+      ? task.statusHistory[task.statusHistory.length - 1]
+      : null;
 
   return (
     <div className="container mt-4">
 
-      {/* Smooth Scroll */}
-      <style>{`
-        .scroll-area {
-          max-height: calc(100vh - 130px);
-          overflow-y: auto;
-          padding-right: 10px;
-        }
-        .scroll-area::-webkit-scrollbar {
-          width: 6px;
-        }
-        .scroll-area::-webkit-scrollbar-thumb {
-          background: #ccc;
-          border-radius: 4px;
-        }
-      `}</style>
-
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h3>
-          {task.title} — <span className="text-muted">{task.TaskId}</span>
-        </h3>
-
+        <h3>{task.title}</h3>
         <button className="btn btn-secondary" onClick={() => navigate(-1)}>
           ← Back
         </button>
@@ -151,9 +131,9 @@ export default function EmployeeTaskView() {
       <div className="row">
 
         {/* LEFT SIDE */}
-        <div className="col-md-8 scroll-area">
+        <div className="col-md-8">
 
-          {/* Details */}
+          {/* DETAILS */}
           <div className="card mb-3">
             <div className="card-header bg-dark text-white">Details</div>
             <div className="card-body">
@@ -164,35 +144,55 @@ export default function EmployeeTaskView() {
               <p><strong>Description:</strong> {task.description || "-"}</p>
             </div>
           </div>
+          {/* 🔔 ADMIN MESSAGE */}
+          {adminMessages.length > 0 && (
+            <div className="card mb-3 border-warning">
+              <div className="card-header bg-warning text-dark">
+                🔔 Messages from Admin
+              </div>
 
-          {/* Time Tracking */}
+              <div className="card-body">
+                {adminMessages.map((msg, index) => (
+                  <div key={index} className="border rounded p-2 mb-2">
+                    <p className="mb-1">
+                      <strong>{msg.title}</strong>
+                    </p>
+                    <p>{msg.message}</p>
+                    <p className="text-muted small">
+                      {new Date(msg.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {/* TIME TRACKING */}
           <div className="card mb-3">
             <div className="card-header">Time Tracking</div>
             <div className="card-body">
-              <p><strong>Total Time:</strong> {fmt(task.timeSpent || 0)}</p>
+              <p><strong>Total Time:</strong> {fmt(totalSeconds)}</p>
 
-              {!task.lastLogRunning ? (
-                <button className="btn btn-primary me-2" onClick={startTimer}>
+              {!task.running ? (
+                <button className="btn btn-primary" onClick={startTimer}>
                   ▶ Start Timer
                 </button>
               ) : (
-                <button className="btn btn-danger me-2" onClick={stopTimer}>
+                <button className="btn btn-danger" onClick={stopTimer}>
                   ■ Stop Timer
                 </button>
               )}
             </div>
           </div>
 
-          {/* Time Logs */}
+          {/* TIME LOGS */}
           <div className="card mb-3">
             <div className="card-header">Time Logs</div>
             <div className="card-body">
               {!task.timeLogs?.length && <p>No logs recorded yet.</p>}
 
-              {task.timeLogs?.map((log, i) => (
+              {task.timeLogs.map((log, i) => (
                 <div key={i} className="border rounded p-2 mb-2">
-                  <strong>{new Date(log.startAt).toLocaleString()}</strong>
-                  {" → "}
+                  <strong>{new Date(log.startAt).toLocaleString()}</strong>{" → "}
                   {log.endAt
                     ? new Date(log.endAt).toLocaleString()
                     : "Running..."}
@@ -203,58 +203,9 @@ export default function EmployeeTaskView() {
             </div>
           </div>
 
-          {/* Comments */}
-          <div className="card mb-3">
-            <div className="card-header">Comments</div>
-
-            <div className="card-body">
-
-              <textarea
-                className="form-control"
-                rows="3"
-                placeholder="Write your comment..."
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-              />
-
-              <input
-                type="file"
-                className="form-control mt-2"
-                onChange={(e) => setFile(e.target.files[0])}
-              />
-
-              <button className="btn btn-primary mt-2" onClick={addComment}>
-                Add Comment
-              </button>
-
-              <hr />
-
-              {task.comments?.map((c, i) => (
-                <div key={i} className="border rounded p-2 mb-2">
-                  <strong>{c?.user?.ename || "User"}</strong>
-                  <small className="text-muted">
-                    {" "}
-                    ({new Date(c.createdAt).toLocaleString()})
-                  </small>
-                  <p>{c.text}</p>
-
-                  {c.attachment && (
-                    <a
-                      href={`${API_URL}/${c.attachment}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      📎 View Attachment
-                    </a>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
         </div>
 
-        {/* RIGHT SIDE */}
+        {/* RIGHT SIDE (ORANGE AREA FIXED) */}
         <div className="col-md-4">
           <div className="card">
             <div className="card-header bg-primary text-white">Meta</div>
@@ -262,11 +213,47 @@ export default function EmployeeTaskView() {
 
               <p><strong>Status:</strong> {task.status}</p>
               <p><strong>Priority:</strong> {task.priority}</p>
-
               <p><strong>Start Date:</strong> {task.startDate?.split("T")[0]}</p>
               <p><strong>Due Date:</strong> {task.dueDate?.split("T")[0]}</p>
 
               <hr />
+
+              {/* 🔶 STATUS REASON */}
+              {lastStatus && (
+                <>
+                  <h6>Status Update</h6>
+
+                  {lastStatus.reason && (
+                    <p><strong>Reason:</strong> {lastStatus.reason}</p>
+                  )}
+
+                  {/* ✅ SHOW PROGRESS */}
+                  {lastStatus.progress !== undefined && (
+                    <p><strong>Progress:</strong> {lastStatus.progress}%</p>
+                  )}
+
+                  {/* ✅ SHOW ATTACHMENT */}
+                  {lastStatus?.attachment && (
+                    <p>
+                      <strong>Attachment:</strong>{" "}
+                      <a
+                        href={`${API_URL}/api/tasks/task/status-file/${task._id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-sm btn-outline-primary ms-2"
+                      >
+                        View File
+                      </a>
+                    </p>
+                  )}
+
+                  <p className="text-muted small">
+                    Updated: {new Date(lastStatus.updatedAt).toLocaleString()}
+                  </p>
+
+                  <hr />
+                </>
+              )}
 
               <p><strong>Created:</strong> {new Date(task.createdAt).toLocaleString()}</p>
               <p><strong>Updated:</strong> {new Date(task.updatedAt).toLocaleString()}</p>

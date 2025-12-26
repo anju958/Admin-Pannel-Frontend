@@ -265,10 +265,6 @@ function ClientLead() {
                 <option value="">-- Select Project Type --</option>
                 <option value="One-time Project">One-time Project</option>
                 <option value="Recurring Project">Recurring Project</option>
-                <option value="Dedicated Resource">Dedicated Resource</option>
-                <option value="Time & Material">Time & Material</option>
-                <option value="Fixed Price">Fixed Price</option>
-                <option value="Maintenance & Support">Maintenance & Support</option>
                 <option value="Other">Other</option>
               </select>
               {formData.project_type === "Other" && (
