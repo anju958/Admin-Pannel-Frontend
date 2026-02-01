@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_URL } from "../../../config";
+import axiosInstance from '../../../../../frontend/src/utils/axiosInstance'
 
 function UpdateEmp() {
   const { employeeId } = useParams();
@@ -84,7 +85,7 @@ function UpdateEmp() {
     if (imgFile) data.append("img", imgFile);
 
     try {
-      await axios.put(
+      await axiosInstance.put(
         `${API_URL}/api/updateSignUser/${employeeId}`,
         data,
         { headers: { "Content-Type": "multipart/form-data" } }

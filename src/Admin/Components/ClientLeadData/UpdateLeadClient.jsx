@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Select from "react-select";
 import { API_URL } from "../../../config";
+import axiosInstance from '../../../../../frontend/src/utils/axiosInstance'
 
 function UpdateLeadClient() {
   const { leadId } = useParams();
@@ -129,7 +130,7 @@ function UpdateLeadClient() {
 
     try {
       setLoading(true);
-      await axios.put(`${API_URL}/api/updateClientLead/${leadId}`, formData);
+      await axiosInstance.put(`${API_URL}/api/updateClientLead/${leadId}`, formData);
       alert("Lead updated successfully!");
       navigate("/admin/leads");
     } catch (err) {

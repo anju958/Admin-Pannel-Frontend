@@ -2,6 +2,7 @@ import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_URL } from "../../../config";
+import axiosInstance from '../../../../../frontend/src/utils/axiosInstance'
 
 function AddServices() {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ function AddServices() {
     }
 
     try {
-      const res = await axios.post(`${API_URL}/api/addService`, formData);
+      const res = await axiosInstance.post(`${API_URL}/api/addService`, formData);
 
       // ✅ Backend always sends { success, message }
       if (res.data.success) {

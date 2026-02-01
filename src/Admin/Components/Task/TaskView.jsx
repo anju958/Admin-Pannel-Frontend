@@ -13,6 +13,7 @@ const TaskView = () => {
   const [loading, setLoading] = useState(true);
   const [employees, setEmployees] = useState([]);
   const [adminMessages, setAdminMessages] = useState([]);
+  const [statusHistory, setStatusHistory] = useState([]);
 
   const [commentText, setCommentText] = useState("");
 
@@ -52,6 +53,23 @@ const TaskView = () => {
       console.error("ADMIN MESSAGE LOAD ERROR:", err);
     }
   };
+  const loadStatusHistory = async () => {
+    try {
+      const res = await axios.get(
+        `${API_URL}/api/tasks/statusHistoryForAdmin/${taskId}`
+      );
+      setStatusHistory(res.data.statusHistory || []);
+    } catch (err) {
+      console.error("STATUS HISTORY LOAD ERROR:", err);
+    }
+  };
+
+  useEffect(() => {
+    loadEmployees();
+    loadTask();
+    loadAdminMessages();
+    loadStatusHistory(); // ✅ ADD
+  }, []);
 
   useEffect(() => {
     loadEmployees();
@@ -420,6 +438,53 @@ const TaskView = () => {
               <p><strong>Updated:</strong> {new Date(task.updatedAt).toLocaleString()}</p>
             </div>
           </div>
+          {/* EMPLOYEE STATUS RESPONSES */}
+          <div className="card mb-4">
+            <div className="card-header bg-warning">
+              Employee Status Updates
+            </div>
+
+            <div className="card-body">
+              {statusHistory.length === 0 ? (
+                <p className="text-muted">No status updates from employee.</p>
+              ) : (
+                statusHistory.map((s, i) => (
+                  <div key={i} className="border rounded p-3 mb-3">
+                    <div className="d-flex justify-content-between">
+                      <strong>Status: {s.status}</strong>
+                      <small className="text-muted">
+                        {new Date(s.updatedAt).toLocaleString()}
+                      </small>
+                    </div>
+
+                    {s.reason && (
+                      <p className="mt-2 mb-1">
+                        <strong>Reason:</strong> {s.reason}
+                      </p>
+                    )}
+
+                    {typeof s.progress === "number" && (
+                      <p className="mb-1">
+                        <strong>Progress:</strong> {s.progress}%
+                      </p>
+                    )}
+
+                    {s.attachment && (
+                      <a
+                        href={`${API_URL}/api/tasks/admin/status-attachment/${task._id}/${i}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-sm btn-outline-primary mt-2"
+                      >
+                        View Attachment
+                      </a>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
 
         </div>
 

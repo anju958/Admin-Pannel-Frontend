@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom'
 import { API_URL } from "../../../config";
+import axiosInstance from '../../../../../frontend/src/utils/axiosInstance'
 
 function AddJobs() {
   const navigate = useNavigate();
@@ -123,7 +124,7 @@ function AddJobs() {
     }
 
     try {
-      const res = await axios.post(`${API_URL}/api/addJob`, formData);
+      const res = await axiosInstance.post(`${API_URL}/api/addJob`, formData);
       alert("✅ Job Added Successfully!");
       console.log("Form submitted:", res.data);
 

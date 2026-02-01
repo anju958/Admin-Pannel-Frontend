@@ -8,7 +8,10 @@ export const ROLE_PRESETS = {
     "proposals",
     "projects",
     "attendance",
-    "trainees"
+    "trainees",
+    "employees",
+    "jobOpenings",
+    "tasks"
   ],
 
   hr: [
@@ -25,6 +28,7 @@ export const ROLE_PRESETS = {
     "invoices",
     "proposals",
     "attendance",
+    "employees",
     "salaries"
   ]
 };

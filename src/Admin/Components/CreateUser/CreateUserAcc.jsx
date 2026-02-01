@@ -117,7 +117,9 @@ function CreateUserAcc({ editUser, closeForm, refresh }) {
 
           <PermissionSelector
             permissions={form.permissions}
-            setPermissions={perms => setForm(f => ({ ...f, permissions: perms }))}
+            setPermissions={(perms) =>
+              setForm((f) => ({ ...f, permissions: perms }))
+            }
             role={form.role}
           />
 

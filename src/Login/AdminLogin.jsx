@@ -164,7 +164,7 @@ function AdminLogin() {
               <option value="superadmin">Super Admin</option>
               <option value="admin">Admin</option>
               <option value="hr">HR</option>
-              <option value="account">Accountant</option>
+              <option value="accountant">Accountant</option>
               <option value="manager">Manager</option>
             </select>
 

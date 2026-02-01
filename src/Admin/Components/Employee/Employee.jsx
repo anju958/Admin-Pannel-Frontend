@@ -4,6 +4,7 @@ import axios from "axios";
 import * as XLSX from "xlsx";
 import { API_URL } from "../../../config";
 import { AuthContext } from "../../../Context/AuthContext";
+import axiosInstance from '../../../../../frontend/src/utils/axiosInstance'
 
 // ✅ Permission Check Helper
 const canDo = (user, module, action) => {
@@ -40,7 +41,7 @@ function Employee() {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`${API_URL}/api/deleteSignUpUser/${employeeId}`);
+      await axiosInstance.delete(`${API_URL}/api/deleteSignUpUser/${employeeId}`);
       setEmployee(employee.filter((emp) => emp.employeeId !== employeeId));
       alert("Employee deleted successfully!");
     } catch (error) {

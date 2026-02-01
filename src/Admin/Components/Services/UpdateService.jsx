@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useParams, useNavigate } from 'react-router-dom'
 import { API_URL } from "../../../config";
+import axiosInstance from '../../../../../frontend/src/utils/axiosInstance'
 
 function UpdateService() {
   const { id } = useParams()
@@ -36,7 +37,7 @@ function UpdateService() {
   const handleUpdate = async (e) => {
     e.preventDefault()
     try {
-      await axios.put(`${API_URL}/api/UpdateService/${id}`, {
+      await axiosInstance.put(`${API_URL}/api/UpdateService/${id}`, {
         serviceName,
         servicePrice,
         deptId

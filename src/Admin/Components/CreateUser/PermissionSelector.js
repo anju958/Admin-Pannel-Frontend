@@ -18,36 +18,33 @@ const MODULE_LABELS = {
   salaries: "Salaries",
   noticeBoard: "Notice Board",
   company: "Company Settings",
+  tasks: "Tasks",
 };
 
 const ACTIONS = ["Add", "Edit", "View", "Delete"];
 
 export default function PermissionSelector({ permissions, setPermissions, role }) {
-  // Determine which modules should show
   let allowedModules = [];
 
   if (!role) {
-    allowedModules = []; // no role selected yet
+    allowedModules = [];
   } else if (ROLE_PRESETS[role] === "ALL") {
     allowedModules = Object.keys(MODULE_LABELS);
   } else {
-    allowedModules = ROLE_PRESETS[role];
+    allowedModules = ROLE_PRESETS[role] || [];
   }
 
   const toggle = (moduleKey, action) => {
     const current = permissions[moduleKey] || [];
     const updated = current.includes(action)
-      ? current.filter(a => a !== action)
+      ? current.filter((a) => a !== action)
       : [...current, action];
 
     setPermissions({ ...permissions, [moduleKey]: updated });
   };
 
   const selectAll = (moduleKey) => {
-    setPermissions({
-      ...permissions,
-      [moduleKey]: [...ACTIONS],
-    });
+    setPermissions({ ...permissions, [moduleKey]: [...ACTIONS] });
   };
 
   const deselectAll = (moduleKey) => {
@@ -60,7 +57,6 @@ export default function PermissionSelector({ permissions, setPermissions, role }
     <div className="card mt-3">
       <div className="card-header fw-bold">Module Permissions</div>
       <div className="card-body">
-
         {allowedModules.length === 0 && (
           <p className="text-muted">Select a role to see permissions.</p>
         )}
@@ -71,10 +67,18 @@ export default function PermissionSelector({ permissions, setPermissions, role }
               <h6 className="mb-0">{MODULE_LABELS[key]}</h6>
 
               <div>
-                <button className="btn btn-sm btn-outline-primary me-2" type="button" onClick={() => selectAll(key)}>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-primary me-2"
+                  onClick={() => selectAll(key)}
+                >
                   Select All
                 </button>
-                <button className="btn btn-sm btn-outline-secondary" type="button" onClick={() => deselectAll(key)}>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  onClick={() => deselectAll(key)}
+                >
                   Deselect All
                 </button>
               </div>
@@ -95,7 +99,6 @@ export default function PermissionSelector({ permissions, setPermissions, role }
             </div>
           </div>
         ))}
-
       </div>
     </div>
   );

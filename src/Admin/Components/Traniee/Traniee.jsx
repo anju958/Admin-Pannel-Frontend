@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_URL } from "../../../config";
 import { AuthContext } from "../../../Context/AuthContext";
+import axiosInstance from '../../../../../frontend/src/utils/axiosInstance'
 
 // Permission helpers
 const canDo = (user, module, action) => {
@@ -39,7 +40,7 @@ function Trainee() {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`${API_URL}/api/deleteSignUpUser/${employeeId}`);
+      await axiosInstance.delete(`${API_URL}/api/deleteSignUpUser/${employeeId}`);
       setEmployee((prev) => prev.filter((emp) => emp.employeeId !== employeeId));
       alert("Trainee deleted successfully!");
     } catch (error) {

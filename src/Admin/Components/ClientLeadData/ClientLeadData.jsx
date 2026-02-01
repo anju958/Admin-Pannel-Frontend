@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_URL } from "../../../config";
+import axiosInstance from '../../../../../frontend/src/utils/axiosInstance'
 
 function ClientLead() {
   const navigate = useNavigate();
@@ -121,7 +122,7 @@ function ClientLead() {
 
     try {
       setLoading(true);
-      await axios.post(`${API_URL}/api/genClientLead`, formData);
+      await axiosInstance.post(`${API_URL}/api/genClientLead`, formData);
       alert("Lead Added Successfully!");
       navigate("/admin/leads");
     } catch (err) {

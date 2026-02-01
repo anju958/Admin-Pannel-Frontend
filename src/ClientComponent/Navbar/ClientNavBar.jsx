@@ -1,6 +1,7 @@
 import React from 'react';
 import { FaUserCircle } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
+import UniversalNotificationBell from "../../Admin/Components/Common/UniversalNotificationBell";
 
 function ClientNavBar() {
   const client = JSON.parse(localStorage.getItem("clientUser"));
@@ -9,6 +10,7 @@ function ClientNavBar() {
   const handleLogout = () => {
     localStorage.removeItem("clientToken");
     localStorage.removeItem("clientUser");
+    localStorage.removeItem("token"); // Also clear general token if any
     navigate("/client/ClientPage");
   };
 
@@ -33,7 +35,7 @@ function ClientNavBar() {
         <span
           style={{
             fontWeight: "800",
-            fontSize: "2rem",
+            fontSize: "1.8rem",
             color: "white",
             letterSpacing: "2px"
           }}
@@ -42,8 +44,12 @@ function ClientNavBar() {
         </span>
       </div>
 
-      {/* PROFILE DROPDOWN */}
-      <div>
+      {/* RIGHT SIDE */}
+      <div className="d-flex align-items-center gap-3">
+        {/* 🔔 UNIVERSAL NOTIFICATION BELL */}
+        <UniversalNotificationBell />
+
+        {/* PROFILE DROPDOWN */}
         <div className="dropdown">
           <button
             className="btn dropdown-toggle d-flex align-items-center px-3 fw-bold"
@@ -61,7 +67,7 @@ function ClientNavBar() {
             }}
           >
             <FaUserCircle size={28} className="me-2 text-primary" />
-            <span>{client?.leadName || "Client"}</span>
+            <span className="d-none d-sm-inline">{client?.leadName || "Client"}</span>
           </button>
 
           <ul className="dropdown-menu dropdown-menu-end shadow">

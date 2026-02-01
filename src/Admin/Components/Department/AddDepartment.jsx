@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -11,7 +10,18 @@ function AddDepartment() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${API_URL}/api/addDepartment`, { deptName });
+      const token = localStorage.getItem("token");
+
+      const res = await axios.post(
+        `${API_URL}/api/addDepartment`,
+        { deptName },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
       alert(res.data.message);
       navigate('/admin/department');
     } catch (error) {
@@ -29,12 +39,10 @@ function AddDepartment() {
         <div className="card shadow-lg border-0 rounded-4">
           <div className="card-body p-5">
 
-            {/* Heading */}
             <h3 className="fw-bold text-center mb-4" style={{ color: "#1f3b98" }}>
               ➕ Add New Department
             </h3>
 
-            {/* Form */}
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label className="form-label fw-semibold">Department Name</label>

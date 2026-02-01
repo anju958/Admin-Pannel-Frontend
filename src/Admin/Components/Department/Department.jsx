@@ -24,19 +24,28 @@ function Department() {
     fetchDepartments()
   }, [])
 
- 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this department?")) {
-      try {
-        await axios.delete(`${API_URL}/api/deleteDepartment/${id}`)
-        alert("Department deleted successfully")
-        fetchDepartments() 
-      } catch (error) {
-        console.error(error)
-        alert("Error deleting department")
-      }
+  if (window.confirm("Are you sure you want to delete this department?")) {
+    try {
+      const token = localStorage.getItem("token"); // 🔑 get token
+
+      await axios.delete(
+        `${API_URL}/api/deleteDepartment/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // 🔑 send token
+          },
+        }
+      );
+
+      alert("Department deleted successfully");
+      fetchDepartments();
+    } catch (error) {
+      console.error(error);
+      alert("Error deleting department");
     }
   }
+};
 
  
   const handleUpdate = (id) => {

@@ -6,10 +6,8 @@ import { API_URL } from "../../../config";
 function UpdateDepartment() {
   const { id } = useParams();
   const navigate = useNavigate();
-
   const [deptName, setDeptName] = useState("");
 
-  // Fetch department details by ID
   useEffect(() => {
     axios.get(`${API_URL}/api/getDepartmentById/${id}`)
       .then(res => {
@@ -17,19 +15,28 @@ function UpdateDepartment() {
           setDeptName(res.data.deptName);
         }
       })
-      .catch(err => {
-        console.error(err);
+      .catch(() => {
         alert("Error fetching department details");
       });
   }, [id]);
 
-  // Handle update
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`${API_URL}/api/updateDepartment/${id}`, { deptName });
+      const token = localStorage.getItem("token");
+
+      await axios.put(
+        `${API_URL}/api/updateDepartment/${id}`,
+        { deptName },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
       alert("Department updated successfully");
-      navigate("/admin/department"); // ✅ go back to list
+      navigate("/admin/department");
     } catch (error) {
       console.error(error);
       alert("Error updating department");

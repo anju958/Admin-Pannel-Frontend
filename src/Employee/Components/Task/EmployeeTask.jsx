@@ -216,6 +216,10 @@ export default function EmployeeTask() {
   };
 
   const submitStatus = async () => {
+    if (!currentTask?._id) {
+      alert("Task not selected");
+      return;
+    }
     const form = new FormData();
     form.append("status", statusForm.status);
     form.append("reason", statusForm.reason);

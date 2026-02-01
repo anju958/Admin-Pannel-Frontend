@@ -4,6 +4,7 @@ import axios from "axios";
 import { API_URL } from "../../../config";
 import { formatDate } from "../../../utils/dateFormatter";
 import { AuthContext } from "../../../Context/AuthContext";
+import axiosInstance from '../../../../../frontend/src/utils/axiosInstance'
 
 // ✅ Permission helper functions
 const canDo = (user, module, action) => {
@@ -71,7 +72,7 @@ function Opening() {
 
     if (window.confirm("Are you sure you want to delete this job?")) {
       try {
-        await axios.delete(`${API_URL}/api/deleteJob/${jobId}`);
+        await axiosInstance.delete(`${API_URL}/api/deleteJob/${jobId}`);
         setJobs((prev) => prev.filter((job) => job._id !== jobId));
         alert("Job deleted successfully");
       } catch (error) {

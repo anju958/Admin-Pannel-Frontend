@@ -1,64 +1,45 @@
-// import React, { createContext, useState, useEffect } from "react";
-// import axios from "axios";
-// import { API_URL } from "../config";
-
-// export const AuthContext = createContext();
-
-// export const AuthProvider = ({ children }) => {
-//   const [user, setUser] = useState(null);
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     const token = localStorage.getItem("token");
-//     if (!token) {
-//       setLoading(false);
-//       return;
-//     }
-//     // Fetch user using token from backend
-//     axios
-//       .get(`${API_URL}/api/users/me`, {
-//         headers: { Authorization: `Bearer ${token}` },
-//       })
-//       .then((res) => {
-//         setUser(res.data.user);
-//       })
-//       .catch(() => {
-//         localStorage.removeItem("token");
-//         setUser(null);
-//       })
-//       .finally(() => setLoading(false));
-//   }, []);
-
-//   const login = ({ token, user }) => {
-//     localStorage.setItem("token", token);
-//     setUser(user);
-//   };
-
-//   const logout = () => {
-//     localStorage.removeItem("token");
-//     setUser(null);
-//   };
-
-//   return (
-//     <AuthContext.Provider value={{ user, login, logout, loading }}>
-//       {children}
-//     </AuthContext.Provider>
-//   );
-// };
-
 import React, { createContext, useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { API_URL } from "../config";
+import { initSocket, disconnectSocket } from "../socket";
+
 
 export const AuthContext = createContext();
+export const useAuth = () => useContext(AuthContext);
 
-export const useAuth = () => useContext(AuthContext); // 👈 helper for other contexts (like ChatContext)
+/* ================================
+   🔧 NORMALIZE PERMISSIONS (KEY FIX)
+================================ */
+const normalizePermissions = (permissions = {}) => {
+  const normalized = {};
+
+  Object.keys(permissions || {}).forEach((key) => {
+    const cleanKey = key.toLowerCase().replace(/\s+/g, "");
+
+    const value = permissions[key];
+
+    // ARRAY → ["View","Add"]
+    if (Array.isArray(value)) {
+      normalized[cleanKey] = value;
+    }
+
+    // OBJECT → { view:true }
+    else if (typeof value === "object" && value !== null) {
+      normalized[cleanKey] = value;
+    }
+  });
+
+  return normalized;
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem("token") || null); // 👈 add token state
+  const [token, setToken] = useState(localStorage.getItem("token"));
   const [loading, setLoading] = useState(true);
 
+  /* ================================
+     LOAD USER FROM TOKEN
+  ================================ */
   useEffect(() => {
     if (!token) {
       setLoading(false);
@@ -70,7 +51,12 @@ export const AuthProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        setUser(res.data.user);
+        const fetchedUser = res.data.user;
+
+        setUser({
+          ...fetchedUser,
+          permissions: normalizePermissions(fetchedUser.permissions),
+        });
       })
       .catch(() => {
         localStorage.removeItem("token");
@@ -80,23 +66,78 @@ export const AuthProvider = ({ children }) => {
       .finally(() => setLoading(false));
   }, [token]);
 
+  /* ================================
+   INIT SOCKET AFTER LOGIN
+================================ */
+useEffect(() => {
+  if (!token || !user) return;
+
+  // initialize socket once
+  const socket = initSocket(token);
+
+  // 🔔 join admin room ONLY for admins
+  if (user.role === "admin") {
+    socket.emit("join-admin");
+  }
+
+  return () => {
+    // optional: disconnect on logout
+    // disconnectSocket();
+  };
+}, [token, user]);
+
+  /* ================================
+     LOGIN
+  ================================ */
   const login = ({ token, user }) => {
     localStorage.setItem("token", token);
-    setToken(token); // 👈 also update token state
-    setUser(user);
+
+    setToken(token);
+    setUser({
+      ...user,
+      permissions: normalizePermissions(user.permissions),
+    });
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    setUser(null);
-    setToken(null);
+useEffect(() => {
+  if (!token || !user) return;
+
+  // 1️⃣ initialize socket
+  const socket = initSocket(token);
+
+  // 2️⃣ join role-based room
+  if (user.role) {
+    socket.emit("join-role", user.role);
+  }
+
+  return () => {
+    // optional cleanup on logout
+    // disconnectSocket();
   };
+}, [token, user]);
+
+
+  /* ================================
+     LOGOUT
+  ================================ */
+  // const logout = () => {
+  //   localStorage.removeItem("token");
+  //   setUser(null);
+  //   setToken(null);
+  // };
+const logout = () => {
+  localStorage.removeItem("token");
+  disconnectSocket(); // 🔌 disconnect socket
+  setUser(null);
+  setToken(null);
+};
+
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        token, // 👈 include token in context
+        token,
         login,
         logout,
         loading,

@@ -15,6 +15,7 @@ export function initSocket(token, url) {
     transports: ["websocket", "polling"],
     autoConnect: true,
   });
+  
 
   socket.on("connect_error", (err) => {
     console.error("Socket connect_error", err.message || err);

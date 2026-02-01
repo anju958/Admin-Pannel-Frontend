@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_URL } from "../../../config";
+import axiosInstance from '../../../../../frontend/src/utils/axiosInstance'
 
 function AddEmployee() {
   const navigate = useNavigate();
@@ -181,7 +182,7 @@ function AddEmployee() {
       // Temporary jobId if missing
       if (!formData.jobId) data.append("jobId", "JOB123");
 
-      const res = await axios.post(`${API_URL}/api/signUp`, data, {
+      const res = await axiosInstance.post(`${API_URL}/api/signUp`, data, {
         headers: { "Content-Type": "multipart/form-data" }
       });
 
