@@ -312,7 +312,7 @@ function EmployeeProfile() {
                 <p>
                   <strong>Resume:</strong>{" "}
                   {employee.resumeFile ? (
-                    <a href={employee.resumeFile} target="_blank">
+                    <a href={employee.resumeFile} target="_blank" rel="noopener noreferrer"> 
                       View
                     </a>
                   ) : (

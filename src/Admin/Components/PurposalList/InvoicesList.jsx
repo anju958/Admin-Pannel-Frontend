@@ -224,12 +224,9 @@ function InvoiceList() {
                   inv.status?.toLowerCase().includes(q) ||
                   String(inv.totalAmount).includes(q)
                 );
-              })
-                .
-                map((invoice, idx) => {
+              }).map((invoice, idx) => {
                   const paid = invoice.paidAmount || 0;
                   const unpaid = invoice.totalAmount - paid;
-
                   return (
                     <tr key={invoice._id} className="invoice-row">
 
