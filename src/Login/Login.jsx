@@ -227,7 +227,7 @@ const handleSubmit = async (e) => {
                     Admin Login
                   </button>
                 </div>
-                   <div className="pt-3 pb-2 mt-2 text-center" style={{ borderTop: "1px solid #eee" }}>
+                   {/* <div className="pt-3 pb-2 mt-2 text-center" style={{ borderTop: "1px solid #eee" }}>
                 <span className='fw-semibold text-secondary'>Are you a Client?</span>
                 <br />
                 <Link
@@ -237,7 +237,7 @@ const handleSubmit = async (e) => {
                 >
                   Create your password and login here
                 </Link>
-              </div>
+              </div> */}
           </div>
         </div>
       </div>

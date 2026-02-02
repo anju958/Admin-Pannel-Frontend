@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom'
 import { API_URL } from "../../../config";
-import axiosInstance from '../../../../../frontend/src/utils/axiosInstance'
+import axiosInstance from '../../../utils/axiosInstance'
 
 function AddJobs() {
   const navigate = useNavigate();

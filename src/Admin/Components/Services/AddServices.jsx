@@ -2,7 +2,7 @@ import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_URL } from "../../../config";
-import axiosInstance from '../../../../../frontend/src/utils/axiosInstance'
+import axiosInstance from '../../../utils/axiosInstance'
 
 function AddServices() {
   const navigate = useNavigate();

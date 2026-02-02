@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_URL } from "../../../config";
 import { AuthContext } from "../../../Context/AuthContext";
-import axiosInstance from '../../../../../frontend/src/utils/axiosInstance'
+import axiosInstance from '../../../utils/axiosInstance'
 
 // Permission helpers
 const canDo = (user, module, action) => {

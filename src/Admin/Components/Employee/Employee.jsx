@@ -4,7 +4,7 @@ import axios from "axios";
 import * as XLSX from "xlsx";
 import { API_URL } from "../../../config";
 import { AuthContext } from "../../../Context/AuthContext";
-import axiosInstance from '../../../../../frontend/src/utils/axiosInstance'
+import axiosInstance from '../../../utils/axiosInstance'
 
 // ✅ Permission Check Helper
 const canDo = (user, module, action) => {

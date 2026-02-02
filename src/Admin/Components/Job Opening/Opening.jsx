@@ -4,7 +4,7 @@ import axios from "axios";
 import { API_URL } from "../../../config";
 import { formatDate } from "../../../utils/dateFormatter";
 import { AuthContext } from "../../../Context/AuthContext";
-import axiosInstance from '../../../../../frontend/src/utils/axiosInstance'
+import axiosInstance from '../../../utils/axiosInstance'
 
 // ✅ Permission helper functions
 const canDo = (user, module, action) => {
